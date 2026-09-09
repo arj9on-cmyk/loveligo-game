@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>LOVELIGO - المجازفة</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; -webkit-tap-highlight-color: transparent; }
+        body { background: linear-gradient(135deg, #1a1a2e 0%, #2d1b4e 100%); min-height: 100vh; color: #fff; overflow-x: hidden; }
+        .mode-screen { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; padding: 20px; }
+        .logo-container { text-align: center; margin-bottom: 50px; }
+        .logo { font-size: 60px; font-weight: bold; background: linear-gradient(135deg, #FFD700 0%, #FF6B6B 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 10px; }
+        .subtitle { font-size: 20px; color: rgba(255,255,255,0.7); }
+        .mode-buttons { display: grid; grid-template-columns: 1fr; gap: 20px; width: 100%; max-width: 400px; }
+        .mode-btn { padding: 30px; border: 3px solid rgba(255,255,255,0.2); border-radius: 20px; background: rgba(255,255,255,0.1); color: #fff; font-size: 22px; font-weight: bold; cursor: pointer; transition: all 0.3s; }
+        .mode-btn.controller { border-color: #FFD700; background: linear-gradient(135deg, rgba(255,215,0,0.2) 0%, rgba(255,107,107,0.2) 100%); }
+        .mode-btn.viewer { border-color: #00CED1; background: linear-gradient(135deg, rgba(0,206,209,0.2) 0%, rgba(0,255,255,0.2) 100%); }
+        .mode-btn:active { transform: scale(0.95); }
+        .login-screen { display: none; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; padding: 20px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+        .login-box { background: rgba(255, 255, 255, 0.15); backdrop-filter: blur(20px); border: 2px solid rgba(255, 255, 255, 0.3); border-radius: 30px; padding: 40px; width: 100%; max-width: 400px; text-align: center; }
+        .key-input { width: 100%; padding: 18px; border: 2px solid rgba(255, 255, 255, 0.3); border-radius: 15px; background: rgba(255, 255, 255, 0.2); color: #fff; font-size: 18px; text-align: center; margin-bottom: 20px; outline: none; }
+        .login-btn { width: 100%; padding: 18px; background: linear-gradient(135deg, #FFD700 0%, #FFED4E 100%); border: none; border-radius: 15px; color: #1a1a2e; font-size: 20px; font-weight: bold; cursor: pointer; }
+        .controller-screen { display: none; padding: 15px; min-height: 100vh; }
+        .header { background: linear-gradient(135deg, rgba(255,215,0,0.2) 0%, rgba(255,107,107,0.2) 100%); padding: 20px; border-radius: 20px; margin-bottom: 20px; border: 2px solid rgba(255,215,0,0.5); }
+        .header h1 { font-size: 28px; text-align: center; margin-bottom: 15px; }
+        .share-link { background: rgba(0,0,0,0.3); padding: 15px; border-radius: 10px; text-align: center; margin-bottom: 15px; }
+        .share-link-text { font-size: 14px; color: rgba(255,255,255,0.8); margin-bottom: 10px; }
+        .copy-btn { background: #00CED1; color: #000; border: none; padding: 10px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; }
+        .teams-display { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px; }
+        .team-box { background: rgba(255,255,255,0.1); padding: 20px; border-radius: 15px; text-align: center; border: 2px solid transparent; }
+        .team-box.active { border-color: #FFD700; background: rgba(255,215,0,0.2); }
+        .team-name { font-size: 18px; margin-bottom: 10px; }
+        .team-score { font-size: 36px; font-weight: bold; color: #FFD700; }
+        .current-score-box { background: linear-gradient(135deg, #FFD700 0%, #FF6B6B 100%); padding: 20px; border-radius: 15px; text-align: center; margin-bottom: 20px; }
+        .current-score-label { font-size: 16px; margin-bottom: 5px; }
+        .current-score-value { font-size: 48px; font-weight: bold; }
+        .cards-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 8px; margin-bottom: 20px; }
+        .card { aspect-ratio: 1; background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%); border: 2px solid #FFD700; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: bold; cursor: pointer; }
+        .card.revealed { background: rgba(255,255,255,0.2); }
+        .card:active { transform: scale(0.9); }
+        .card.bomb { background: #ff0000 !important; }
+        .card.skip { background: #FFD700 !important; color: #000; }
+        .color-red { background: #ff0000 !important; }
+        .color-green { background: #00ff00 !important; color: #000; }
+        .color-blue { background: #0088ff !important; }
+        .color-yellow { background: #ffff00 !important; color: #000; }
+        .color-purple { background: #ff00ff !important; }
+        .color-orange { background: #ff8800 !important; }
+        .color-pink { background: #ff69b4 !important; }
+        .color-cyan { background: #00ffff !important; color: #000; }
+        .controls { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; }
+        .control-btn { padding: 15px; border: none; border-radius: 10px; font-size: 16px; font-weight: bold; cursor: pointer; }
+        .next-btn { background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); color: #fff; }
+        .reset-btn { background: linear-gradient(135deg, #ff416c 0%, #ff4b2b 100%); color: #fff; }
+        .settings-btn { background: rgba(255,255,255,0.2); color: #fff; grid-column: span 2; }
+        .viewer-screen { display: none; padding: 15px; min-height: 100vh; }
+        .viewer-header { background: linear-gradient(135deg, rgba(0,206,209,0.2) 0%, rgba(0,255,255,0.2) 100%); padding: 20px; border-radius: 20px; margin-bottom: 20px; border: 2px solid rgba(0,206,209,0.5); text-align: center; }
+        .status-indicator { display: inline-block; width: 12px; height: 12px; border-radius: 50%; background: #00ff00; margin-left: 10px; animation: pulse 2s infinite; }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+        .message-box { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(0, 0, 0, 0.95); padding: 30px; border-radius: 20px; text-align: center; z-index: 1000; display: none; border: 3px solid #FFD700; min-width: 300px; }
+        .message-box.show { display: block; animation: popIn 0.3s ease; }
+        @keyframes popIn { from { transform: translate(-50%, -50%) scale(0.8); opacity: 0; } to { transform: translate(-50%, -50%) scale(1); opacity: 1; } }
+        .overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.8); z-index: 999; display: none; }
+        .overlay.show { display: block; }
+        @media (max-width: 600px) { .cards-grid { grid-template-columns: repeat(5, 1fr); } }
+    </style>
+</head>
+<body>
+
+    <div class="mode-screen" id="modeScreen">
+        <div class="logo-container">
+            <div class="logo">LOVELIGO</div>
+            <div class="subtitle">لعبة المجازفة</div>
+        </div>
+        <div class="mode-buttons">
+            <button class="mode-btn controller" onclick="selectMode('controller')">🎮 أنا المتحكم</button>
+            <button class="mode-btn viewer" onclick="selectMode('viewer')">👁️ مشاهدة فقط</button>
+        </div>
+    </div>
+
+    <div class="login-screen" id="loginScreen">
+        <div class="login-box">
+            <div class="logo" style="font-size: 40px; margin-bottom: 30px;">🔑</div>
+            <input type="password" class="key-input" id="keyInput" placeholder="أدخل مفتاح الدخول">
+            <button class="login-btn" onclick="checkKey()">دخول</button>
+        </div>
+    </div>
+
+    <div class="controller-screen" id="controllerScreen">
+        <div class="header">
+            <h1> LOVELIGO - المتحكم</h1>
+            <div class="share-link">
+                <div class="share-link-text">رابط المشاهدة (انسخه وشاركه):</div>
+                <div id="viewerLink" style="font-size: 12px; margin-bottom: 10px; word-break: break-all;"></div>
+                <button class="copy-btn" onclick="copyLink()">📋 نسخ الرابط</button>
+            </div>
+        </div>
+        <div class="current-score-box">
+            <div class="current-score-label">النقاط الحالية</div>
+            <div class="current-score-value" id="currentScore">0</div>
+        </div>
+        <div class="teams-display" id="teamsDisplay"></div>
+        <div class="cards-grid" id="cardsGrid"></div>
+        <div class="controls">
+            <button class="control-btn next-btn" onclick="nextTurn()">التالي ⬅️</button>
+            <button class="control-btn reset-btn" onclick="resetGame()">إعادة اللعبة 🔄</button>
+            <button class="control-btn settings-btn" onclick="showSettings()">⚙️ الإعدادات</button>
+        </div>
+    </div>
+
+    <div class="viewer-screen" id="viewerScreen">
+        <div class="viewer-header">
+            <h1>👁️ LOVELIGO - مشاهدة</h1>
+            <div style="margin-top: 10px;">
+                <span class="status-indicator"></span>
+                <span>متصل مباشرة</span>
+            </div>
+        </div>
+        <div class="current-score-box">
+            <div class="current-score-label">النقاط الحالية</div>
+            <div class="current-score-value" id="viewerCurrentScore">0</div>
+        </div>
+        <div class="teams-display" id="viewerTeamsDisplay"></div>
+        <div class="cards-grid" id="viewerCardsGrid"></div>
+    </div>
+
+    <div class="overlay" id="overlay"></div>
+    <div class="message-box" id="messageBox">
+        <div style="font-size: 24px; margin-bottom: 15px;" id="msgTitle"></div>
+        <div style="font-size: 18px; margin-bottom: 20px;" id="msgText"></div>
+        <button class="login-btn" onclick="closeMessage()">حسناً</button>
+    </div>
+
+    <script>
+        const FIREBASE_URL = 'https://alired-default-rtdb.firebaseio.com';
+        const BIN_ID = "6aa0aa65ffd5d16053ef5a5f";
+        const API_URL = `https://api.jsonbin.io/v3/b/${BIN_ID}/latest`;
+        let correctKey = "12345";
+        let currentMode = null;
+        let gameId = null;
+        let gameState = {
+            cards: [], teamScores: [], currentTeam: 0, currentScore: 0,
+            totalCards: 50, bombCount: 2, skipCount: 0, teamCount: 2, revealedCards: []
+        };
+        const colors = ['red', 'green', 'blue', 'yellow', 'purple', 'orange', 'pink', 'cyan'];
+        let syncInterval = null;
+
+        function selectMode(mode) {
+            currentMode = mode;
+            if (mode === 'controller') {
+                document.getElementById('modeScreen').style.display = 'none';
+                document.getElementById('loginScreen').style.display = 'flex';
+            } else {
+                document.getElementById('modeScreen').style.display = 'none';
+                document.getElementById('viewerScreen').style.display = 'block';
+                initViewer();
+            }
+        }
+
+        async function checkKey() {
+            const enteredKey = document.getElementById('keyInput').value.trim();
+            if (!enteredKey) { alert('⚠️ أدخل المفتاح'); return; }
+            try {
+                const response = await fetch(API_URL);
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.record && data.record.key) correctKey = data.record.key;
+                }
+            } catch (e) { console.log("Using local key"); }
+            if (enteredKey === correctKey) {
+                localStorage.setItem('auth', 'true');
+                document.getElementById('loginScreen').style.display = 'none';
+                document.getElementById('controllerScreen').style.display = 'block';
+                initController();
+            } else { alert('❌ مفتاح خاطئ'); }
+        }
+
+        async function saveToFirebase() {
+            try {
+                await fetch(`${FIREBASE_URL}/games/${gameId}.json`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(gameState)
+                });
+            } catch (e) { console.log("Firebase save error:", e); }
+        }
+
+        async function loadFromFirebase() {
+            try {
+                const response = await fetch(`${FIREBASE_URL}/games/${gameId}.json`);
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data) gameState = data;
+                }
+            } catch (e) { console.log("Firebase load error:", e); }
+        }
+
+        function initController() {
+            gameId = 'game_' + Date.now();
+            const viewerUrl = window.location.href.split('?')[0] + '?mode=viewer&game=' + gameId;
+            document.getElementById('viewerLink').textContent = viewerUrl;
+            initializeGame();
+            renderCards();
+            updateTeamsDisplay();
+            saveToFirebase();
+        }
+
+        function initializeGame() {
+            gameState.cards = []; gameState.teamScores = []; gameState.currentTeam = 0;
+            gameState.currentScore = 0; gameState.revealedCards = [];
+            for (let i = 1; i <= gameState.totalCards; i++) {
+                gameState.cards.push({ number: i, revealed: false, value: null, color: null, isBomb: false, isSkip: false });
+            }
+            let bombsAdded = 0;
+            while (bombsAdded < gameState.bombCount) {
+                const idx = Math.floor(Math.random() * gameState.cards.length);
+                if (!gameState.cards[idx].isBomb && !gameState.cards[idx].isSkip) {
+                    gameState.cards[idx].isBomb = true; bombsAdded++;
+                }
+            }
+            let skipsAdded = 0;
+            while (skipsAdded < gameState.skipCount) {
+                const idx = Math.floor(Math.random() * gameState.cards.length);
+                if (!gameState.cards[idx].isBomb && !gameState.cards[idx].isSkip) {
+                    gameState.cards[idx].isSkip = true; skipsAdded++;
+                }
+            }
+            for (let i = 0; i < gameState.teamCount; i++) {
+                gameState.teamScores.push({ name: `الفريق ${i + 1}`, points: 0 });
+            }
+        }
+
+        function renderCards() {
+            const grid = document.getElementById('cardsGrid');
+            grid.innerHTML = '';
+            gameState.cards.forEach((card, index) => {
+                const cardEl = document.createElement('div');
+                cardEl.className = 'card';
+                if (card.revealed) {
+                    cardEl.classList.add('revealed');
+                    if (card.isBomb) { cardEl.classList.add('bomb'); cardEl.innerHTML = '💣'; }
+                    else if (card.isSkip) { cardEl.classList.add('skip'); cardEl.innerHTML = '⏭️'; }
+                    else { cardEl.classList.add('color-' + card.color); cardEl.textContent = card.value; }
+                } else {
+                    cardEl.textContent = card.number;
+                    cardEl.onclick = () => revealCard(index);
+                }
+                grid.appendChild(cardEl);
+            });
+            document.getElementById('currentScore').textContent = gameState.currentScore;
+        }
+
+        function revealCard(index) {
+            const card = gameState.cards[index];
+            if (card.revealed) return;
+            card.revealed = true; gameState.revealedCards.push(index);
+            if (card.isBomb) {
+                showMessage('💣 قنبلة!', `خسرت ${gameState.currentScore} نقطة`);
+                gameState.currentScore = 0; gameState.teamScores[gameState.currentTeam].points = 0;
+            } else if (card.isSkip) {
+                showMessage('⏭️ تخطي', 'تم تخطي الدور'); nextTurn(); renderCards(); return;
+            } else {
+                const randomValue = Math.floor(Math.random() * 10) + 1;
+                const randomColor = colors[Math.floor(Math.random() * colors.length)];
+                card.value = randomValue; card.color = randomColor;
+                if (gameState.currentScore === 0) { gameState.currentScore = randomValue; }
+                else { gameState.currentScore += randomValue; }
+                gameState.teamScores[gameState.currentTeam].points = gameState.currentScore;
+            }
+            renderCards(); updateTeamsDisplay(); saveToFirebase();
+        }
+
+        function nextTurn() {
+            gameState.currentTeam = (gameState.currentTeam + 1) % gameState.teamCount;
+            gameState.currentScore = 0; updateTeamsDisplay(); saveToFirebase();
+        }
+
+        function updateTeamsDisplay() {
+            const container = document.getElementById('teamsDisplay');
+            container.innerHTML = '';
+            gameState.teamScores.forEach((team, index) => {
+                const teamEl = document.createElement('div');
+                teamEl.className = 'team-box' + (index === gameState.currentTeam ? ' active' : '');
+                teamEl.innerHTML = `<div class="team-name">${team.name}</div><div class="team-score">${team.points}</div>`;
+                container.appendChild(teamEl);
+            });
+        }
+
+        function resetGame() {
+            if (confirm('هل تريد إعادة اللعبة؟')) {
+                initializeGame(); renderCards(); updateTeamsDisplay(); saveToFirebase();
+            }
+        }
+
+        function showSettings() {
+            const totalCards = prompt('عدد البطاقات (40-100):', gameState.totalCards);
+            if (totalCards) {
+                gameState.totalCards = parseInt(totalCards);
+                gameState.bombCount = parseInt(prompt('عدد القنابل (1-10):', gameState.bombCount));
+                gameState.skipCount = parseInt(prompt('بطاقات التخطي (0-5):', gameState.skipCount));
+                gameState.teamCount = parseInt(prompt('عدد الفرق (2-4):', gameState.teamCount));
+                initializeGame(); renderCards(); updateTeamsDisplay();
+            }
+        }
+
+        function copyLink() {
+            const link = document.getElementById('viewerLink').textContent;
+            navigator.clipboard.writeText(link).then(() => { alert('✅ تم نسخ الرابط!'); });
+        }
+
+        function initViewer() {
+            const urlParams = new URLSearchParams(window.location.search);
+            gameId = urlParams.get('game');
+            if (!gameId) { alert('❌ رابط غير صحيح'); return; }
+            loadFromFirebase(); renderViewerCards(); renderViewerTeams();
+            syncInterval = setInterval(() => { loadFromFirebase(); renderViewerCards(); renderViewerTeams(); }, 1000);
+        }
+
+        function renderViewerCards() {
+            const grid = document.getElementById('viewerCardsGrid');
+            grid.innerHTML = '';
+            gameState.cards.forEach((card) => {
+                const cardEl = document.createElement('div');
+                cardEl.className = 'card';
+                if (card.revealed) {
+                    cardEl.classList.add('revealed');
+                    if (card.isBomb) { cardEl.classList.add('bomb'); cardEl.innerHTML = '💣'; }
+                    else if (card.isSkip) { cardEl.classList.add('skip'); cardEl.innerHTML = '️'; }
+                    else { cardEl.classList.add('color-' + card.color); cardEl.textContent = card.value; }
+                } else { cardEl.textContent = card.number; }
+                grid.appendChild(cardEl);
+            });
+            document.getElementById('viewerCurrentScore').textContent = gameState.currentScore;
+        }
+
+        function renderViewerTeams() {
+            const container = document.getElementById('viewerTeamsDisplay');
+            container.innerHTML = '';
+            gameState.teamScores.forEach((team, index) => {
+                const teamEl = document.createElement('div');
+                teamEl.className = 'team-box' + (index === gameState.currentTeam ? ' active' : '');
+                teamEl.innerHTML = `<div class="team-name">${team.name}</div><div class="team-score">${team.points}</div>`;
+                container.appendChild(teamEl);
+            });
+        }
+
+        function showMessage(title, text) {
+            document.getElementById('msgTitle').textContent = title;
+            document.getElementById('msgText').textContent = text;
+            document.getElementById('overlay').classList.add('show');
+            document.getElementById('messageBox').classList.add('show');
+        }
+
+        function closeMessage() {
+            document.getElementById('overlay').classList.remove('show');
+            document.getElementById('messageBox').classList.remove('show');
+        }
+
+        window.onload = function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const mode = urlParams.get('mode');
+            if (mode === 'viewer') selectMode('viewer');
+        };
+    </script>
+</body>
+</html>
