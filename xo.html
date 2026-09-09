@@ -19,18 +19,15 @@
         .social-section { margin-top: 30px; width: 100%; max-width: 400px; }
         .social-title { text-align: center; color: rgba(255,255,255,0.7); font-size: 14px; margin-bottom: 15px; }
         .social-buttons { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-        .social-btn { padding: 15px; border: 2px solid rgba(255,255,255,0.2); border-radius: 15px; background: rgba(255,255,255,0.1); color: #fff; font-size: 16px; font-weight: bold; cursor: pointer; transition: all 0.3s; display: flex; align-items: center; justify-content: center; gap: 8px; text-decoration: none; }
+        .social-btn { padding: 15px; border: 2px solid rgba(255,255,255,0.2); border-radius: 15px; background: rgba(255,255,255,0.1); color: #fff; font-size: 16px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; text-decoration: none; }
         .social-btn.instagram { border-color: #E4405F; background: linear-gradient(135deg, rgba(228,64,95,0.2) 0%, rgba(131,58,180,0.2) 100%); }
-        .social-btn.instagram:hover { border-color: #E4405F; background: linear-gradient(135deg, rgba(228,64,95,0.3) 0%, rgba(131,58,180,0.3) 100%); }
         .social-btn.telegram { border-color: #0088cc; background: rgba(0,136,204,0.2); }
-        .social-btn.telegram:hover { border-color: #0088cc; background: rgba(0,136,204,0.3); }
         .social-btn:active { transform: scale(0.95); }
         .login-screen { display: none; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; padding: 20px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
         .login-box { background: rgba(255, 255, 255, 0.15); backdrop-filter: blur(20px); border: 2px solid rgba(255, 255, 255, 0.3); border-radius: 30px; padding: 40px; width: 100%; max-width: 400px; text-align: center; }
         .key-input { width: 100%; padding: 18px; border: 2px solid rgba(255, 255, 255, 0.3); border-radius: 15px; background: rgba(255, 255, 255, 0.2); color: #fff; font-size: 18px; text-align: center; margin-bottom: 20px; outline: none; }
         .key-input:focus { border-color: #FFD700; background: rgba(255,255,255,0.3); }
         .login-btn { width: 100%; padding: 18px; background: linear-gradient(135deg, #FFD700 0%, #FFED4E 100%); border: none; border-radius: 15px; color: #1a1a2e; font-size: 20px; font-weight: bold; cursor: pointer; }
-        .login-btn:active { transform: scale(0.95); }
         .subscription-info { background: linear-gradient(135deg, rgba(255,215,0,0.15) 0%, rgba(255,107,107,0.15) 100%); border: 2px solid rgba(255,215,0,0.4); border-radius: 15px; padding: 15px; margin-bottom: 20px; text-align: center; }
         .subscription-info .sub-label { font-size: 12px; color: rgba(255,255,255,0.7); margin-bottom: 5px; }
         .subscription-info .sub-name { font-size: 18px; font-weight: bold; color: #FFD700; margin-bottom: 5px; }
@@ -42,20 +39,20 @@
         .share-link { background: rgba(0,0,0,0.3); padding: 15px; border-radius: 10px; text-align: center; margin-bottom: 15px; }
         .share-link-text { font-size: 14px; color: rgba(255,255,255,0.8); margin-bottom: 10px; }
         .copy-btn { background: #00CED1; color: #000; border: none; padding: 10px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; }
-        .teams-display { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; margin-bottom: 20px; }
-        .team-box { background: rgba(255,255,255,0.1); padding: 15px; border-radius: 15px; text-align: center; border: 2px solid transparent; position: relative; }
-        .team-box.active { border-color: #FFD700; background: rgba(255,215,0,0.2); }
+        .current-round-box { background: linear-gradient(135deg, #FF6B6B 0%, #FFD700 100%); padding: 15px; border-radius: 15px; text-align: center; margin-bottom: 15px; }
+        .current-round-label { font-size: 14px; margin-bottom: 5px; }
+        .current-round-value { font-size: 36px; font-weight: bold; }
+        .teams-display { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; margin-bottom: 20px; }
+        .team-box { background: rgba(255,255,255,0.1); padding: 15px; border-radius: 15px; text-align: center; border: 2px solid transparent; position: relative; transition: all 0.3s; }
+        .team-box.active { border-color: #FFD700; background: rgba(255,215,0,0.2); box-shadow: 0 0 15px rgba(255,215,0,0.3); }
         .team-name { font-size: 16px; margin-bottom: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 5px; }
-        .team-name:hover { opacity: 0.8; }
-        .edit-team-icon { font-size: 12px; cursor: pointer; }
+        .edit-team-icon { font-size: 12px; }
         .team-score { font-size: 32px; font-weight: bold; color: #FFD700; }
-        .current-score-box { background: linear-gradient(135deg, #FFD700 0%, #FF6B6B 100%); padding: 20px; border-radius: 15px; text-align: center; margin-bottom: 20px; }
-        .current-score-label { font-size: 16px; margin-bottom: 5px; }
-        .current-score-value { font-size: 48px; font-weight: bold; }
+        .team-label { font-size: 11px; color: rgba(255,255,255,0.6); margin-top: 3px; }
         .last-card-info { background: rgba(255,255,255,0.1); padding: 10px; border-radius: 10px; text-align: center; margin-bottom: 15px; font-size: 14px; }
-        .cards-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 8px; margin-bottom: 20px; }
-        .card { aspect-ratio: 1; background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%); border: 2px solid #FFD700; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: bold; cursor: pointer; transition: all 0.3s; }
-        .card.hidden { opacity: 0; pointer-events: none; }
+        .cards-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin-bottom: 20px; }
+        .card { aspect-ratio: 1; background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%); border: 2px solid #FFD700; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 22px; font-weight: bold; cursor: pointer; transition: all 0.3s; }
+        .card.hidden { opacity: 0.15; pointer-events: none; border-color: rgba(255,215,0,0.2); }
         .card.revealed { background: rgba(255,255,255,0.2); }
         .card:active { transform: scale(0.9); }
         .card.bomb { background: #ff0000 !important; }
@@ -70,10 +67,9 @@
         .color-cyan { background: #00ffff !important; color: #000; }
         .controls { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; }
         .control-btn { padding: 15px; border: none; border-radius: 10px; font-size: 16px; font-weight: bold; cursor: pointer; }
-        .next-btn { background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); color: #fff; }
-        .save-btn { background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%); color: #000; }
+        .save-btn { background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%); color: #000; grid-column: span 2; }
         .reset-btn { background: linear-gradient(135deg, #ff416c 0%, #ff4b2b 100%); color: #fff; }
-        .settings-btn { background: rgba(255,255,255,0.2); color: #fff; grid-column: span 2; }
+        .settings-btn { background: rgba(255,255,255,0.2); color: #fff; }
         .viewer-screen { display: none; padding: 15px; min-height: 100vh; }
         .viewer-header { background: linear-gradient(135deg, rgba(0,206,209,0.2) 0%, rgba(0,255,255,0.2) 100%); padding: 20px; border-radius: 20px; margin-bottom: 20px; border: 2px solid rgba(0,206,209,0.5); text-align: center; }
         .status-indicator { display: inline-block; width: 12px; height: 12px; border-radius: 50%; background: #00ff00; margin-left: 10px; animation: pulse 2s infinite; }
@@ -105,18 +101,16 @@
         </div>
         <div class="mode-buttons">
             <button class="mode-btn controller" onclick="selectMode('controller')">🎮 أنا المتحكم</button>
-            <button class="mode-btn viewer" onclick="selectMode('viewer')">️ مشاهدة فقط</button>
+            <button class="mode-btn viewer" onclick="selectMode('viewer')">👁️ مشاهدة فقط</button>
         </div>
         <div class="social-section">
             <div class="social-title">📱 تابعني على</div>
             <div class="social-buttons">
                 <a href="#" class="social-btn instagram" onclick="openSocial(event, 'instagram')">
-                    <span>📷</span>
-                    <span>إنستقرام</span>
+                    <span>📷</span><span>إنستقرام</span>
                 </a>
                 <a href="#" class="social-btn telegram" onclick="openSocial(event, 'telegram')">
-                    <span>✈️</span>
-                    <span>تيليجرام</span>
+                    <span>✈️</span><span>تيليجرام</span>
                 </a>
             </div>
         </div>
@@ -124,7 +118,7 @@
 
     <div class="login-screen" id="loginScreen">
         <div class="login-box">
-            <div class="logo" style="font-size: 40px; margin-bottom: 30px;">🔑</div>
+            <div class="logo" style="font-size: 40px; margin-bottom: 30px;"></div>
             <input type="password" class="key-input" id="keyInput" placeholder="أدخل مفتاح الدخول">
             <button class="login-btn" onclick="checkKey()">دخول</button>
         </div>
@@ -145,42 +139,45 @@
                 <button class="copy-btn" onclick="copyLink()">📋 نسخ الرابط</button>
             </div>
         </div>
-        <div class="current-score-box">
-            <div class="current-score-label">النقاط الحالية</div>
-            <div class="current-score-value" id="currentScore">0</div>
+        
+        <div class="current-round-box">
+            <div class="current-round-label">🎯 نقاط الجولة الحالية</div>
+            <div class="current-round-value" id="currentScore">0</div>
         </div>
+        
         <div class="last-card-info" id="lastCardInfo">لم يتم كشف أي بطاقة بعد</div>
+        
         <div class="teams-display" id="teamsDisplay"></div>
+        
         <div class="cards-grid" id="cardsGrid"></div>
+        
         <div class="controls">
-            <button class="control-btn next-btn" onclick="nextTurn()">التالي ⬅️</button>
-            <button class="control-btn save-btn" onclick="savePoints()">💰 حفظ النقاط</button>
-            <button class="control-btn reset-btn" onclick="resetGame()">إعادة اللعبة 🔄</button>
-            <button class="control-btn settings-btn" onclick="showSettings()">⚙️ الإعدادات</button>
+            <button class="control-btn save-btn" onclick="savePoints()">💰 حفظ النقاط والانتقال</button>
+            <button class="control-btn reset-btn" onclick="resetGame()"> إعادة اللعبة</button>
+            <button class="control-btn settings-btn" onclick="showSettings()">️ الإعدادات</button>
         </div>
     </div>
 
     <div class="viewer-screen" id="viewerScreen">
         <div class="viewer-header">
-            <h1>👁️ LOVELIGO - مشاهدة</h1>
+            <h1>️ LOVELIGO - مشاهدة</h1>
             <div style="margin-top: 10px;">
                 <span class="status-indicator"></span>
                 <span>متصل مباشرة</span>
             </div>
         </div>
-        <div class="current-score-box">
-            <div class="current-score-label">النقاط الحالية</div>
-            <div class="current-score-value" id="viewerCurrentScore">0</div>
+        <div class="current-round-box">
+            <div class="current-round-label">🎯 نقاط الجولة الحالية</div>
+            <div class="current-round-value" id="viewerCurrentScore">0</div>
         </div>
         <div class="last-card-info" id="viewerLastCardInfo">لم يتم كشف أي بطاقة بعد</div>
         <div class="teams-display" id="viewerTeamsDisplay"></div>
         <div class="cards-grid" id="viewerCardsGrid"></div>
     </div>
 
-    <!-- نافذة تعديل اسم الفريق -->
     <div class="overlay" id="editOverlay"></div>
     <div class="edit-modal" id="editModal">
-        <h3>✏️ تعديل اسم الفريق</h3>
+        <h3>✏️ تعديل اسم اللاعب</h3>
         <input type="text" id="teamNameInput" placeholder="أدخل اسم اللاعب">
         <button onclick="saveTeamName()">حفظ</button>
     </div>
@@ -202,8 +199,9 @@
         let editingTeamIndex = null;
         let gameState = {
             cards: [], teamScores: [], currentTeam: 0, currentScore: 0,
-            totalCards: 50, bombCount: 2, skipCount: 0, teamCount: 2, revealedCards: [],
-            previousNumber: null, previousColor: null, roundRevealedCards: []
+            totalCards: 50, bombCount: 2, skipCount: 0, teamCount: 2,
+            previousNumber: null, previousColor: null,
+            roundRevealedCards: []
         };
         const colors = ['red', 'green', 'blue', 'yellow', 'purple', 'orange', 'pink', 'cyan'];
         const colorNames = {
@@ -227,12 +225,9 @@
 
         function openSocial(event, platform) {
             event.preventDefault();
-            let url = '';
-            if (platform === 'instagram') {
-                url = 'https://www.instagram.com/tf69x?stkn=cnRpMjZsbjdkczFy';
-            } else if (platform === 'telegram') {
-                url = 'https://t.me/TF_69';
-            }
+            let url = platform === 'instagram' 
+                ? 'https://www.instagram.com/tf69x?stkn=cnRpMjZsbjdkczFy' 
+                : 'https://t.me/TF_69';
             if (typeof AndroidInterface !== 'undefined') {
                 AndroidInterface.openUrl(url);
             } else {
@@ -242,10 +237,7 @@
 
         async function checkKey() {
             const enteredKey = document.getElementById('keyInput').value.trim();
-            if (!enteredKey) { 
-                showMessageAlert('⚠️ تنبيه', 'الرجاء إدخال المفتاح', 'warning');
-                return; 
-            }
+            if (!enteredKey) { showMessageAlert('️ تنبيه', 'الرجاء إدخال المفتاح', 'warning'); return; }
             try {
                 const response = await fetch(API_URL);
                 if (response.ok) {
@@ -253,10 +245,7 @@
                     const keysList = data.record.keys;
                     let foundKey = null;
                     for (let k of keysList) {
-                        if (k.key === enteredKey) {
-                            foundKey = k;
-                            break;
-                        }
+                        if (k.key === enteredKey) { foundKey = k; break; }
                     }
                     if (foundKey) {
                         if (!foundKey.active) {
@@ -272,9 +261,6 @@
                         }
                         const daysLeft = Math.floor((expireDate - today) / (1000 * 60 * 60 * 24));
                         localStorage.setItem('auth', 'true');
-                        localStorage.setItem('keyName', foundKey.name || '');
-                        localStorage.setItem('keyExpire', foundKey.expires);
-                        localStorage.setItem('keyDaysLeft', daysLeft);
                         displaySubscriptionInfo(foundKey.name, foundKey.expires, daysLeft);
                         showMessageAlert('✅ مفتاح صحيح', `مرحباً بك!<br><br>المفتاح: <b>${foundKey.name}</b><br>الأيام المتبقية: <b>${daysLeft}</b> يوم<br>تاريخ الانتهاء: <b>${foundKey.expires}</b>`, 'success', () => {
                             document.getElementById('loginScreen').style.display = 'none';
@@ -285,11 +271,10 @@
                         showMessageAlert('❌ مفتاح خطأ', 'المفتاح الذي أدخلته غير صحيح أو غير موجود', 'error');
                     }
                 } else {
-                    showMessageAlert('⚠️ خطأ في الاتصال', 'تعذر الاتصال بالسيرفر، تحقق من الإنترنت', 'error');
+                    showMessageAlert('⚠️ خطأ في الاتصال', 'تعذر الاتصال بالسيرفر', 'error');
                 }
             } catch (e) {
-                console.log("خطأ في الاتصال:", e);
-                showMessageAlert('⚠️ خطأ في الاتصال', 'تعذر الاتصال بالسيرفر، تحقق من الإنترنت', 'error');
+                showMessageAlert('⚠️ خطأ في الاتصال', 'تحقق من الإنترنت', 'error');
             }
         }
 
@@ -297,14 +282,14 @@
             const subName = document.getElementById('subName');
             const subExpire = document.getElementById('subExpire');
             const subDays = document.getElementById('subDays');
-            if (subName) subName.textContent = `🎫 ${name}`;
+            if (subName) subName.textContent = ` ${name}`;
             if (subExpire) subExpire.textContent = `📅 تاريخ الانتهاء: ${expireDate}`;
             if (subDays) {
                 if (daysLeft <= 3) {
-                    subDays.textContent = `⚠️ متبقي ${daysLeft} يوم فقط!`;
+                    subDays.textContent = `️ متبقي ${daysLeft} يوم فقط!`;
                     subDays.style.color = '#ff4444';
                 } else if (daysLeft <= 7) {
-                    subDays.textContent = `⏰ متبقي ${daysLeft} يوم`;
+                    subDays.textContent = ` متبقي ${daysLeft} يوم`;
                     subDays.style.color = '#FFD700';
                 } else {
                     subDays.textContent = `✅ متبقي ${daysLeft} يوم`;
@@ -320,7 +305,7 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(gameState)
                 });
-            } catch (e) { console.log("Firebase save error:", e); }
+            } catch (e) { console.log("Firebase error:", e); }
         }
 
         async function loadFromFirebase() {
@@ -330,7 +315,7 @@
                     const data = await response.json();
                     if (data) gameState = data;
                 }
-            } catch (e) { console.log("Firebase load error:", e); }
+            } catch (e) { console.log("Firebase error:", e); }
         }
 
         function initController() {
@@ -345,23 +330,25 @@
         }
 
         function initializeGame() {
-            gameState.cards = []; 
-            gameState.teamScores = []; 
+            gameState.cards = [];
+            gameState.teamScores = [];
             gameState.currentTeam = 0;
-            gameState.currentScore = 0; 
-            gameState.revealedCards = [];
-            gameState.roundRevealedCards = [];
-            gameState.previousNumber = null; 
+            gameState.currentScore = 0;
+            gameState.previousNumber = null;
             gameState.previousColor = null;
-            
+            gameState.roundRevealedCards = [];
+
             for (let i = 1; i <= gameState.totalCards; i++) {
-                gameState.cards.push({ number: i, revealed: false, value: null, color: null, isBomb: false, isSkip: false });
+                gameState.cards.push({ 
+                    number: i, revealed: false, hidden: false,
+                    value: null, color: null, isBomb: false, isSkip: false 
+                });
             }
             let bombsAdded = 0;
             while (bombsAdded < gameState.bombCount) {
                 const idx = Math.floor(Math.random() * gameState.cards.length);
                 if (!gameState.cards[idx].isBomb && !gameState.cards[idx].isSkip) {
-                    gameState.cards[idx].isBomb = true; 
+                    gameState.cards[idx].isBomb = true;
                     bombsAdded++;
                 }
             }
@@ -369,12 +356,12 @@
             while (skipsAdded < gameState.skipCount) {
                 const idx = Math.floor(Math.random() * gameState.cards.length);
                 if (!gameState.cards[idx].isBomb && !gameState.cards[idx].isSkip) {
-                    gameState.cards[idx].isSkip = true; 
+                    gameState.cards[idx].isSkip = true;
                     skipsAdded++;
                 }
             }
             for (let i = 0; i < gameState.teamCount; i++) {
-                gameState.teamScores.push({ name: `الفريق ${i + 1}`, points: 0 });
+                gameState.teamScores.push({ name: `اللاعب ${i + 1}`, points: 0 });
             }
         }
 
@@ -386,96 +373,168 @@
                 cardEl.className = 'card';
                 
                 // إخفاء البطاقات المحفوظة
-                if (gameState.roundRevealedCards.includes(index) && !card.revealed) {
+                if (card.hidden) {
                     cardEl.classList.add('hidden');
                 }
                 
-                if (card.revealed) {
+                if (card.revealed && !card.hidden) {
                     cardEl.classList.add('revealed');
-                    if (card.isBomb) { 
-                        cardEl.classList.add('bomb'); 
-                        cardEl.innerHTML = '💣'; 
-                    } else if (card.isSkip) { 
-                        cardEl.classList.add('skip'); 
-                        cardEl.innerHTML = '⏭️'; 
-                    } else { 
-                        cardEl.classList.add('color-' + card.color); 
-                        cardEl.textContent = card.value; 
+                    if (card.isBomb) {
+                        cardEl.classList.add('bomb');
+                        cardEl.innerHTML = '';
+                    } else if (card.isSkip) {
+                        cardEl.classList.add('skip');
+                        cardEl.innerHTML = '⏭️';
+                    } else {
+                        cardEl.classList.add('color-' + card.color);
+                        cardEl.textContent = card.value;
                     }
-                } else {
+                } else if (!card.hidden) {
                     cardEl.textContent = card.number;
                     cardEl.onclick = () => revealCard(index);
+                } else {
+                    // بطاقة مخفية - لا تعرض شيئاً أو رقم صغير
+                    cardEl.textContent = '';
                 }
                 grid.appendChild(cardEl);
             });
             document.getElementById('currentScore').textContent = gameState.currentScore;
+            if (document.getElementById('viewerCurrentScore')) {
+                document.getElementById('viewerCurrentScore').textContent = gameState.currentScore;
+            }
         }
 
         function revealCard(index) {
             const card = gameState.cards[index];
-            if (card.revealed) return;
+            if (card.revealed || card.hidden) return;
+            
             card.revealed = true;
-            gameState.revealedCards.push(index);
             gameState.roundRevealedCards.push(index);
 
+            // 💣 قنبلة - تصفير جميع النقاط
             if (card.isBomb) {
-                showMessageWithButtons(' قنبلة!', `ظهرت قنبلة!<br>خسرت <b>${gameState.currentScore}</b> نقطة`, true, false, false, false, true);
+                gameState.teamScores[gameState.currentTeam].points = 0;
                 gameState.currentScore = 0;
                 gameState.previousNumber = null;
                 gameState.previousColor = null;
-            } else if (card.isSkip) {
-                showMessageWithButtons('⏭️ تخطي', 'حصلت على بطاقة تخطي!<br>الانتقال للاعب التالي', false, false, false, false, true);
+                // إخفاء البطاقات المقلوبة
+                hideRoundCards();
+                showMessageAuto('💣 قنبلة!', 
+                    `ظهرت قنبلة!<br>تم تصفير جميع نقاط <b>${gameState.teamScores[gameState.currentTeam].name}</b>`, 
+                    () => nextTurn());
+                renderCards();
+                updateTeamsDisplay();
+                updateLastCardInfo();
+                saveToFirebase();
+                return;
+            }
+            
+            // ⏭️ تخطي - انتقال تلقائي + فقدان النقاط الحالية
+            if (card.isSkip) {
+                gameState.currentScore = 0;
                 gameState.previousNumber = null;
                 gameState.previousColor = null;
-            } else {
-                const randomValue = Math.floor(Math.random() * 10) + 1;
-                const randomColor = colors[Math.floor(Math.random() * colors.length)];
-                card.value = randomValue;
-                card.color = randomColor;
-                if (gameState.previousNumber === null && gameState.previousColor === null) {
-                    gameState.currentScore = randomValue;
-                    gameState.previousNumber = randomValue;
-                    gameState.previousColor = randomColor;
-                    showMessageWithButtons('🎯 بداية اللعبة!', `الرقم <b>${randomValue}</b> باللون <b>${colorNames[randomColor]}</b><br>نقاطك: <b>${randomValue}</b><br><br>هل تريد الاستمرار أم تحفظ نقاطك؟`, false, true, true);
-                } else if (randomValue === gameState.previousNumber) {
-                    showMessageWithButtons('😢 نفس الرقم!', `الرقم <b>${randomValue}</b> تكرر!<br>خسرت <b>${gameState.currentScore}</b> نقطة`, true, false, false, false, true);
-                    gameState.currentScore = 0;
-                    gameState.previousNumber = null;
-                    gameState.previousColor = null;
-                } else if (randomColor === gameState.previousColor) {
-                    showMessageWithButtons('😢 نفس اللون!', `اللون <b>${colorNames[randomColor]}</b> تكرر!<br>خسرت <b>${gameState.currentScore}</b> نقطة`, true, false, false, false, true);
-                    gameState.currentScore = 0;
-                    gameState.previousNumber = null;
-                    gameState.previousColor = null;
-                } else {
-                    gameState.currentScore += randomValue;
-                    gameState.previousNumber = randomValue;
-                    gameState.previousColor = randomColor;
-                    showMessageWithButtons('🎉 ممتاز!', `الرقم <b>${randomValue}</b> باللون <b>${colorNames[randomColor]}</b><br>مجموع نقاطك: <b>${gameState.currentScore}</b><br><br>هل تريد الاستمرار أم تحفظ نقاطك؟`, false, true, true);
-                }
+                hideRoundCards();
+                showMessageAuto('⏭️ تخطي!', 
+                    `حصلت على بطاقة تخطي!<br>فقدت <b>${gameState.currentScore}</b> نقطة محتملة<br>الانتقال إلى <b>${getNextPlayerName()}</b>`, 
+                    () => nextTurn());
+                renderCards();
+                updateTeamsDisplay();
+                updateLastCardInfo();
+                saveToFirebase();
+                return;
             }
+
+            // رقم عادي
+            const randomValue = Math.floor(Math.random() * 10) + 1;
+            const randomColor = colors[Math.floor(Math.random() * colors.length)];
+            card.value = randomValue;
+            card.color = randomColor;
+
+            // أول بطاقة
+            if (gameState.previousNumber === null && gameState.previousColor === null) {
+                gameState.currentScore = randomValue;
+                gameState.previousNumber = randomValue;
+                gameState.previousColor = randomColor;
+                showMessageContinue('🎯 بداية الجولة!', 
+                    `الرقم <b>${randomValue}</b> باللون <b>${colorNames[randomColor]}</b><br>نقاطك: <b>${randomValue}</b><br><br>استمر أو احفظ نقاطك`);
+            }
+            // نفس الرقم - خسارة
+            else if (randomValue === gameState.previousNumber) {
+                showMessageAuto('😢 نفس الرقم!', 
+                    `الرقم <b>${randomValue}</b> تكرر!<br>فقدت <b>${gameState.currentScore}</b> نقطة<br>الانتقال إلى <b>${getNextPlayerName()}</b>`, 
+                    () => {
+                        gameState.currentScore = 0;
+                        gameState.previousNumber = null;
+                        gameState.previousColor = null;
+                        hideRoundCards();
+                        nextTurn();
+                    });
+            }
+            // نفس اللون - خسارة
+            else if (randomColor === gameState.previousColor) {
+                showMessageAuto('😢 نفس اللون!', 
+                    `اللون <b>${colorNames[randomColor]}</b> تكرر!<br>فقدت <b>${gameState.currentScore}</b> نقطة<br>الانتقال إلى <b>${getNextPlayerName()}</b>`, 
+                    () => {
+                        gameState.currentScore = 0;
+                        gameState.previousNumber = null;
+                        gameState.previousColor = null;
+                        hideRoundCards();
+                        nextTurn();
+                    });
+            }
+            // مختلف - ربح
+            else {
+                gameState.currentScore += randomValue;
+                gameState.previousNumber = randomValue;
+                gameState.previousColor = randomColor;
+                showMessageContinue('🎉 ممتاز!', 
+                    `الرقم <b>${randomValue}</b> باللون <b>${colorNames[randomColor]}</b><br>مجموع نقاطك: <b>${gameState.currentScore}</b><br><br>استمر أو احفظ نقاطك`);
+            }
+            
             renderCards();
             updateTeamsDisplay();
             updateLastCardInfo();
             saveToFirebase();
         }
 
+        function hideRoundCards() {
+            gameState.roundRevealedCards.forEach(idx => {
+                gameState.cards[idx].hidden = true;
+                gameState.cards[idx].revealed = false;
+            });
+            gameState.roundRevealedCards = [];
+        }
+
         function savePoints() {
             if (gameState.currentScore > 0) {
                 gameState.teamScores[gameState.currentTeam].points += gameState.currentScore;
-                // إخفاء البطاقات المقلوبة في هذه الجولة
-                gameState.roundRevealedCards.forEach(idx => {
-                    gameState.cards[idx].revealed = false;
-                });
-                gameState.roundRevealedCards = [];
-                showMessageWithButtons('✅ تم الحفظ!', `تم حفظ <b>${gameState.currentScore}</b> نقطة لـ <b>${gameState.teamScores[gameState.currentTeam].name}</b><br>المجموع: <b>${gameState.teamScores[gameState.currentTeam].points}</b>`, false, false, false, false, true);
-                gameState.currentScore = 0;
-                gameState.previousNumber = null;
-                gameState.previousColor = null;
-                nextTurn();
+                const savedPoints = gameState.currentScore;
+                const playerName = gameState.teamScores[gameState.currentTeam].name;
+                const totalPoints = gameState.teamScores[gameState.currentTeam].points;
+                
+                hideRoundCards();
+                
+                showMessageAuto('✅ تم الحفظ!', 
+                    `تم حفظ <b>${savedPoints}</b> نقطة لـ <b>${playerName}</b><br>المجموع الكلي: <b>${totalPoints}</b><br><br>الانتقال إلى <b>${getNextPlayerName()}</b>`, 
+                    () => {
+                        gameState.currentScore = 0;
+                        gameState.previousNumber = null;
+                        gameState.previousColor = null;
+                        nextTurn();
+                    });
+                renderCards();
+                updateTeamsDisplay();
+                updateLastCardInfo();
+                saveToFirebase();
             } else {
-                showMessageAlert('️ تنبيه', 'لا توجد نقاط لحفظها', 'warning');
+                showMessageAlert('⚠️ تنبيه', 'لا توجد نقاط لحفظها', 'warning');
             }
+        }
+
+        function getNextPlayerName() {
+            const nextIndex = (gameState.currentTeam + 1) % gameState.teamCount;
+            return gameState.teamScores[nextIndex].name;
         }
 
         function nextTurn() {
@@ -483,6 +542,7 @@
             gameState.currentScore = 0;
             gameState.previousNumber = null;
             gameState.previousColor = null;
+            gameState.roundRevealedCards = [];
             updateTeamsDisplay();
             updateLastCardInfo();
             saveToFirebase();
@@ -519,9 +579,25 @@
                         <span class="edit-team-icon">✏️</span>
                     </div>
                     <div class="team-score">${team.points}</div>
+                    <div class="team-label">نقطة ${index === gameState.currentTeam ? '(دوره الآن)' : ''}</div>
                 `;
                 container.appendChild(teamEl);
             });
+            
+            const viewerContainer = document.getElementById('viewerTeamsDisplay');
+            if (viewerContainer) {
+                viewerContainer.innerHTML = '';
+                gameState.teamScores.forEach((team, index) => {
+                    const teamEl = document.createElement('div');
+                    teamEl.className = 'team-box' + (index === gameState.currentTeam ? ' active' : '');
+                    teamEl.innerHTML = `
+                        <div class="team-name">${team.name}</div>
+                        <div class="team-score">${team.points}</div>
+                        <div class="team-label">${index === gameState.currentTeam ? '(دوره الآن)' : ''}</div>
+                    `;
+                    viewerContainer.appendChild(teamEl);
+                });
+            }
         }
 
         function updateLastCardInfo() {
@@ -529,61 +605,57 @@
             const viewerInfo = document.getElementById('viewerLastCardInfo');
             let text = '';
             if (gameState.previousNumber !== null && gameState.previousColor !== null) {
-                text = `آخر بطاقة: الرقم ${gameState.previousNumber} باللون ${colorNames[gameState.previousColor]}`;
+                text = `🎯 آخر بطاقة: الرقم ${gameState.previousNumber} باللون ${colorNames[gameState.previousColor]} | اللاعب: ${gameState.teamScores[gameState.currentTeam].name}`;
             } else {
-                text = 'لم يتم كشف أي بطاقة بعد';
+                text = `🎮 دور: ${gameState.teamScores[gameState.currentTeam].name}`;
             }
             if (info) info.textContent = text;
             if (viewerInfo) viewerInfo.textContent = text;
         }
 
         function resetGame() {
-            if (confirm('هل تريد إعادة اللعبة؟')) {
-                initializeGame(); 
-                renderCards(); 
-                updateTeamsDisplay(); 
-                updateLastCardInfo(); 
+            if (confirm('هل تريد إعادة اللعبة؟ سيتم تصفير جميع النقاط.')) {
+                initializeGame();
+                renderCards();
+                updateTeamsDisplay();
+                updateLastCardInfo();
                 saveToFirebase();
             }
         }
 
         function showSettings() {
-            const totalCards = prompt('عدد البطاقات (40-100):', gameState.totalCards);
+            const totalCards = prompt('عدد البطاقات (25-100):', gameState.totalCards);
             if (totalCards) {
                 gameState.totalCards = parseInt(totalCards);
                 gameState.bombCount = parseInt(prompt('عدد القنابل (1-10):', gameState.bombCount));
                 gameState.skipCount = parseInt(prompt('بطاقات التخطي (0-5):', gameState.skipCount));
-                gameState.teamCount = parseInt(prompt('عدد الفرق (2-4):', gameState.teamCount));
-                initializeGame(); 
-                renderCards(); 
-                updateTeamsDisplay(); 
+                gameState.teamCount = parseInt(prompt('عدد اللاعبين (2-4):', gameState.teamCount));
+                initializeGame();
+                renderCards();
+                updateTeamsDisplay();
                 updateLastCardInfo();
             }
         }
 
         function copyLink() {
             const link = document.getElementById('viewerLink').textContent;
-            navigator.clipboard.writeText(link).then(() => { showMessageAlert('✅ تم', 'تم نسخ الرابط بنجاح!', 'success'); });
+            navigator.clipboard.writeText(link).then(() => {
+                showMessageAlert('✅ تم', 'تم نسخ الرابط بنجاح!', 'success');
+            });
         }
 
         function showMessageAlert(title, message, type, callback = null) {
             const overlay = document.getElementById('overlay');
             const msgBox = document.getElementById('messageBox');
-            const msgTitle = document.getElementById('msgTitle');
-            const msgText = document.getElementById('msgText');
+            document.getElementById('msgTitle').textContent = title;
+            document.getElementById('msgText').innerHTML = message;
             const msgButtons = document.getElementById('msgButtons');
-            msgTitle.textContent = title;
-            msgText.innerHTML = message;
             msgButtons.innerHTML = '';
-            if (type === 'success') {
-                msgBox.style.borderColor = '#00ff00';
-            } else if (type === 'error') {
-                msgBox.style.borderColor = '#ff0000';
-            } else if (type === 'warning') {
-                msgBox.style.borderColor = '#FFD700';
-            } else {
-                msgBox.style.borderColor = '#FFD700';
-            }
+            
+            if (type === 'success') msgBox.style.borderColor = '#00ff00';
+            else if (type === 'error') msgBox.style.borderColor = '#ff0000';
+            else msgBox.style.borderColor = '#FFD700';
+            
             const btn = document.createElement('button');
             btn.className = 'msg-btn msg-btn-ok';
             btn.textContent = 'حسناً';
@@ -597,54 +669,58 @@
             msgBox.classList.add('show');
         }
 
-        function showMessageWithButtons(title, text, isLose, canContinue = false, isFirst = false, isSave = false, isSkipOrBomb = false) {
+        // رسالة تلقائية (زر واحد + تنفيذ callback)
+        function showMessageAuto(title, text, callback) {
             const overlay = document.getElementById('overlay');
             const msgBox = document.getElementById('messageBox');
-            const msgTitle = document.getElementById('msgTitle');
-            const msgText = document.getElementById('msgText');
+            document.getElementById('msgTitle').textContent = title;
+            document.getElementById('msgText').innerHTML = text;
             const msgButtons = document.getElementById('msgButtons');
-            msgTitle.textContent = title;
-            msgText.innerHTML = text;
             msgButtons.innerHTML = '';
             msgBox.style.borderColor = '#FFD700';
-            if (isLose || isSkipOrBomb) {
-                const btn = document.createElement('button');
-                btn.className = 'msg-btn msg-btn-ok';
-                btn.textContent = 'حسناً';
-                btn.onclick = () => {
-                    overlay.classList.remove('show');
-                    msgBox.classList.remove('show');
-                    if (isSkipOrBomb) nextTurn();
-                };
-                msgButtons.appendChild(btn);
-            } else if (canContinue || isFirst) {
-                const continueBtn = document.createElement('button');
-                continueBtn.className = 'msg-btn msg-btn-continue';
-                continueBtn.textContent = '🎲 استمرار';
-                continueBtn.onclick = () => {
-                    overlay.classList.remove('show');
-                    msgBox.classList.remove('show');
-                };
-                msgButtons.appendChild(continueBtn);
-                const saveBtn = document.createElement('button');
-                saveBtn.className = 'msg-btn msg-btn-stop';
-                saveBtn.textContent = '💰 حفظ النقاط';
-                saveBtn.onclick = () => {
-                    overlay.classList.remove('show');
-                    msgBox.classList.remove('show');
-                    savePoints();
-                };
-                msgButtons.appendChild(saveBtn);
-            } else if (isSave) {
-                const btn = document.createElement('button');
-                btn.className = 'msg-btn msg-btn-ok';
-                btn.textContent = 'حسناً';
-                btn.onclick = () => {
-                    overlay.classList.remove('show');
-                    msgBox.classList.remove('show');
-                };
-                msgButtons.appendChild(btn);
-            }
+            
+            const btn = document.createElement('button');
+            btn.className = 'msg-btn msg-btn-ok';
+            btn.textContent = 'حسناً';
+            btn.onclick = () => {
+                overlay.classList.remove('show');
+                msgBox.classList.remove('show');
+                if (callback) setTimeout(callback, 100);
+            };
+            msgButtons.appendChild(btn);
+            overlay.classList.add('show');
+            msgBox.classList.add('show');
+        }
+
+        // رسالة مع خيارين (استمرار / حفظ)
+        function showMessageContinue(title, text) {
+            const overlay = document.getElementById('overlay');
+            const msgBox = document.getElementById('messageBox');
+            document.getElementById('msgTitle').textContent = title;
+            document.getElementById('msgText').innerHTML = text;
+            const msgButtons = document.getElementById('msgButtons');
+            msgButtons.innerHTML = '';
+            msgBox.style.borderColor = '#FFD700';
+            
+            const continueBtn = document.createElement('button');
+            continueBtn.className = 'msg-btn msg-btn-continue';
+            continueBtn.textContent = '🎲 استمرار';
+            continueBtn.onclick = () => {
+                overlay.classList.remove('show');
+                msgBox.classList.remove('show');
+            };
+            msgButtons.appendChild(continueBtn);
+            
+            const saveBtn = document.createElement('button');
+            saveBtn.className = 'msg-btn msg-btn-stop';
+            saveBtn.textContent = '💰 حفظ النقاط';
+            saveBtn.onclick = () => {
+                overlay.classList.remove('show');
+                msgBox.classList.remove('show');
+                savePoints();
+            };
+            msgButtons.appendChild(saveBtn);
+            
             overlay.classList.add('show');
             msgBox.classList.add('show');
         }
@@ -653,15 +729,15 @@
             const urlParams = new URLSearchParams(window.location.search);
             gameId = urlParams.get('game');
             if (!gameId) { showMessageAlert('❌ خطأ', 'رابط غير صحيح', 'error'); return; }
-            loadFromFirebase(); 
-            renderViewerCards(); 
-            renderViewerTeams(); 
+            loadFromFirebase();
+            renderViewerCards();
+            renderViewerTeams();
             updateLastCardInfo();
-            syncInterval = setInterval(() => { 
-                loadFromFirebase(); 
-                renderViewerCards(); 
-                renderViewerTeams(); 
-                updateLastCardInfo(); 
+            syncInterval = setInterval(() => {
+                loadFromFirebase();
+                renderViewerCards();
+                renderViewerTeams();
+                updateLastCardInfo();
             }, 1000);
         }
 
@@ -671,31 +747,26 @@
             gameState.cards.forEach((card, index) => {
                 const cardEl = document.createElement('div');
                 cardEl.className = 'card';
-                if (gameState.roundRevealedCards.includes(index) && !card.revealed) {
+                if (card.hidden) {
                     cardEl.classList.add('hidden');
-                }
-                if (card.revealed) {
+                } else if (card.revealed) {
                     cardEl.classList.add('revealed');
-                    if (card.isBomb) { 
-                        cardEl.classList.add('bomb'); 
-                        cardEl.innerHTML = '💣'; 
-                    } else if (card.isSkip) { 
-                        cardEl.classList.add('skip'); 
-                        cardEl.innerHTML = '️'; 
-                    } else { 
-                        cardEl.classList.add('color-' + card.color); 
-                        cardEl.textContent = card.value; 
-                    }
-                } else { 
-                    cardEl.textContent = card.number; 
+                    if (card.isBomb) { cardEl.classList.add('bomb'); cardEl.innerHTML = ''; }
+                    else if (card.isSkip) { cardEl.classList.add('skip'); cardEl.innerHTML = '⏭️'; }
+                    else { cardEl.classList.add('color-' + card.color); cardEl.textContent = card.value; }
+                } else {
+                    cardEl.textContent = card.number;
                 }
                 grid.appendChild(cardEl);
             });
-            document.getElementById('viewerCurrentScore').textContent = gameState.currentScore;
+            if (document.getElementById('viewerCurrentScore')) {
+                document.getElementById('viewerCurrentScore').textContent = gameState.currentScore;
+            }
         }
 
         function renderViewerTeams() {
             const container = document.getElementById('viewerTeamsDisplay');
+            if (!container) return;
             container.innerHTML = '';
             gameState.teamScores.forEach((team, index) => {
                 const teamEl = document.createElement('div');
@@ -703,6 +774,7 @@
                 teamEl.innerHTML = `
                     <div class="team-name">${team.name}</div>
                     <div class="team-score">${team.points}</div>
+                    <div class="team-label">${index === gameState.currentTeam ? '(دوره الآن)' : ''}</div>
                 `;
                 container.appendChild(teamEl);
             });
