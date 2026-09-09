@@ -52,7 +52,7 @@
         .last-card-info { background: rgba(255,255,255,0.1); padding: 10px; border-radius: 10px; text-align: center; margin-bottom: 15px; font-size: 14px; }
         .cards-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin-bottom: 20px; }
         .card { aspect-ratio: 1; background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%); border: 2px solid #FFD700; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 22px; font-weight: bold; cursor: pointer; transition: all 0.3s; }
-        .card.hidden { opacity: 0.15; pointer-events: none; border-color: rgba(255,215,0,0.2); }
+        .card.hidden { opacity: 0.2; pointer-events: none; border-color: rgba(255,215,0,0.1); background: rgba(255,255,255,0.05) !important; color: rgba(255,255,255,0.3); }
         .card.revealed { background: rgba(255,255,255,0.2); }
         .card:active { transform: scale(0.9); }
         .card.bomb { background: #ff0000 !important; }
@@ -101,7 +101,7 @@
             <div class="subtitle">لعبة المجازفة</div>
         </div>
         <div class="mode-buttons">
-            <button class="mode-btn controller" onclick="selectMode('controller')"> أنا المتحكم</button>
+            <button class="mode-btn controller" onclick="selectMode('controller')">🎮 أنا المتحكم</button>
             <button class="mode-btn viewer" onclick="selectMode('viewer')">👁️ مشاهدة فقط</button>
         </div>
         <div class="social-section">
@@ -127,9 +127,9 @@
 
     <div class="controller-screen" id="controllerScreen">
         <div class="header">
-            <h1> LOVELIGO - المتحكم</h1>
+            <h1>🎮 LOVELIGO - المتحكم</h1>
             <div class="subscription-info" id="subscriptionInfo">
-                <div class="sub-label"> معلومات الاشتراك</div>
+                <div class="sub-label">📋 معلومات الاشتراك</div>
                 <div class="sub-name" id="subName">-</div>
                 <div class="sub-expire" id="subExpire">تاريخ الانتهاء: -</div>
                 <div class="sub-days" id="subDays">الأيام المتبقية: -</div>
@@ -179,7 +179,7 @@
 
     <div class="overlay" id="editOverlay"></div>
     <div class="edit-modal" id="editModal">
-        <h3>✏️ تعديل اسم اللاعب</h3>
+        <h3>️ تعديل اسم اللاعب</h3>
         <input type="text" id="teamNameInput" placeholder="أدخل اسم اللاعب">
         <button onclick="saveTeamName()">حفظ</button>
     </div>
@@ -237,7 +237,6 @@
             }
         }
 
-        // 🔐 الحصول على معرف الجهاز
         function getDeviceId() {
             if (typeof AndroidInterface !== 'undefined') {
                 return AndroidInterface.getDeviceId();
@@ -277,11 +276,10 @@
                         const expireDate = new Date(foundKey.expires);
                         if (today > expireDate) {
                             const daysDiff = Math.floor((today - expireDate) / (1000 * 60 * 60 * 24));
-                            showMessageAlert('⏰ مفتاح منتهي', `انتهت صلاحية هذا المفتاح منذ ${daysDiff} يوم<br>تاريخ الانتهاء: ${foundKey.expires}`, 'error');
+                            showMessageAlert(' مفتاح منتهي', `انتهت صلاحية هذا المفتاح منذ ${daysDiff} يوم<br>تاريخ الانتهاء: ${foundKey.expires}`, 'error');
                             return;
                         }
                         
-                        // 🔐 التحقق من استخدام المفتاح على جهاز واحد فقط
                         const keyUsageRef = `${FIREBASE_URL}/keyUsage/${enteredKey}.json`;
                         try {
                             const usageResponse = await fetch(keyUsageRef);
@@ -292,13 +290,12 @@
                             
                             if (usageData && usageData.deviceId) {
                                 if (usageData.deviceId !== deviceId) {
-                                    showMessageAlert('🚫 المفتاح مستخدم', 
+                                    showMessageAlert(' المفتاح مستخدم', 
                                         `هذا المفتاح مستخدم بالفعل على جهاز آخر<br><br>لا يمكنك استخدام نفس المفتاح على أكثر من جهاز<br><br>إذا كنت صاحب المفتاح، استخدم زر "تحرير المفتاح" من جهازك الأصلي`, 
                                         'error');
                                     return;
                                 }
                             } else {
-                                // تسجيل الجهاز الحالي
                                 await fetch(keyUsageRef, {
                                     method: 'PUT',
                                     headers: { 'Content-Type': 'application/json' },
@@ -323,7 +320,7 @@
                             initController();
                         });
                     } else {
-                        showMessageAlert(' مفتاح خطأ', 'المفتاح الذي أدخلته غير صحيح أو غير موجود', 'error');
+                        showMessageAlert('❌ مفتاح خطأ', 'المفتاح الذي أدخلته غير صحيح أو غير موجود', 'error');
                     }
                 } else {
                     showMessageAlert('⚠️ خطأ في الاتصال', 'تعذر الاتصال بالسيرفر', 'error');
@@ -333,7 +330,6 @@
             }
         }
 
-        // 🔐 تحرير المفتاح من الجهاز
         async function releaseKey() {
             const enteredKey = prompt('أدخل المفتاح لتحريره من هذا الجهاز:');
             if (!enteredKey) return;
@@ -349,12 +345,10 @@
                 }
                 
                 if (usageData && usageData.deviceId === deviceId) {
-                    await fetch(keyUsageRef, {
-                        method: 'DELETE'
-                    });
+                    await fetch(keyUsageRef, { method: 'DELETE' });
                     showMessageAlert('✅ تم التحرير', 'تم تحرير المفتاح من هذا الجهاز بنجاح<br>يمكنك الآن استخدامه على جهاز آخر', 'success');
                 } else if (usageData && usageData.deviceId !== deviceId) {
-                    showMessageAlert('🚫 غير مصرح', 'هذا المفتاح مسجل على جهاز آخر<br>لا يمكنك تحريره من هذا الجهاز', 'error');
+                    showMessageAlert(' غير مصرح', 'هذا المفتاح مسجل على جهاز آخر<br>لا يمكنك تحريره من هذا الجهاز', 'error');
                 } else {
                     showMessageAlert('ℹ️ معلومات', 'المفتاح غير مستخدم حالياً', 'warning');
                 }
@@ -368,10 +362,10 @@
             const subExpire = document.getElementById('subExpire');
             const subDays = document.getElementById('subDays');
             if (subName) subName.textContent = `🎫 ${name}`;
-            if (subExpire) subExpire.textContent = `📅 تاريخ الانتهاء: ${expireDate}`;
+            if (subExpire) subExpire.textContent = ` تاريخ الانتهاء: ${expireDate}`;
             if (subDays) {
                 if (daysLeft <= 3) {
-                    subDays.textContent = `⚠️ متبقي ${daysLeft} يوم فقط!`;
+                    subDays.textContent = `️ متبقي ${daysLeft} يوم فقط!`;
                     subDays.style.color = '#ff4444';
                 } else if (daysLeft <= 7) {
                     subDays.textContent = `⏰ متبقي ${daysLeft} يوم`;
@@ -452,12 +446,14 @@
 
         function renderCards() {
             const grid = document.getElementById('cardsGrid');
+            if (!grid) return;
             grid.innerHTML = '';
             gameState.cards.forEach((card, index) => {
                 const cardEl = document.createElement('div');
                 cardEl.className = 'card';
                 if (card.hidden) {
                     cardEl.classList.add('hidden');
+                    cardEl.textContent = card.number;
                 } else if (card.revealed) {
                     cardEl.classList.add('revealed');
                     if (card.isBomb) { cardEl.classList.add('bomb'); cardEl.innerHTML = '💣'; }
@@ -470,9 +466,6 @@
                 grid.appendChild(cardEl);
             });
             document.getElementById('currentScore').textContent = gameState.currentScore;
-            if (document.getElementById('viewerCurrentScore')) {
-                document.getElementById('viewerCurrentScore').textContent = gameState.currentScore;
-            }
         }
 
         function revealCard(index) {
@@ -488,7 +481,7 @@
                 gameState.previousNumber = null;
                 gameState.previousColor = null;
                 hideRoundCards();
-                showMessageAuto('💣 قنبلة!', 
+                showMessageAuto(' قنبلة!', 
                     `ظهرت قنبلة!<br>تم تصفير جميع نقاط <b>${gameState.teamScores[gameState.currentTeam].name}</b>`, 
                     () => nextTurn());
                 renderCards();
@@ -528,7 +521,7 @@
             }
             else if (randomValue === gameState.previousNumber) {
                 const lostPoints = gameState.currentScore;
-                showMessageAuto(' نفس الرقم!', 
+                showMessageAuto('😢 نفس الرقم!', 
                     `الرقم <b>${randomValue}</b> تكرر!<br>فقدت <b>${lostPoints}</b> نقطة<br>الانتقال إلى <b>${getNextPlayerName()}</b>`, 
                     () => {
                         gameState.currentScore = 0;
@@ -554,7 +547,7 @@
                 gameState.currentScore += randomValue;
                 gameState.previousNumber = randomValue;
                 gameState.previousColor = randomColor;
-                showMessageContinue(' ممتاز!', 
+                showMessageContinue('🎉 ممتاز!', 
                     `الرقم <b>${randomValue}</b> باللون <b>${colorNames[randomColor]}</b><br>مجموع نقاطك: <b>${gameState.currentScore}</b><br><br>استمر أو احفظ نقاطك`);
             }
             
@@ -594,7 +587,7 @@
                 updateLastCardInfo();
                 saveToFirebase();
             } else {
-                showMessageAlert('⚠️ تنبيه', 'لا توجد نقاط لحفظها', 'warning');
+                showMessageAlert('️ تنبيه', 'لا توجد نقاط لحفظها', 'warning');
             }
         }
 
@@ -635,20 +628,22 @@
 
         function updateTeamsDisplay() {
             const container = document.getElementById('teamsDisplay');
-            container.innerHTML = '';
-            gameState.teamScores.forEach((team, index) => {
-                const teamEl = document.createElement('div');
-                teamEl.className = 'team-box' + (index === gameState.currentTeam ? ' active' : '');
-                teamEl.innerHTML = `
-                    <div class="team-name" onclick="editTeamName(${index})">
-                        ${team.name}
-                        <span class="edit-team-icon">✏️</span>
-                    </div>
-                    <div class="team-score">${team.points}</div>
-                    <div class="team-label">${index === gameState.currentTeam ? '(دوره الآن)' : ''}</div>
-                `;
-                container.appendChild(teamEl);
-            });
+            if (container) {
+                container.innerHTML = '';
+                gameState.teamScores.forEach((team, index) => {
+                    const teamEl = document.createElement('div');
+                    teamEl.className = 'team-box' + (index === gameState.currentTeam ? ' active' : '');
+                    teamEl.innerHTML = `
+                        <div class="team-name" onclick="editTeamName(${index})">
+                            ${team.name}
+                            <span class="edit-team-icon">✏️</span>
+                        </div>
+                        <div class="team-score">${team.points}</div>
+                        <div class="team-label">${index === gameState.currentTeam ? '(دوره الآن)' : ''}</div>
+                    `;
+                    container.appendChild(teamEl);
+                });
+            }
             
             const viewerContainer = document.getElementById('viewerTeamsDisplay');
             if (viewerContainer) {
@@ -764,7 +759,7 @@
             msgBox.style.borderColor = '#FFD700';
             const continueBtn = document.createElement('button');
             continueBtn.className = 'msg-btn msg-btn-continue';
-            continueBtn.textContent = ' استمرار';
+            continueBtn.textContent = '🎲 استمرار';
             continueBtn.onclick = () => {
                 overlay.classList.remove('show');
                 msgBox.classList.remove('show');
@@ -801,22 +796,36 @@
 
         function renderViewerCards() {
             const grid = document.getElementById('viewerCardsGrid');
+            if (!grid) return;
+            
             grid.innerHTML = '';
             gameState.cards.forEach((card, index) => {
                 const cardEl = document.createElement('div');
                 cardEl.className = 'card';
+                
                 if (card.hidden) {
+                    // بطاقة مخفية - تظهر برقمها مع شفافية
                     cardEl.classList.add('hidden');
+                    cardEl.textContent = card.number;
                 } else if (card.revealed) {
                     cardEl.classList.add('revealed');
-                    if (card.isBomb) { cardEl.classList.add('bomb'); cardEl.innerHTML = '💣'; }
-                    else if (card.isSkip) { cardEl.classList.add('skip'); cardEl.innerHTML = '⏭️'; }
-                    else { cardEl.classList.add('color-' + card.color); cardEl.textContent = card.value; }
+                    if (card.isBomb) { 
+                        cardEl.classList.add('bomb'); 
+                        cardEl.innerHTML = '💣'; 
+                    } else if (card.isSkip) { 
+                        cardEl.classList.add('skip'); 
+                        cardEl.innerHTML = '⏭️'; 
+                    } else { 
+                        cardEl.classList.add('color-' + card.color); 
+                        cardEl.textContent = card.value; 
+                    }
                 } else {
+                    // بطاقة عادية غير مقلوبة
                     cardEl.textContent = card.number;
                 }
                 grid.appendChild(cardEl);
             });
+            
             if (document.getElementById('viewerCurrentScore')) {
                 document.getElementById('viewerCurrentScore').textContent = gameState.currentScore;
             }
