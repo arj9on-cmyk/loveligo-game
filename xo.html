@@ -70,6 +70,7 @@
         .save-btn { background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%); color: #000; grid-column: span 2; }
         .reset-btn { background: linear-gradient(135deg, #ff416c 0%, #ff4b2b 100%); color: #fff; }
         .settings-btn { background: rgba(255,255,255,0.2); color: #fff; }
+        .release-btn { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: #fff; grid-column: span 2; }
         .viewer-screen { display: none; padding: 15px; min-height: 100vh; }
         .viewer-header { background: linear-gradient(135deg, rgba(0,206,209,0.2) 0%, rgba(0,255,255,0.2) 100%); padding: 20px; border-radius: 20px; margin-bottom: 20px; border: 2px solid rgba(0,206,209,0.5); text-align: center; }
         .status-indicator { display: inline-block; width: 12px; height: 12px; border-radius: 50%; background: #00ff00; margin-left: 10px; animation: pulse 2s infinite; }
@@ -100,7 +101,7 @@
             <div class="subtitle">لعبة المجازفة</div>
         </div>
         <div class="mode-buttons">
-            <button class="mode-btn controller" onclick="selectMode('controller')">🎮 أنا المتحكم</button>
+            <button class="mode-btn controller" onclick="selectMode('controller')"> أنا المتحكم</button>
             <button class="mode-btn viewer" onclick="selectMode('viewer')">👁️ مشاهدة فقط</button>
         </div>
         <div class="social-section">
@@ -118,7 +119,7 @@
 
     <div class="login-screen" id="loginScreen">
         <div class="login-box">
-            <div class="logo" style="font-size: 40px; margin-bottom: 30px;"></div>
+            <div class="logo" style="font-size: 40px; margin-bottom: 30px;">🔑</div>
             <input type="password" class="key-input" id="keyInput" placeholder="أدخل مفتاح الدخول">
             <button class="login-btn" onclick="checkKey()">دخول</button>
         </div>
@@ -126,9 +127,9 @@
 
     <div class="controller-screen" id="controllerScreen">
         <div class="header">
-            <h1>🎮 LOVELIGO - المتحكم</h1>
+            <h1> LOVELIGO - المتحكم</h1>
             <div class="subscription-info" id="subscriptionInfo">
-                <div class="sub-label">📋 معلومات الاشتراك</div>
+                <div class="sub-label"> معلومات الاشتراك</div>
                 <div class="sub-name" id="subName">-</div>
                 <div class="sub-expire" id="subExpire">تاريخ الانتهاء: -</div>
                 <div class="sub-days" id="subDays">الأيام المتبقية: -</div>
@@ -153,14 +154,15 @@
         
         <div class="controls">
             <button class="control-btn save-btn" onclick="savePoints()">💰 حفظ النقاط والانتقال</button>
-            <button class="control-btn reset-btn" onclick="resetGame()"> إعادة اللعبة</button>
-            <button class="control-btn settings-btn" onclick="showSettings()">️ الإعدادات</button>
+            <button class="control-btn reset-btn" onclick="resetGame()">🔄 إعادة اللعبة</button>
+            <button class="control-btn settings-btn" onclick="showSettings()">⚙️ الإعدادات</button>
+            <button class="control-btn release-btn" onclick="releaseKey()">🔓 تحرير المفتاح</button>
         </div>
     </div>
 
     <div class="viewer-screen" id="viewerScreen">
         <div class="viewer-header">
-            <h1>️ LOVELIGO - مشاهدة</h1>
+            <h1>👁️ LOVELIGO - مشاهدة</h1>
             <div style="margin-top: 10px;">
                 <span class="status-indicator"></span>
                 <span>متصل مباشرة</span>
@@ -235,9 +237,28 @@
             }
         }
 
+        // 🔐 الحصول على معرف الجهاز
+        function getDeviceId() {
+            if (typeof AndroidInterface !== 'undefined') {
+                return AndroidInterface.getDeviceId();
+            }
+            let id = localStorage.getItem('deviceId');
+            if (!id) {
+                id = 'browser_' + Math.random().toString(36).substr(2, 9);
+                localStorage.setItem('deviceId', id);
+            }
+            return id;
+        }
+
         async function checkKey() {
             const enteredKey = document.getElementById('keyInput').value.trim();
-            if (!enteredKey) { showMessageAlert('️ تنبيه', 'الرجاء إدخال المفتاح', 'warning'); return; }
+            if (!enteredKey) { 
+                showMessageAlert('⚠️ تنبيه', 'الرجاء إدخال المفتاح', 'warning');
+                return; 
+            }
+            
+            const deviceId = getDeviceId();
+            
             try {
                 const response = await fetch(API_URL);
                 if (response.ok) {
@@ -259,8 +280,42 @@
                             showMessageAlert('⏰ مفتاح منتهي', `انتهت صلاحية هذا المفتاح منذ ${daysDiff} يوم<br>تاريخ الانتهاء: ${foundKey.expires}`, 'error');
                             return;
                         }
+                        
+                        // 🔐 التحقق من استخدام المفتاح على جهاز واحد فقط
+                        const keyUsageRef = `${FIREBASE_URL}/keyUsage/${enteredKey}.json`;
+                        try {
+                            const usageResponse = await fetch(keyUsageRef);
+                            let usageData = null;
+                            if (usageResponse.ok) {
+                                usageData = await usageResponse.json();
+                            }
+                            
+                            if (usageData && usageData.deviceId) {
+                                if (usageData.deviceId !== deviceId) {
+                                    showMessageAlert('🚫 المفتاح مستخدم', 
+                                        `هذا المفتاح مستخدم بالفعل على جهاز آخر<br><br>لا يمكنك استخدام نفس المفتاح على أكثر من جهاز<br><br>إذا كنت صاحب المفتاح، استخدم زر "تحرير المفتاح" من جهازك الأصلي`, 
+                                        'error');
+                                    return;
+                                }
+                            } else {
+                                // تسجيل الجهاز الحالي
+                                await fetch(keyUsageRef, {
+                                    method: 'PUT',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify({
+                                        deviceId: deviceId,
+                                        keyName: foundKey.name,
+                                        loginTime: new Date().toISOString()
+                                    })
+                                });
+                            }
+                        } catch (usageError) {
+                            console.log("خطأ في التحقق من الجهاز:", usageError);
+                        }
+                        
                         const daysLeft = Math.floor((expireDate - today) / (1000 * 60 * 60 * 24));
                         localStorage.setItem('auth', 'true');
+                        localStorage.setItem('currentKey', enteredKey);
                         displaySubscriptionInfo(foundKey.name, foundKey.expires, daysLeft);
                         showMessageAlert('✅ مفتاح صحيح', `مرحباً بك!<br><br>المفتاح: <b>${foundKey.name}</b><br>الأيام المتبقية: <b>${daysLeft}</b> يوم<br>تاريخ الانتهاء: <b>${foundKey.expires}</b>`, 'success', () => {
                             document.getElementById('loginScreen').style.display = 'none';
@@ -268,7 +323,7 @@
                             initController();
                         });
                     } else {
-                        showMessageAlert('❌ مفتاح خطأ', 'المفتاح الذي أدخلته غير صحيح أو غير موجود', 'error');
+                        showMessageAlert(' مفتاح خطأ', 'المفتاح الذي أدخلته غير صحيح أو غير موجود', 'error');
                     }
                 } else {
                     showMessageAlert('⚠️ خطأ في الاتصال', 'تعذر الاتصال بالسيرفر', 'error');
@@ -278,18 +333,48 @@
             }
         }
 
+        // 🔐 تحرير المفتاح من الجهاز
+        async function releaseKey() {
+            const enteredKey = prompt('أدخل المفتاح لتحريره من هذا الجهاز:');
+            if (!enteredKey) return;
+            
+            const deviceId = getDeviceId();
+            
+            try {
+                const keyUsageRef = `${FIREBASE_URL}/keyUsage/${enteredKey}.json`;
+                const usageResponse = await fetch(keyUsageRef);
+                let usageData = null;
+                if (usageResponse.ok) {
+                    usageData = await usageResponse.json();
+                }
+                
+                if (usageData && usageData.deviceId === deviceId) {
+                    await fetch(keyUsageRef, {
+                        method: 'DELETE'
+                    });
+                    showMessageAlert('✅ تم التحرير', 'تم تحرير المفتاح من هذا الجهاز بنجاح<br>يمكنك الآن استخدامه على جهاز آخر', 'success');
+                } else if (usageData && usageData.deviceId !== deviceId) {
+                    showMessageAlert('🚫 غير مصرح', 'هذا المفتاح مسجل على جهاز آخر<br>لا يمكنك تحريره من هذا الجهاز', 'error');
+                } else {
+                    showMessageAlert('ℹ️ معلومات', 'المفتاح غير مستخدم حالياً', 'warning');
+                }
+            } catch (e) {
+                showMessageAlert('❌ خطأ', 'حدث خطأ في عملية التحرير', 'error');
+            }
+        }
+
         function displaySubscriptionInfo(name, expireDate, daysLeft) {
             const subName = document.getElementById('subName');
             const subExpire = document.getElementById('subExpire');
             const subDays = document.getElementById('subDays');
-            if (subName) subName.textContent = ` ${name}`;
+            if (subName) subName.textContent = `🎫 ${name}`;
             if (subExpire) subExpire.textContent = `📅 تاريخ الانتهاء: ${expireDate}`;
             if (subDays) {
                 if (daysLeft <= 3) {
-                    subDays.textContent = `️ متبقي ${daysLeft} يوم فقط!`;
+                    subDays.textContent = `⚠️ متبقي ${daysLeft} يوم فقط!`;
                     subDays.style.color = '#ff4444';
                 } else if (daysLeft <= 7) {
-                    subDays.textContent = ` متبقي ${daysLeft} يوم`;
+                    subDays.textContent = `⏰ متبقي ${daysLeft} يوم`;
                     subDays.style.color = '#FFD700';
                 } else {
                     subDays.textContent = `✅ متبقي ${daysLeft} يوم`;
@@ -371,30 +456,16 @@
             gameState.cards.forEach((card, index) => {
                 const cardEl = document.createElement('div');
                 cardEl.className = 'card';
-                
-                // إخفاء البطاقات المحفوظة
                 if (card.hidden) {
                     cardEl.classList.add('hidden');
-                }
-                
-                if (card.revealed && !card.hidden) {
+                } else if (card.revealed) {
                     cardEl.classList.add('revealed');
-                    if (card.isBomb) {
-                        cardEl.classList.add('bomb');
-                        cardEl.innerHTML = '';
-                    } else if (card.isSkip) {
-                        cardEl.classList.add('skip');
-                        cardEl.innerHTML = '⏭️';
-                    } else {
-                        cardEl.classList.add('color-' + card.color);
-                        cardEl.textContent = card.value;
-                    }
-                } else if (!card.hidden) {
+                    if (card.isBomb) { cardEl.classList.add('bomb'); cardEl.innerHTML = '💣'; }
+                    else if (card.isSkip) { cardEl.classList.add('skip'); cardEl.innerHTML = '⏭️'; }
+                    else { cardEl.classList.add('color-' + card.color); cardEl.textContent = card.value; }
+                } else {
                     cardEl.textContent = card.number;
                     cardEl.onclick = () => revealCard(index);
-                } else {
-                    // بطاقة مخفية - لا تعرض شيئاً أو رقم صغير
-                    cardEl.textContent = '';
                 }
                 grid.appendChild(cardEl);
             });
@@ -411,13 +482,11 @@
             card.revealed = true;
             gameState.roundRevealedCards.push(index);
 
-            // 💣 قنبلة - تصفير جميع النقاط
             if (card.isBomb) {
                 gameState.teamScores[gameState.currentTeam].points = 0;
                 gameState.currentScore = 0;
                 gameState.previousNumber = null;
                 gameState.previousColor = null;
-                // إخفاء البطاقات المقلوبة
                 hideRoundCards();
                 showMessageAuto('💣 قنبلة!', 
                     `ظهرت قنبلة!<br>تم تصفير جميع نقاط <b>${gameState.teamScores[gameState.currentTeam].name}</b>`, 
@@ -429,14 +498,14 @@
                 return;
             }
             
-            // ⏭️ تخطي - انتقال تلقائي + فقدان النقاط الحالية
             if (card.isSkip) {
+                const lostPoints = gameState.currentScore;
                 gameState.currentScore = 0;
                 gameState.previousNumber = null;
                 gameState.previousColor = null;
                 hideRoundCards();
                 showMessageAuto('⏭️ تخطي!', 
-                    `حصلت على بطاقة تخطي!<br>فقدت <b>${gameState.currentScore}</b> نقطة محتملة<br>الانتقال إلى <b>${getNextPlayerName()}</b>`, 
+                    `حصلت على بطاقة تخطي!<br>فقدت <b>${lostPoints}</b> نقطة<br>الانتقال إلى <b>${getNextPlayerName()}</b>`, 
                     () => nextTurn());
                 renderCards();
                 updateTeamsDisplay();
@@ -445,24 +514,22 @@
                 return;
             }
 
-            // رقم عادي
             const randomValue = Math.floor(Math.random() * 10) + 1;
             const randomColor = colors[Math.floor(Math.random() * colors.length)];
             card.value = randomValue;
             card.color = randomColor;
 
-            // أول بطاقة
             if (gameState.previousNumber === null && gameState.previousColor === null) {
                 gameState.currentScore = randomValue;
                 gameState.previousNumber = randomValue;
                 gameState.previousColor = randomColor;
-                showMessageContinue('🎯 بداية الجولة!', 
+                showMessageContinue(' بداية الجولة!', 
                     `الرقم <b>${randomValue}</b> باللون <b>${colorNames[randomColor]}</b><br>نقاطك: <b>${randomValue}</b><br><br>استمر أو احفظ نقاطك`);
             }
-            // نفس الرقم - خسارة
             else if (randomValue === gameState.previousNumber) {
-                showMessageAuto('😢 نفس الرقم!', 
-                    `الرقم <b>${randomValue}</b> تكرر!<br>فقدت <b>${gameState.currentScore}</b> نقطة<br>الانتقال إلى <b>${getNextPlayerName()}</b>`, 
+                const lostPoints = gameState.currentScore;
+                showMessageAuto(' نفس الرقم!', 
+                    `الرقم <b>${randomValue}</b> تكرر!<br>فقدت <b>${lostPoints}</b> نقطة<br>الانتقال إلى <b>${getNextPlayerName()}</b>`, 
                     () => {
                         gameState.currentScore = 0;
                         gameState.previousNumber = null;
@@ -471,10 +538,10 @@
                         nextTurn();
                     });
             }
-            // نفس اللون - خسارة
             else if (randomColor === gameState.previousColor) {
+                const lostPoints = gameState.currentScore;
                 showMessageAuto('😢 نفس اللون!', 
-                    `اللون <b>${colorNames[randomColor]}</b> تكرر!<br>فقدت <b>${gameState.currentScore}</b> نقطة<br>الانتقال إلى <b>${getNextPlayerName()}</b>`, 
+                    `اللون <b>${colorNames[randomColor]}</b> تكرر!<br>فقدت <b>${lostPoints}</b> نقطة<br>الانتقال إلى <b>${getNextPlayerName()}</b>`, 
                     () => {
                         gameState.currentScore = 0;
                         gameState.previousNumber = null;
@@ -483,12 +550,11 @@
                         nextTurn();
                     });
             }
-            // مختلف - ربح
             else {
                 gameState.currentScore += randomValue;
                 gameState.previousNumber = randomValue;
                 gameState.previousColor = randomColor;
-                showMessageContinue('🎉 ممتاز!', 
+                showMessageContinue(' ممتاز!', 
                     `الرقم <b>${randomValue}</b> باللون <b>${colorNames[randomColor]}</b><br>مجموع نقاطك: <b>${gameState.currentScore}</b><br><br>استمر أو احفظ نقاطك`);
             }
             
@@ -579,7 +645,7 @@
                         <span class="edit-team-icon">✏️</span>
                     </div>
                     <div class="team-score">${team.points}</div>
-                    <div class="team-label">نقطة ${index === gameState.currentTeam ? '(دوره الآن)' : ''}</div>
+                    <div class="team-label">${index === gameState.currentTeam ? '(دوره الآن)' : ''}</div>
                 `;
                 container.appendChild(teamEl);
             });
@@ -651,11 +717,9 @@
             document.getElementById('msgText').innerHTML = message;
             const msgButtons = document.getElementById('msgButtons');
             msgButtons.innerHTML = '';
-            
             if (type === 'success') msgBox.style.borderColor = '#00ff00';
             else if (type === 'error') msgBox.style.borderColor = '#ff0000';
             else msgBox.style.borderColor = '#FFD700';
-            
             const btn = document.createElement('button');
             btn.className = 'msg-btn msg-btn-ok';
             btn.textContent = 'حسناً';
@@ -669,7 +733,6 @@
             msgBox.classList.add('show');
         }
 
-        // رسالة تلقائية (زر واحد + تنفيذ callback)
         function showMessageAuto(title, text, callback) {
             const overlay = document.getElementById('overlay');
             const msgBox = document.getElementById('messageBox');
@@ -678,7 +741,6 @@
             const msgButtons = document.getElementById('msgButtons');
             msgButtons.innerHTML = '';
             msgBox.style.borderColor = '#FFD700';
-            
             const btn = document.createElement('button');
             btn.className = 'msg-btn msg-btn-ok';
             btn.textContent = 'حسناً';
@@ -692,7 +754,6 @@
             msgBox.classList.add('show');
         }
 
-        // رسالة مع خيارين (استمرار / حفظ)
         function showMessageContinue(title, text) {
             const overlay = document.getElementById('overlay');
             const msgBox = document.getElementById('messageBox');
@@ -701,16 +762,14 @@
             const msgButtons = document.getElementById('msgButtons');
             msgButtons.innerHTML = '';
             msgBox.style.borderColor = '#FFD700';
-            
             const continueBtn = document.createElement('button');
             continueBtn.className = 'msg-btn msg-btn-continue';
-            continueBtn.textContent = '🎲 استمرار';
+            continueBtn.textContent = ' استمرار';
             continueBtn.onclick = () => {
                 overlay.classList.remove('show');
                 msgBox.classList.remove('show');
             };
             msgButtons.appendChild(continueBtn);
-            
             const saveBtn = document.createElement('button');
             saveBtn.className = 'msg-btn msg-btn-stop';
             saveBtn.textContent = '💰 حفظ النقاط';
@@ -720,7 +779,6 @@
                 savePoints();
             };
             msgButtons.appendChild(saveBtn);
-            
             overlay.classList.add('show');
             msgBox.classList.add('show');
         }
@@ -751,7 +809,7 @@
                     cardEl.classList.add('hidden');
                 } else if (card.revealed) {
                     cardEl.classList.add('revealed');
-                    if (card.isBomb) { cardEl.classList.add('bomb'); cardEl.innerHTML = ''; }
+                    if (card.isBomb) { cardEl.classList.add('bomb'); cardEl.innerHTML = '💣'; }
                     else if (card.isSkip) { cardEl.classList.add('skip'); cardEl.innerHTML = '⏭️'; }
                     else { cardEl.classList.add('color-' + card.color); cardEl.textContent = card.value; }
                 } else {
