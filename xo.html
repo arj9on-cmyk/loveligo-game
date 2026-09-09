@@ -137,7 +137,7 @@
             <div class="share-link">
                 <div class="share-link-text">رابط المشاهدة (انسخه وشاركه):</div>
                 <div id="viewerLink" style="font-size: 12px; margin-bottom: 10px; word-break: break-all;"></div>
-                <button class="copy-btn" onclick="copyLink()">📋 نسخ الرابط</button>
+                <button class="copy-btn" onclick="copyLink()"> نسخ الرابط</button>
             </div>
         </div>
         
@@ -156,7 +156,7 @@
             <button class="control-btn save-btn" onclick="savePoints()">💰 حفظ النقاط والانتقال</button>
             <button class="control-btn reset-btn" onclick="resetGame()">🔄 إعادة اللعبة</button>
             <button class="control-btn settings-btn" onclick="showSettings()">⚙️ الإعدادات</button>
-            <button class="control-btn release-btn" onclick="releaseKey()">🔓 تحرير المفتاح</button>
+            <button class="control-btn release-btn" onclick="releaseKey()"> تحرير المفتاح</button>
         </div>
     </div>
 
@@ -169,7 +169,7 @@
             </div>
         </div>
         <div class="current-round-box">
-            <div class="current-round-label">🎯 نقاط الجولة الحالية</div>
+            <div class="current-round-label"> نقاط الجولة الحالية</div>
             <div class="current-round-value" id="viewerCurrentScore">0</div>
         </div>
         <div class="last-card-info" id="viewerLastCardInfo">لم يتم كشف أي بطاقة بعد</div>
@@ -179,7 +179,7 @@
 
     <div class="overlay" id="editOverlay"></div>
     <div class="edit-modal" id="editModal">
-        <h3>️ تعديل اسم اللاعب</h3>
+        <h3>✏️ تعديل اسم اللاعب</h3>
         <input type="text" id="teamNameInput" placeholder="أدخل اسم اللاعب">
         <button onclick="saveTeamName()">حفظ</button>
     </div>
@@ -276,10 +276,11 @@
                         const expireDate = new Date(foundKey.expires);
                         if (today > expireDate) {
                             const daysDiff = Math.floor((today - expireDate) / (1000 * 60 * 60 * 24));
-                            showMessageAlert(' مفتاح منتهي', `انتهت صلاحية هذا المفتاح منذ ${daysDiff} يوم<br>تاريخ الانتهاء: ${foundKey.expires}`, 'error');
+                            showMessageAlert('⏰ مفتاح منتهي', `انتهت صلاحية هذا المفتاح منذ ${daysDiff} يوم<br>تاريخ الانتهاء: ${foundKey.expires}`, 'error');
                             return;
                         }
                         
+                        // 🔐 التحقق من استخدام المفتاح على جهاز واحد فقط
                         const keyUsageRef = `${FIREBASE_URL}/keyUsage/${enteredKey}.json`;
                         try {
                             const usageResponse = await fetch(keyUsageRef);
@@ -288,14 +289,21 @@
                                 usageData = await usageResponse.json();
                             }
                             
+                            console.log("Device ID:", deviceId);
+                            console.log("Usage Data:", usageData);
+                            
                             if (usageData && usageData.deviceId) {
+                                // المفتاح مستخدم بالفعل
                                 if (usageData.deviceId !== deviceId) {
+                                    // جهاز مختلف - رفض الدخول
                                     showMessageAlert(' المفتاح مستخدم', 
                                         `هذا المفتاح مستخدم بالفعل على جهاز آخر<br><br>لا يمكنك استخدام نفس المفتاح على أكثر من جهاز<br><br>إذا كنت صاحب المفتاح، استخدم زر "تحرير المفتاح" من جهازك الأصلي`, 
                                         'error');
                                     return;
                                 }
+                                // نفس الجهاز - نسمح بالدخول
                             } else {
+                                // المفتاح غير مستخدم - نسجل الجهاز الحالي
                                 await fetch(keyUsageRef, {
                                     method: 'PUT',
                                     headers: { 'Content-Type': 'application/json' },
@@ -305,6 +313,7 @@
                                         loginTime: new Date().toISOString()
                                     })
                                 });
+                                console.log("تم تسجيل الجهاز في Firebase");
                             }
                         } catch (usageError) {
                             console.log("خطأ في التحقق من الجهاز:", usageError);
@@ -348,7 +357,7 @@
                     await fetch(keyUsageRef, { method: 'DELETE' });
                     showMessageAlert('✅ تم التحرير', 'تم تحرير المفتاح من هذا الجهاز بنجاح<br>يمكنك الآن استخدامه على جهاز آخر', 'success');
                 } else if (usageData && usageData.deviceId !== deviceId) {
-                    showMessageAlert(' غير مصرح', 'هذا المفتاح مسجل على جهاز آخر<br>لا يمكنك تحريره من هذا الجهاز', 'error');
+                    showMessageAlert('🚫 غير مصرح', 'هذا المفتاح مسجل على جهاز آخر<br>لا يمكنك تحريره من هذا الجهاز', 'error');
                 } else {
                     showMessageAlert('ℹ️ معلومات', 'المفتاح غير مستخدم حالياً', 'warning');
                 }
@@ -362,10 +371,10 @@
             const subExpire = document.getElementById('subExpire');
             const subDays = document.getElementById('subDays');
             if (subName) subName.textContent = `🎫 ${name}`;
-            if (subExpire) subExpire.textContent = ` تاريخ الانتهاء: ${expireDate}`;
+            if (subExpire) subExpire.textContent = `📅 تاريخ الانتهاء: ${expireDate}`;
             if (subDays) {
                 if (daysLeft <= 3) {
-                    subDays.textContent = `️ متبقي ${daysLeft} يوم فقط!`;
+                    subDays.textContent = `⚠️ متبقي ${daysLeft} يوم فقط!`;
                     subDays.style.color = '#ff4444';
                 } else if (daysLeft <= 7) {
                     subDays.textContent = `⏰ متبقي ${daysLeft} يوم`;
@@ -392,7 +401,10 @@
                 const response = await fetch(`${FIREBASE_URL}/games/${gameId}.json`);
                 if (response.ok) {
                     const data = await response.json();
-                    if (data) gameState = data;
+                    if (data) {
+                        gameState = data;
+                        console.log("تم تحميل البيانات من Firebase");
+                    }
                 }
             } catch (e) { console.log("Firebase error:", e); }
         }
@@ -481,7 +493,7 @@
                 gameState.previousNumber = null;
                 gameState.previousColor = null;
                 hideRoundCards();
-                showMessageAuto(' قنبلة!', 
+                showMessageAuto('💣 قنبلة!', 
                     `ظهرت قنبلة!<br>تم تصفير جميع نقاط <b>${gameState.teamScores[gameState.currentTeam].name}</b>`, 
                     () => nextTurn());
                 renderCards();
@@ -516,7 +528,7 @@
                 gameState.currentScore = randomValue;
                 gameState.previousNumber = randomValue;
                 gameState.previousColor = randomColor;
-                showMessageContinue(' بداية الجولة!', 
+                showMessageContinue('🎯 بداية الجولة!', 
                     `الرقم <b>${randomValue}</b> باللون <b>${colorNames[randomColor]}</b><br>نقاطك: <b>${randomValue}</b><br><br>استمر أو احفظ نقاطك`);
             }
             else if (randomValue === gameState.previousNumber) {
@@ -781,22 +793,39 @@
         function initViewer() {
             const urlParams = new URLSearchParams(window.location.search);
             gameId = urlParams.get('game');
-            if (!gameId) { showMessageAlert('❌ خطأ', 'رابط غير صحيح', 'error'); return; }
-            loadFromFirebase();
-            renderViewerCards();
-            renderViewerTeams();
-            updateLastCardInfo();
-            syncInterval = setInterval(() => {
-                loadFromFirebase();
+            console.log("👁️ Viewer - Game ID:", gameId);
+            
+            if (!gameId) { 
+                showMessageAlert('❌ خطأ', 'رابط غير صحيح', 'error'); 
+                return; 
+            }
+            
+            // تحميل البيانات فوراً
+            loadFromFirebase().then(() => {
                 renderViewerCards();
                 renderViewerTeams();
                 updateLastCardInfo();
+            });
+            
+            // تحديث دوري كل ثانية
+            syncInterval = setInterval(() => {
+                console.log("🔄 جاري التحديث من Firebase...");
+                loadFromFirebase().then(() => {
+                    renderViewerCards();
+                    renderViewerTeams();
+                    updateLastCardInfo();
+                });
             }, 1000);
         }
 
         function renderViewerCards() {
             const grid = document.getElementById('viewerCardsGrid');
-            if (!grid) return;
+            if (!grid) {
+                console.error("❌ لم يتم العثور على grid البطاقات");
+                return;
+            }
+            
+            console.log("🃏 جاري عرض البطاقات - العدد:", gameState.cards.length);
             
             grid.innerHTML = '';
             gameState.cards.forEach((card, index) => {
@@ -829,11 +858,19 @@
             if (document.getElementById('viewerCurrentScore')) {
                 document.getElementById('viewerCurrentScore').textContent = gameState.currentScore;
             }
+            
+            console.log("✅ تم عرض البطاقات بنجاح");
         }
 
         function renderViewerTeams() {
             const container = document.getElementById('viewerTeamsDisplay');
-            if (!container) return;
+            if (!container) {
+                console.error("❌ لم يتم العثور على container الفرق");
+                return;
+            }
+            
+            console.log("👥 جاري عرض الفرق - العدد:", gameState.teamScores.length);
+            
             container.innerHTML = '';
             gameState.teamScores.forEach((team, index) => {
                 const teamEl = document.createElement('div');
@@ -845,12 +882,17 @@
                 `;
                 container.appendChild(teamEl);
             });
+            
+            console.log("✅ تم عرض الفرق بنجاح");
         }
 
         window.onload = function() {
             const urlParams = new URLSearchParams(window.location.search);
             const mode = urlParams.get('mode');
-            if (mode === 'viewer') selectMode('viewer');
+            if (mode === 'viewer') {
+                console.log("👁️ تم فتح وضع المشاهدة");
+                selectMode('viewer');
+            }
         };
     </script>
 </body>
