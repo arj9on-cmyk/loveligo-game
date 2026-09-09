@@ -16,6 +16,15 @@
         .mode-btn.controller { border-color: #FFD700; background: linear-gradient(135deg, rgba(255,215,0,0.2) 0%, rgba(255,107,107,0.2) 100%); }
         .mode-btn.viewer { border-color: #00CED1; background: linear-gradient(135deg, rgba(0,206,209,0.2) 0%, rgba(0,255,255,0.2) 100%); }
         .mode-btn:active { transform: scale(0.95); }
+        .social-section { margin-top: 30px; width: 100%; max-width: 400px; }
+        .social-title { text-align: center; color: rgba(255,255,255,0.7); font-size: 14px; margin-bottom: 15px; }
+        .social-buttons { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .social-btn { padding: 15px; border: 2px solid rgba(255,255,255,0.2); border-radius: 15px; background: rgba(255,255,255,0.1); color: #fff; font-size: 16px; font-weight: bold; cursor: pointer; transition: all 0.3s; display: flex; align-items: center; justify-content: center; gap: 8px; text-decoration: none; }
+        .social-btn.instagram { border-color: #E4405F; background: linear-gradient(135deg, rgba(228,64,95,0.2) 0%, rgba(131,58,180,0.2) 100%); }
+        .social-btn.instagram:hover { border-color: #E4405F; background: linear-gradient(135deg, rgba(228,64,95,0.3) 0%, rgba(131,58,180,0.3) 100%); }
+        .social-btn.telegram { border-color: #0088cc; background: rgba(0,136,204,0.2); }
+        .social-btn.telegram:hover { border-color: #0088cc; background: rgba(0,136,204,0.3); }
+        .social-btn:active { transform: scale(0.95); }
         .login-screen { display: none; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; padding: 20px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
         .login-box { background: rgba(255, 255, 255, 0.15); backdrop-filter: blur(20px); border: 2px solid rgba(255, 255, 255, 0.3); border-radius: 30px; padding: 40px; width: 100%; max-width: 400px; text-align: center; }
         .key-input { width: 100%; padding: 18px; border: 2px solid rgba(255, 255, 255, 0.3); border-radius: 15px; background: rgba(255, 255, 255, 0.2); color: #fff; font-size: 18px; text-align: center; margin-bottom: 20px; outline: none; }
@@ -90,6 +99,19 @@
             <button class="mode-btn controller" onclick="selectMode('controller')">🎮 أنا المتحكم</button>
             <button class="mode-btn viewer" onclick="selectMode('viewer')">👁️ مشاهدة فقط</button>
         </div>
+        <div class="social-section">
+            <div class="social-title">📱 تابعني على</div>
+            <div class="social-buttons">
+                <a href="#" class="social-btn instagram" onclick="openSocial(event, 'instagram')">
+                    <span>📷</span>
+                    <span>إنستقرام</span>
+                </a>
+                <a href="#" class="social-btn telegram" onclick="openSocial(event, 'telegram')">
+                    <span>✈️</span>
+                    <span>تيليجرام</span>
+                </a>
+            </div>
+        </div>
     </div>
 
     <div class="login-screen" id="loginScreen">
@@ -102,19 +124,17 @@
 
     <div class="controller-screen" id="controllerScreen">
         <div class="header">
-            <h1>🎮 LOVELIGO - المتحكم</h1>
-            
+            <h1> LOVELIGO - المتحكم</h1>
             <div class="subscription-info" id="subscriptionInfo">
-                <div class="sub-label">📋 معلومات الاشتراك</div>
+                <div class="sub-label"> معلومات الاشتراك</div>
                 <div class="sub-name" id="subName">-</div>
                 <div class="sub-expire" id="subExpire">تاريخ الانتهاء: -</div>
                 <div class="sub-days" id="subDays">الأيام المتبقية: -</div>
             </div>
-            
             <div class="share-link">
                 <div class="share-link-text">رابط المشاهدة (انسخه وشاركه):</div>
                 <div id="viewerLink" style="font-size: 12px; margin-bottom: 10px; word-break: break-all;"></div>
-                <button class="copy-btn" onclick="copyLink()">📋 نسخ الرابط</button>
+                <button class="copy-btn" onclick="copyLink()"> نسخ الرابط</button>
             </div>
         </div>
         <div class="current-score-box">
@@ -125,7 +145,7 @@
         <div class="teams-display" id="teamsDisplay"></div>
         <div class="cards-grid" id="cardsGrid"></div>
         <div class="controls">
-            <button class="control-btn next-btn" onclick="nextTurn()">التالي ️</button>
+            <button class="control-btn next-btn" onclick="nextTurn()">التالي ⬅️</button>
             <button class="control-btn save-btn" onclick="savePoints()">💰 حفظ النقاط</button>
             <button class="control-btn reset-btn" onclick="resetGame()">إعادة اللعبة 🔄</button>
             <button class="control-btn settings-btn" onclick="showSettings()">⚙️ الإعدادات</button>
@@ -159,7 +179,7 @@
     <script>
         const GITHUB_BASE_URL = 'https://arj9on-cmyk.github.io/loveligo-game/xo.html';
         const FIREBASE_URL = 'https://alired-default-rtdb.firebaseio.com';
-        const BIN_ID = "6aa0fbefffd5d16053f03eda";
+        const BIN_ID = "6aa0aa65ffd5d16053ef5a5f";
         const API_URL = `https://api.jsonbin.io/v3/b/${BIN_ID}/latest`;
         let currentMode = null;
         let gameId = null;
@@ -188,21 +208,32 @@
             }
         }
 
+        function openSocial(event, platform) {
+            event.preventDefault();
+            let url = '';
+            if (platform === 'instagram') {
+                url = 'https://www.instagram.com/tf69x?stkn=cnRpMjZsbjdkczFy';
+            } else if (platform === 'telegram') {
+                url = 'https://t.me/TF_69';
+            }
+            if (typeof AndroidInterface !== 'undefined') {
+                AndroidInterface.openUrl(url);
+            } else {
+                window.open(url, '_blank');
+            }
+        }
+
         async function checkKey() {
             const enteredKey = document.getElementById('keyInput').value.trim();
-            
             if (!enteredKey) { 
                 showMessageAlert('⚠️ تنبيه', 'الرجاء إدخال المفتاح', 'warning');
                 return; 
             }
-            
             try {
                 const response = await fetch(API_URL);
-                
                 if (response.ok) {
                     const data = await response.json();
                     const keysList = data.record.keys;
-                    
                     let foundKey = null;
                     for (let k of keysList) {
                         if (k.key === enteredKey) {
@@ -210,45 +241,34 @@
                             break;
                         }
                     }
-                    
                     if (foundKey) {
                         if (!foundKey.active) {
                             showMessageAlert('🚫 مفتاح معطّل', 'هذا المفتاح معطّل من قبل الإدارة', 'error');
                             return;
                         }
-                        
                         const today = new Date();
                         const expireDate = new Date(foundKey.expires);
-                        
                         if (today > expireDate) {
                             const daysDiff = Math.floor((today - expireDate) / (1000 * 60 * 60 * 24));
-                            showMessageAlert(' مفتاح منتهي', 
-                                `انتهت صلاحية هذا المفتاح منذ ${daysDiff} يوم<br>تاريخ الانتهاء: ${foundKey.expires}`, 
-                                'error');
+                            showMessageAlert('⏰ مفتاح منتهي', `انتهت صلاحية هذا المفتاح منذ ${daysDiff} يوم<br>تاريخ الانتهاء: ${foundKey.expires}`, 'error');
                             return;
                         }
-                        
                         const daysLeft = Math.floor((expireDate - today) / (1000 * 60 * 60 * 24));
-                        
                         localStorage.setItem('auth', 'true');
                         localStorage.setItem('keyName', foundKey.name || '');
                         localStorage.setItem('keyExpire', foundKey.expires);
                         localStorage.setItem('keyDaysLeft', daysLeft);
-                        
                         displaySubscriptionInfo(foundKey.name, foundKey.expires, daysLeft);
-                        
-                        showMessageAlert('✅ مفتاح صحيح', 
-                            `مرحباً بك!<br><br>المفتاح: <b>${foundKey.name}</b><br>الأيام المتبقية: <b>${daysLeft}</b> يوم<br>تاريخ الانتهاء: <b>${foundKey.expires}</b>`, 
-                            'success', () => {
-                                document.getElementById('loginScreen').style.display = 'none';
-                                document.getElementById('controllerScreen').style.display = 'block';
-                                initController();
-                            });
+                        showMessageAlert('✅ مفتاح صحيح', `مرحباً بك!<br><br>المفتاح: <b>${foundKey.name}</b><br>الأيام المتبقية: <b>${daysLeft}</b> يوم<br>تاريخ الانتهاء: <b>${foundKey.expires}</b>`, 'success', () => {
+                            document.getElementById('loginScreen').style.display = 'none';
+                            document.getElementById('controllerScreen').style.display = 'block';
+                            initController();
+                        });
                     } else {
                         showMessageAlert('❌ مفتاح خطأ', 'المفتاح الذي أدخلته غير صحيح أو غير موجود', 'error');
                     }
                 } else {
-                    showMessageAlert('️ خطأ في الاتصال', 'تعذر الاتصال بالسيرفر، تحقق من الإنترنت', 'error');
+                    showMessageAlert('⚠️ خطأ في الاتصال', 'تعذر الاتصال بالسيرفر، تحقق من الإنترنت', 'error');
                 }
             } catch (e) {
                 console.log("خطأ في الاتصال:", e);
@@ -260,7 +280,6 @@
             const subName = document.getElementById('subName');
             const subExpire = document.getElementById('subExpire');
             const subDays = document.getElementById('subDays');
-            
             if (subName) subName.textContent = `🎫 ${name}`;
             if (subExpire) subExpire.textContent = `📅 تاريخ الانتهاء: ${expireDate}`;
             if (subDays) {
@@ -359,64 +378,45 @@
             if (card.revealed) return;
             card.revealed = true;
             gameState.revealedCards.push(index);
-
             if (card.isBomb) {
-                showMessageWithButtons('💣 قنبلة!',
-                    `ظهرت قنبلة!<br>خسرت <b>${gameState.currentScore}</b> نقطة`,
-                    true);
+                showMessageWithButtons('💣 قنبلة!', `ظهرت قنبلة!<br>خسرت <b>${gameState.currentScore}</b> نقطة`, true);
                 gameState.currentScore = 0;
                 gameState.teamScores[gameState.currentTeam].points = 0;
                 gameState.previousNumber = null;
                 gameState.previousColor = null;
-            }
-            else if (card.isSkip) {
-                showMessageWithButtons('⏭️ تخطي',
-                    'حصلت على بطاقة تخطي!<br>تم تخطي الدور',
-                    false, true);
+            } else if (card.isSkip) {
+                showMessageWithButtons('⏭️ تخطي', 'حصلت على بطاقة تخطي!<br>تم تخطي الدور', false, true);
                 gameState.previousNumber = null;
                 gameState.previousColor = null;
-            }
-            else {
+            } else {
                 const randomValue = Math.floor(Math.random() * 10) + 1;
                 const randomColor = colors[Math.floor(Math.random() * colors.length)];
                 card.value = randomValue;
                 card.color = randomColor;
-
                 if (gameState.previousNumber === null && gameState.previousColor === null) {
                     gameState.currentScore = randomValue;
                     gameState.previousNumber = randomValue;
                     gameState.previousColor = randomColor;
                     gameState.teamScores[gameState.currentTeam].points = gameState.currentScore;
-                    showMessageWithButtons(' بداية اللعبة!',
-                        `الرقم <b>${randomValue}</b> باللون <b>${colorNames[randomColor]}</b><br>نقاطك: <b>${randomValue}</b><br><br>هل تريد الاستمرار أم تحفظ نقاطك؟`,
-                        false, true, true);
-                }
-                else if (randomValue === gameState.previousNumber) {
-                    showMessageWithButtons('😢 نفس الرقم!',
-                        `الرقم <b>${randomValue}</b> تكرر!<br>خسرت <b>${gameState.currentScore}</b> نقطة`,
-                        true);
+                    showMessageWithButtons('🎯 بداية اللعبة!', `الرقم <b>${randomValue}</b> باللون <b>${colorNames[randomColor]}</b><br>نقاطك: <b>${randomValue}</b><br><br>هل تريد الاستمرار أم تحفظ نقاطك؟`, false, true, true);
+                } else if (randomValue === gameState.previousNumber) {
+                    showMessageWithButtons('😢 نفس الرقم!', `الرقم <b>${randomValue}</b> تكرر!<br>خسرت <b>${gameState.currentScore}</b> نقطة`, true);
                     gameState.currentScore = 0;
                     gameState.teamScores[gameState.currentTeam].points = 0;
                     gameState.previousNumber = null;
                     gameState.previousColor = null;
-                }
-                else if (randomColor === gameState.previousColor) {
-                    showMessageWithButtons('😢 نفس اللون!',
-                        `اللون <b>${colorNames[randomColor]}</b> تكرر!<br>خسرت <b>${gameState.currentScore}</b> نقطة`,
-                        true);
+                } else if (randomColor === gameState.previousColor) {
+                    showMessageWithButtons('😢 نفس اللون!', `اللون <b>${colorNames[randomColor]}</b> تكرر!<br>خسرت <b>${gameState.currentScore}</b> نقطة`, true);
                     gameState.currentScore = 0;
                     gameState.teamScores[gameState.currentTeam].points = 0;
                     gameState.previousNumber = null;
                     gameState.previousColor = null;
-                }
-                else {
+                } else {
                     gameState.currentScore += randomValue;
                     gameState.previousNumber = randomValue;
                     gameState.previousColor = randomColor;
                     gameState.teamScores[gameState.currentTeam].points = gameState.currentScore;
-                    showMessageWithButtons('🎉 ممتاز!',
-                        `الرقم <b>${randomValue}</b> باللون <b>${colorNames[randomColor]}</b><br>مجموع نقاطك: <b>${gameState.currentScore}</b><br><br>هل تريد الاستمرار أم تحفظ نقاطك؟`,
-                        false, true, true);
+                    showMessageWithButtons('🎉 ممتاز!', `الرقم <b>${randomValue}</b> باللون <b>${colorNames[randomColor]}</b><br>مجموع نقاطك: <b>${gameState.currentScore}</b><br><br>هل تريد الاستمرار أم تحفظ نقاطك؟`, false, true, true);
                 }
             }
             renderCards();
@@ -427,9 +427,7 @@
 
         function savePoints() {
             gameState.teamScores[gameState.currentTeam].points += gameState.currentScore;
-            showMessageWithButtons('✅ تم الحفظ!',
-                `تم حفظ <b>${gameState.currentScore}</b> نقطة للفريق ${gameState.currentTeam + 1}`,
-                false, false, false, true);
+            showMessageWithButtons('✅ تم الحفظ!', `تم حفظ <b>${gameState.currentScore}</b> نقطة للفريق ${gameState.currentTeam + 1}`, false, false, false, true);
             gameState.currentScore = 0;
             gameState.previousNumber = null;
             gameState.previousColor = null;
@@ -498,11 +496,9 @@
             const msgTitle = document.getElementById('msgTitle');
             const msgText = document.getElementById('msgText');
             const msgButtons = document.getElementById('msgButtons');
-
             msgTitle.textContent = title;
             msgText.innerHTML = message;
             msgButtons.innerHTML = '';
-
             if (type === 'success') {
                 msgBox.style.borderColor = '#00ff00';
             } else if (type === 'error') {
@@ -512,7 +508,6 @@
             } else {
                 msgBox.style.borderColor = '#FFD700';
             }
-
             const btn = document.createElement('button');
             btn.className = 'msg-btn msg-btn-ok';
             btn.textContent = 'حسناً';
@@ -522,7 +517,6 @@
                 if (callback) callback();
             };
             msgButtons.appendChild(btn);
-
             overlay.classList.add('show');
             msgBox.classList.add('show');
         }
@@ -533,12 +527,10 @@
             const msgTitle = document.getElementById('msgTitle');
             const msgText = document.getElementById('msgText');
             const msgButtons = document.getElementById('msgButtons');
-
             msgTitle.textContent = title;
             msgText.innerHTML = text;
             msgButtons.innerHTML = '';
             msgBox.style.borderColor = '#FFD700';
-
             if (isLose) {
                 const btn = document.createElement('button');
                 btn.className = 'msg-btn msg-btn-ok';
@@ -557,7 +549,6 @@
                     msgBox.classList.remove('show');
                 };
                 msgButtons.appendChild(continueBtn);
-
                 const saveBtn = document.createElement('button');
                 saveBtn.className = 'msg-btn msg-btn-stop';
                 saveBtn.textContent = '💰 حفظ النقاط';
@@ -577,7 +568,6 @@
                 };
                 msgButtons.appendChild(btn);
             }
-
             overlay.classList.add('show');
             msgBox.classList.add('show');
         }
