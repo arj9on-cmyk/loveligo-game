@@ -104,7 +104,6 @@
         <div class="header">
             <h1>🎮 LOVELIGO - المتحكم</h1>
             
-            <!-- معلومات الاشتراك -->
             <div class="subscription-info" id="subscriptionInfo">
                 <div class="sub-label">📋 معلومات الاشتراك</div>
                 <div class="sub-name" id="subName">-</div>
@@ -160,7 +159,7 @@
     <script>
         const GITHUB_BASE_URL = 'https://arj9on-cmyk.github.io/loveligo-game/xo.html';
         const FIREBASE_URL = 'https://alired-default-rtdb.firebaseio.com';
-        const BIN_ID = "6aa0aa65ffd5d16053ef5a5f";
+        const BIN_ID = "6aa0fbefffd5d16053f03eda";
         const API_URL = `https://api.jsonbin.io/v3/b/${BIN_ID}/latest`;
         let currentMode = null;
         let gameId = null;
@@ -236,7 +235,6 @@
                         localStorage.setItem('keyExpire', foundKey.expires);
                         localStorage.setItem('keyDaysLeft', daysLeft);
                         
-                        // عرض معلومات الاشتراك في الواجهة
                         displaySubscriptionInfo(foundKey.name, foundKey.expires, daysLeft);
                         
                         showMessageAlert('✅ مفتاح صحيح', 
@@ -258,7 +256,6 @@
             }
         }
 
-        // عرض معلومات الاشتراك في الواجهة
         function displaySubscriptionInfo(name, expireDate, daysLeft) {
             const subName = document.getElementById('subName');
             const subExpire = document.getElementById('subExpire');
