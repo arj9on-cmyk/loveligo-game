@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://arj9on-cmyk.github.io/loveligo-game/sitemap.xml
