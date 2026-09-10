@@ -83,6 +83,7 @@
         .card:active { transform: scale(0.9); }
         .card.bomb { background: #ff0000 !important; }
         .card.skip { background: #FFD700 !important; color: #000; }
+        .card.multiplier { background: linear-gradient(135deg, #8e2de2 0%, #4a00e0 100%) !important; color: #fff; font-size: 20px; }
         .color-red { background: #ff0000 !important; }
         .color-green { background: #00ff00 !important; color: #000; }
         .color-blue { background: #0088ff !important; }
@@ -227,8 +228,9 @@
         let editingTeamIndex = null;
         let gameState = {
             cards: [], teamScores: [], currentTeam: 0, currentScore: 0,
-            totalCards: 50, bombCount: 2, skipCount: 0, teamCount: 2,
+            totalCards: 50, bombCount: 2, skipCount: 0, multiplierCount: 3, teamCount: 2,
             previousNumber: null, previousColor: null,
+            usedNumbers: [], usedColors: [],
             roundRevealedCards: []
         };
         const colors = ['red', 'green', 'blue', 'yellow', 'purple', 'orange', 'pink', 'cyan'];
@@ -429,6 +431,15 @@
                     const data = await response.json();
                     if (data) {
                         gameState = data;
+                        if (!Array.isArray(gameState.usedNumbers)) gameState.usedNumbers = [];
+                        if (!Array.isArray(gameState.usedColors)) gameState.usedColors = [];
+                        if (!Array.isArray(gameState.roundRevealedCards)) gameState.roundRevealedCards = [];
+                        if (typeof gameState.multiplierCount !== 'number') gameState.multiplierCount = 3;
+                        gameState.cards = (gameState.cards || []).map(card => ({
+                            isMultiplier: false,
+                            multiplier: null,
+                            ...card
+                        }));
                         console.log("تم تحميل البيانات من Firebase");
                     }
                 }
@@ -453,12 +464,14 @@
             gameState.currentScore = 0;
             gameState.previousNumber = null;
             gameState.previousColor = null;
+            gameState.usedNumbers = [];
+            gameState.usedColors = [];
             gameState.roundRevealedCards = [];
 
             for (let i = 1; i <= gameState.totalCards; i++) {
                 gameState.cards.push({ 
                     number: i, revealed: false, hidden: false,
-                    value: null, color: null, isBomb: false, isSkip: false 
+                    value: null, color: null, isBomb: false, isSkip: false, isMultiplier: false, multiplier: null 
                 });
             }
             let bombsAdded = 0;
@@ -472,11 +485,26 @@
             let skipsAdded = 0;
             while (skipsAdded < gameState.skipCount) {
                 const idx = Math.floor(Math.random() * gameState.cards.length);
-                if (!gameState.cards[idx].isBomb && !gameState.cards[idx].isSkip) {
+                if (!gameState.cards[idx].isBomb && !gameState.cards[idx].isSkip && !gameState.cards[idx].isMultiplier) {
                     gameState.cards[idx].isSkip = true;
                     skipsAdded++;
                 }
             }
+
+            // إضافة بطاقات المضاعف الثلاث فقط: ×2 و ×3 و ×5
+            const multipliers = [2, 3, 5];
+            multipliers.forEach(multiplier => {
+                let added = false;
+                while (!added) {
+                    const idx = Math.floor(Math.random() * gameState.cards.length);
+                    if (!gameState.cards[idx].isBomb && !gameState.cards[idx].isSkip && !gameState.cards[idx].isMultiplier) {
+                        gameState.cards[idx].isMultiplier = true;
+                        gameState.cards[idx].multiplier = multiplier;
+                        added = true;
+                    }
+                }
+            });
+
             for (let i = 0; i < gameState.teamCount; i++) {
                 gameState.teamScores.push({ name: `اللاعب ${i + 1}`, points: 0 });
             }
@@ -496,6 +524,7 @@
                     cardEl.classList.add('revealed');
                     if (card.isBomb) { cardEl.classList.add('bomb'); cardEl.innerHTML = '💣'; }
                     else if (card.isSkip) { cardEl.classList.add('skip'); cardEl.innerHTML = '⏭️'; }
+                    else if (card.isMultiplier) { cardEl.classList.add('multiplier'); cardEl.textContent = '×' + card.multiplier; }
                     else { cardEl.classList.add('color-' + card.color); cardEl.textContent = card.value; }
                 } else {
                     cardEl.textContent = card.number;
@@ -518,6 +547,8 @@
                 gameState.currentScore = 0;
                 gameState.previousNumber = null;
                 gameState.previousColor = null;
+                gameState.usedNumbers = [];
+                gameState.usedColors = [];
                 hideRoundCards();
                 showMessageAuto('💣 قنبلة!', 
                     `ظهرت قنبلة!<br>تم تصفير جميع نقاط <b>${gameState.teamScores[gameState.currentTeam].name}</b>`, 
@@ -534,10 +565,41 @@
                 gameState.currentScore = 0;
                 gameState.previousNumber = null;
                 gameState.previousColor = null;
+                gameState.usedNumbers = [];
+                gameState.usedColors = [];
                 hideRoundCards();
                 showMessageAuto('⏭️ تخطي!', 
                     `حصلت على بطاقة تخطي!<br>فقدت <b>${lostPoints}</b> نقطة<br>الانتقال إلى <b>${getNextPlayerName()}</b>`, 
                     () => nextTurn());
+                renderCards();
+                updateTeamsDisplay();
+                updateLastCardInfo();
+                saveToFirebase();
+                return;
+            }
+
+            // بطاقة المضاعف: تضاعف قيمة البطاقة الرقمية السابقة فقط.
+            if (card.isMultiplier) {
+                let previousNumericCard = null;
+                const previousIndex = gameState.roundRevealedCards.length - 2;
+                if (previousIndex >= 0) {
+                    const previousCard = gameState.cards[gameState.roundRevealedCards[previousIndex]];
+                    if (!previousCard.isBomb && !previousCard.isSkip && !previousCard.isMultiplier && previousCard.value !== null) {
+                        previousNumericCard = previousCard;
+                    }
+                }
+
+                if (previousNumericCard) {
+                    const oldValue = previousNumericCard.value;
+                    const multipliedValue = oldValue * card.multiplier;
+                    gameState.currentScore += multipliedValue - oldValue;
+                    showMessageContinue(`✨ مضاعف ×${card.multiplier}!`, 
+                        `البطاقة السابقة كانت <b>${oldValue}</b><br>أصبحت قيمتها <b>${multipliedValue}</b><br>نقاط الجولة: <b>${gameState.currentScore}</b><br><br>استمر أو احفظ نقاطك`);
+                } else {
+                    showMessageContinue(`✨ مضاعف ×${card.multiplier}!`, 
+                        `ظهرت بطاقة المضاعف ×${card.multiplier}<br>لا توجد بطاقة رقمية سابقة لتطبيق المضاعف عليها.<br>نقاط الجولة: <b>${gameState.currentScore}</b><br><br>استمر أو احفظ نقاطك`);
+                }
+
                 renderCards();
                 updateTeamsDisplay();
                 updateLastCardInfo();
@@ -550,33 +612,40 @@
             card.value = randomValue;
             card.color = randomColor;
 
-            if (gameState.previousNumber === null && gameState.previousColor === null) {
+            // القاعدة: التكرار ممنوع مع أي بطاقة رقمية سابقة في نفس الجولة، وليس البطاقة السابقة فقط.
+            if (gameState.usedNumbers.length === 0 && gameState.usedColors.length === 0) {
                 gameState.currentScore = randomValue;
                 gameState.previousNumber = randomValue;
                 gameState.previousColor = randomColor;
+                gameState.usedNumbers.push(randomValue);
+                gameState.usedColors.push(randomColor);
                 showMessageContinue('🎯 بداية الجولة!', 
                     `الرقم <b>${randomValue}</b> باللون <b>${colorNames[randomColor]}</b><br>نقاطك: <b>${randomValue}</b><br><br>استمر أو احفظ نقاطك`);
             }
-            else if (randomValue === gameState.previousNumber) {
+            else if (gameState.usedNumbers.includes(randomValue)) {
                 const lostPoints = gameState.currentScore;
                 showMessageAuto('😢 نفس الرقم!', 
-                    `الرقم <b>${randomValue}</b> تكرر!<br>فقدت <b>${lostPoints}</b> نقطة<br>الانتقال إلى <b>${getNextPlayerName()}</b>`, 
+                    `الرقم <b>${randomValue}</b> تكرر في هذه الجولة!<br>فقدت <b>${lostPoints}</b> نقطة<br>الانتقال إلى <b>${getNextPlayerName()}</b>`, 
                     () => {
                         gameState.currentScore = 0;
                         gameState.previousNumber = null;
                         gameState.previousColor = null;
+                        gameState.usedNumbers = [];
+                        gameState.usedColors = [];
                         hideRoundCards();
                         nextTurn();
                     });
             }
-            else if (randomColor === gameState.previousColor) {
+            else if (gameState.usedColors.includes(randomColor)) {
                 const lostPoints = gameState.currentScore;
                 showMessageAuto('😢 نفس اللون!', 
-                    `اللون <b>${colorNames[randomColor]}</b> تكرر!<br>فقدت <b>${lostPoints}</b> نقطة<br>الانتقال إلى <b>${getNextPlayerName()}</b>`, 
+                    `اللون <b>${colorNames[randomColor]}</b> تكرر في هذه الجولة!<br>فقدت <b>${lostPoints}</b> نقطة<br>الانتقال إلى <b>${getNextPlayerName()}</b>`, 
                     () => {
                         gameState.currentScore = 0;
                         gameState.previousNumber = null;
                         gameState.previousColor = null;
+                        gameState.usedNumbers = [];
+                        gameState.usedColors = [];
                         hideRoundCards();
                         nextTurn();
                     });
@@ -585,6 +654,8 @@
                 gameState.currentScore += randomValue;
                 gameState.previousNumber = randomValue;
                 gameState.previousColor = randomColor;
+                gameState.usedNumbers.push(randomValue);
+                gameState.usedColors.push(randomColor);
                 showMessageContinue('🎉 ممتاز!', 
                     `الرقم <b>${randomValue}</b> باللون <b>${colorNames[randomColor]}</b><br>مجموع نقاطك: <b>${gameState.currentScore}</b><br><br>استمر أو احفظ نقاطك`);
             }
@@ -639,6 +710,8 @@
             gameState.currentScore = 0;
             gameState.previousNumber = null;
             gameState.previousColor = null;
+            gameState.usedNumbers = [];
+            gameState.usedColors = [];
             gameState.roundRevealedCards = [];
             updateTeamsDisplay();
             updateLastCardInfo();
@@ -728,6 +801,7 @@
                 gameState.totalCards = parseInt(totalCards);
                 gameState.bombCount = parseInt(prompt('عدد القنابل (1-10):', gameState.bombCount));
                 gameState.skipCount = parseInt(prompt('بطاقات التخطي (0-5):', gameState.skipCount));
+                gameState.multiplierCount = 3;
                 gameState.teamCount = parseInt(prompt('عدد اللاعبين (2-4):', gameState.teamCount));
                 initializeGame();
                 renderCards();
@@ -870,6 +944,9 @@
                     } else if (card.isSkip) { 
                         cardEl.classList.add('skip'); 
                         cardEl.innerHTML = '⏭️'; 
+                    } else if (card.isMultiplier) {
+                        cardEl.classList.add('multiplier');
+                        cardEl.textContent = '×' + card.multiplier;
                     } else { 
                         cardEl.classList.add('color-' + card.color); 
                         cardEl.textContent = card.value; 
