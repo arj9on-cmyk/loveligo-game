@@ -93,30 +93,11 @@
             gap: 10px;
         }
         
-        .btn-primary {
-            background: #6c5ce7;
-            color: white;
-        }
-        
-        .btn-success {
-            background: #00b894;
-            color: white;
-        }
-        
-        .btn-danger {
-            background: #d63031;
-            color: white;
-        }
-        
-        .btn-warning {
-            background: #fdcb6e;
-            color: #2d3436;
-        }
-        
-        .btn-info {
-            background: #74b9ff;
-            color: white;
-        }
+        .btn-primary { background: #6c5ce7; color: white; }
+        .btn-success { background: #00b894; color: white; }
+        .btn-danger { background: #d63031; color: white; }
+        .btn-warning { background: #fdcb6e; color: #2d3436; }
+        .btn-info { background: #74b9ff; color: white; }
         
         .btn:hover:not(:disabled) {
             transform: translateY(-3px);
@@ -164,6 +145,7 @@
             font-family: monospace;
             margin: 10px 0;
             text-align: center;
+            font-size: 0.85rem;
         }
         
         .player-grid {
@@ -259,9 +241,7 @@
             justify-content: center;
         }
         
-        .modal.active {
-            display: flex;
-        }
+        .modal.active { display: flex; }
         
         .modal-content {
             background: white;
@@ -277,9 +257,7 @@
             to { transform: translateY(0); opacity: 1; }
         }
         
-        .hidden {
-            display: none !important;
-        }
+        .hidden { display: none !important; }
         
         .info-box {
             background: #e8f4f8;
@@ -305,15 +283,6 @@
             margin: 10px 0;
             border-right: 4px solid #00b894;
             color: #00b894;
-        }
-        
-        .warning-box {
-            background: #fff9e6;
-            padding: 15px;
-            border-radius: 10px;
-            margin: 10px 0;
-            border-right: 4px solid #fdcb6e;
-            color: #b8860b;
         }
         
         .loading {
@@ -358,11 +327,8 @@
             margin-top: 10px;
         }
         
-        .request-actions button {
-            flex: 1;
-        }
+        .request-actions button { flex: 1; }
         
-        /* ===== معلومات التواصل ===== */
         .contact-section {
             background: linear-gradient(135deg, #667eea, #764ba2);
             color: white;
@@ -400,15 +366,11 @@
         
         .contact-icon:hover {
             transform: translateY(-5px) scale(1.1);
-            box-shadow: 0 8px 20px rgba(0,0,0,0.3);
         }
         
-        .telegram-icon {
-            background: #0088cc;
-        }
-        
+        .telegram-icon { background: #0088cc; }
         .instagram-icon {
-            background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
+            background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888);
         }
         
         .contact-text {
@@ -416,11 +378,25 @@
             font-size: 0.95rem;
             opacity: 0.95;
         }
+        
+        .winner-announcement {
+            background: linear-gradient(135deg, #f39c12, #e74c3c);
+            color: white;
+            padding: 20px;
+            border-radius: 15px;
+            margin: 15px 0;
+            text-align: center;
+            animation: winPulse 1s infinite;
+        }
+        
+        @keyframes winPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.02); }
+        }
     </style>
 </head>
 <body>
     <div class="container">
-        <!-- الرأس -->
         <div class="header">
             <h1>🎮 لعبة Bingo</h1>
             <p>LOVELIGO - النسخة المتصلة</p>
@@ -429,9 +405,7 @@
         <!-- تسجيل الدخول -->
         <div id="loginPanel" class="panel">
             <h2>🔑 تسجيل الدخول</h2>
-            <div class="info-box">
-                أدخل مفتاح الترخيص للاستمرار
-            </div>
+            <div class="info-box">أدخل مفتاح الترخيص للاستمرار</div>
             <div class="input-group">
                 <label>مفتاح الترخيص:</label>
                 <input type="text" id="licenseKey" placeholder="مثال: VIP2026">
@@ -441,7 +415,6 @@
             </button>
             <div id="loginMessage"></div>
             
-            <!-- معلومات التواصل -->
             <div class="contact-section">
                 <h3> لطلب مفتاح أو الاشتراك</h3>
                 <p class="contact-text">تواصل معي على:</p>
@@ -459,17 +432,17 @@
         <!-- معلومات الاشتراك -->
         <div id="subscriptionPanel" class="panel hidden">
             <div class="subscription-info">
-                <h3>📋 معلومات الاشتراك</h3>
+                <h3> معلومات الاشتراك</h3>
                 <p>🔑 المفتاح: <span id="subKey"></span></p>
                 <p>📅 تاريخ الانتهاء: <span id="subExpiry"></span></p>
-                <p>💚 الحالة: <span id="subStatus"></span></p>
+                <p> الحالة: <span id="subStatus"></span></p>
             </div>
             <button class="btn btn-primary" onclick="showRoleSelection()">متابعة</button>
         </div>
         
         <!-- اختيار الدور -->
         <div id="rolePanel" class="panel hidden">
-            <h2> اختر دورك</h2>
+            <h2>🎯 اختر دورك</h2>
             <button class="btn btn-primary" onclick="selectRole('host')" style="margin-bottom: 10px;">
                 <i class="fas fa-gamepad"></i> أنا المتحكم (Host)
             </button>
@@ -480,9 +453,8 @@
         
         <!-- واجهة المتحكم -->
         <div id="hostPanel" class="hidden">
-            <!-- رابط المشاركة -->
             <div class="panel">
-                <h2> رابط المشاركة</h2>
+                <h2>📤 رابط المشاركة</h2>
                 <div class="share-box">
                     <p>انسخ هذا الرابط وأرسله للاعبين:</p>
                     <input type="text" id="shareLink" readonly>
@@ -492,14 +464,12 @@
                 </div>
             </div>
             
-            <!-- الرقم الحالي -->
             <div class="current-number">
                 <div>الرقم المسحوب</div>
                 <div id="hostCurrentNumber" class="number-display">--</div>
                 <div id="hostCurrentLetter" class="letter-display">-</div>
             </div>
             
-            <!-- أزرار التحكم -->
             <div class="panel">
                 <h2>🎛️ التحكم</h2>
                 <button class="btn btn-primary" onclick="drawNumber()" id="drawBtn">
@@ -513,7 +483,6 @@
                 </button>
             </div>
             
-            <!-- طلبات الانضمام -->
             <div class="panel">
                 <h2>📋 طلبات الانضمام</h2>
                 <div id="pendingRequests">
@@ -524,26 +493,25 @@
                 </div>
             </div>
             
-            <!-- اللاعبون -->
             <div class="panel">
-                <h2>👥 اللاعبون المشاركون</h2>
+                <h2> اللاعبون المشاركون</h2>
                 <div id="playersList">
                     <div class="info-box">لا يوجد لاعبين بعد</div>
                 </div>
             </div>
             
-            <!-- سجل الأرقام -->
             <div class="panel">
                 <h2>📊 سجل الأرقام المسحوبة</h2>
                 <div id="hostNumbersLog" class="numbers-log">
                     <p>لم يتم سحب أي رقم بعد</p>
                 </div>
             </div>
+            
+            <div id="winnerAnnouncement"></div>
         </div>
         
         <!-- واجهة اللاعب -->
         <div id="playerPanel" class="hidden">
-            <!-- نموذج التسجيل -->
             <div id="registrationForm" class="panel">
                 <h2>📝 الانضمام للعبة</h2>
                 <div class="input-group">
@@ -560,7 +528,6 @@
                 <div id="registrationStatus"></div>
             </div>
             
-            <!-- واجهة اللعب -->
             <div id="playerGamePanel" class="hidden">
                 <div class="current-number">
                     <div>آخر رقم مسحوب</div>
@@ -569,16 +536,13 @@
                 </div>
                 
                 <div class="panel">
-                    <h2>🎯 أرقامك (اضغط للتحديد)</h2>
-                    <div class="info-box">
-                        اضغط على الرقم لوضع علامة إذا تم سحبه
-                    </div>
+                    <h2> أرقامك (اضغط للتحديد)</h2>
+                    <div class="info-box">اضغط على الرقم لوضع علامة إذا تم سحبه</div>
                     <div id="playerGrid" class="player-grid"></div>
                 </div>
                 
                 <div class="panel" style="text-align: center;">
-                    <button class="btn btn-warning" onclick="claimBingo()" 
-                        style="font-size: 1.5rem; padding: 20px 40px;">
+                    <button class="btn btn-warning" onclick="claimBingo()" style="font-size: 1.5rem; padding: 20px 40px;">
                         <i class="fas fa-trophy"></i> BINGO!
                     </button>
                 </div>
@@ -590,7 +554,6 @@
         </div>
     </div>
     
-    <!-- نافذة الرسائل -->
     <div id="messageModal" class="modal">
         <div class="modal-content">
             <h2 id="modalTitle"></h2>
@@ -602,9 +565,9 @@
     <script>
         // ===== إعدادات JSONBin =====
         const BIN_ID = '6aa91167ffd5d16053091105';
-        // ⚠️ مهم جداً: استبدل هذا بمفتاحك الحقيقي من JSONBin
-        const API_KEY = '$2b$10$YOUR_REAL_API_KEY_HERE'; 
+        const API_KEY = '$2a$10$RITxbUC8tIk02/FZkOGeYenJCF0HLCbx9UTYcJnTX02kpyCjpCXXS';
         const BASE_URL = `https://api.jsonbin.io/v3/b/${BIN_ID}`;
+        const POLL_INTERVAL = 5000; // 5 ثواني
         
         // ===== متغيرات عامة =====
         let currentRole = null;
@@ -616,6 +579,7 @@
         let markedNumbers = new Set();
         let gameData = null;
         let pollingInterval = null;
+        let isProcessing = false;
         
         // ===== تهيئة =====
         window.onload = function() {
@@ -627,9 +591,40 @@
             const room = urlParams.get('room');
             if (room) {
                 roomId = room;
-                setTimeout(() => {
-                    selectRole('player');
-                }, 500);
+                setTimeout(() => selectRole('player'), 500);
+            }
+        }
+        
+        // ===== دوال JSONBin =====
+        async function readBin() {
+            try {
+                const response = await fetch(BASE_URL, {
+                    headers: { 'X-Master-Key': API_KEY }
+                });
+                if (!response.ok) throw new Error('فشل في القراءة');
+                const data = await response.json();
+                return data.record;
+            } catch (error) {
+                console.error('خطأ في القراءة:', error);
+                throw error;
+            }
+        }
+        
+        async function writeBin(data) {
+            try {
+                const response = await fetch(BASE_URL, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Master-Key': API_KEY
+                    },
+                    body: JSON.stringify(data)
+                });
+                if (!response.ok) throw new Error('فشل في الكتابة');
+                return true;
+            } catch (error) {
+                console.error('خطأ في الكتابة:', error);
+                throw error;
             }
         }
         
@@ -646,18 +641,8 @@
             messageDiv.innerHTML = '<div class="loading"><div class="spinner"></div><p>جاري التحقق...</p></div>';
             
             try {
-                const response = await fetch(BASE_URL, {
-                    headers: {
-                        'X-Master-Key': API_KEY
-                    }
-                });
-                
-                if (!response.ok) {
-                    throw new Error('فشل في الاتصال بـ JSONBin');
-                }
-                
-                const data = await response.json();
-                const keys = data.record.keys || [];
+                const data = await readBin();
+                const keys = data.keys || [];
                 const license = keys.find(k => k.key === keyInput && k.active === true);
                 
                 if (!license) {
@@ -680,41 +665,16 @@
                 }
                 
                 if (!license.deviceId) {
-                    await registerDevice(keyInput, deviceId);
+                    license.deviceId = deviceId;
+                    license.registeredAt = new Date().toISOString();
+                    await writeBin(data);
                 }
                 
                 currentLicense = license;
                 showSubscriptionInfo(keyInput, expiryDate);
                 
             } catch (error) {
-                console.error('Error:', error);
-                messageDiv.innerHTML = '<div class="error-box">❌ خطأ في الاتصال. تأكد من الإنترنت ومفتاح API</div>';
-            }
-        }
-        
-        async function registerDevice(key, deviceId) {
-            try {
-                const currentData = await (await fetch(BASE_URL, {
-                    headers: {'X-Master-Key': API_KEY}
-                })).json();
-                
-                const updatedKeys = currentData.record.keys.map(k => {
-                    if (k.key === key) {
-                        return {...k, deviceId: deviceId, registeredAt: new Date().toISOString()};
-                    }
-                    return k;
-                });
-                
-                await fetch(BASE_URL, {
-                    method: 'PUT',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-Master-Key': API_KEY
-                    },
-                    body: JSON.stringify({keys: updatedKeys})
-                });
-            } catch (error) {
-                console.error('فشل في تسجيل الجهاز:', error);
+                messageDiv.innerHTML = '<div class="error-box">❌ خطأ في الاتصال. تأكد من الإنترنت</div>';
             }
         }
         
@@ -799,17 +759,21 @@
         }
         
         async function saveGameState() {
+            if (isProcessing) return;
+            isProcessing = true;
+            
             try {
-                await fetch(BASE_URL + '/game/' + roomId, {
-                    method: 'PUT',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-Master-Key': API_KEY
-                    },
-                    body: JSON.stringify(gameState)
-                });
+                const data = await readBin();
+                if (!data.rooms) data.rooms = {};
+                data.rooms[roomId] = {
+                    gameState: gameState,
+                    lastUpdate: Date.now()
+                };
+                await writeBin(data);
             } catch (error) {
                 console.error('فشل في حفظ الحالة:', error);
+            } finally {
+                isProcessing = false;
             }
         }
         
@@ -841,79 +805,96 @@
             
             await saveGameState();
             updateHostUI();
+            document.getElementById('winnerAnnouncement').innerHTML = '';
             showMessage('جولة جديدة', 'تم بدء جولة جديدة', 'success');
         }
         
         function startPollingRequests() {
             fetchPendingRequests();
-            pollingInterval = setInterval(fetchPendingRequests, 3000);
+            pollingInterval = setInterval(fetchPendingRequests, POLL_INTERVAL);
         }
         
         async function fetchPendingRequests() {
             try {
-                const response = await fetch(BASE_URL + '/requests/' + roomId, {
-                    headers: {'X-Master-Key': API_KEY}
-                });
+                const data = await readBin();
+                const roomData = data.rooms && data.rooms[roomId];
                 
-                if (response.ok) {
-                    const data = await response.json();
-                    if (data.record && data.record.requests) {
-                        gameState.pendingRequests = data.record.requests;
-                        renderPendingRequests();
-                    } else {
-                        // لا توجد طلبات
-                        document.getElementById('pendingRequests').innerHTML = 
-                            '<div class="info-box">لا توجد طلبات حالياً</div>';
+                if (roomData && roomData.gameState) {
+                    const oldPending = gameState.pendingRequests.length;
+                    gameState = roomData.gameState;
+                    
+                    // إذا كانت هناك طلبات جديدة، اعرضها
+                    if (gameState.pendingRequests.length > oldPending) {
+                        // يمكن إضافة صوت تنبيه هنا
                     }
+                    
+                    renderPendingRequests();
+                    renderPlayersList();
+                    updateHostUI();
                 } else {
-                    console.error('فشل في جلب الطلبات:', response.status);
+                    document.getElementById('pendingRequests').innerHTML = 
+                        '<div class="info-box">لا توجد طلبات حالياً</div>';
                 }
             } catch (error) {
                 console.error('خطأ في جلب الطلبات:', error);
-                document.getElementById('pendingRequests').innerHTML = 
-                    '<div class="error-box">خطأ في تحميل الطلبات</div>';
             }
         }
         
-        async function approvePlayer(playerId) {
-            const request = gameState.pendingRequests.find(r => r.playerId === playerId);
+        async function approvePlayer(reqPlayerId) {
+            if (isProcessing) return;
+            
+            const request = gameState.pendingRequests.find(r => r.playerId === reqPlayerId);
             if (!request) return;
             
-            gameState.pendingRequests = gameState.pendingRequests.filter(r => r.playerId !== playerId);
+            gameState.pendingRequests = gameState.pendingRequests.filter(r => r.playerId !== reqPlayerId);
             gameState.players.push({...request, approvedAt: new Date().toISOString()});
             
             await saveGameState();
-            await updatePlayerStatus(playerId, 'approved');
+            
+            // تحديث حالة اللاعب
+            try {
+                const data = await readBin();
+                if (!data.playerStatus) data.playerStatus = {};
+                data.playerStatus[reqPlayerId] = {
+                    status: 'approved',
+                    roomId: roomId,
+                    timestamp: Date.now()
+                };
+                await writeBin(data);
+            } catch (error) {
+                console.error('فشل في تحديث حالة اللاعب:', error);
+            }
+            
             renderPendingRequests();
             renderPlayersList();
         }
         
-        async function rejectPlayer(playerId) {
-            gameState.pendingRequests = gameState.pendingRequests.filter(r => r.playerId !== playerId);
+        async function rejectPlayer(reqPlayerId) {
+            if (isProcessing) return;
+            
+            gameState.pendingRequests = gameState.pendingRequests.filter(r => r.playerId !== reqPlayerId);
             await saveGameState();
-            await updatePlayerStatus(playerId, 'rejected');
-            renderPendingRequests();
-        }
-        
-        async function updatePlayerStatus(playerId, status) {
+            
             try {
-                await fetch(BASE_URL + '/player-status/' + playerId, {
-                    method: 'PUT',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-Master-Key': API_KEY
-                    },
-                    body: JSON.stringify({status: status, roomId: roomId})
-                });
+                const data = await readBin();
+                if (!data.playerStatus) data.playerStatus = {};
+                data.playerStatus[reqPlayerId] = {
+                    status: 'rejected',
+                    roomId: roomId,
+                    timestamp: Date.now()
+                };
+                await writeBin(data);
             } catch (error) {
-                console.error('فشل في تحديث الحالة:', error);
+                console.error('فشل في تحديث حالة اللاعب:', error);
             }
+            
+            renderPendingRequests();
         }
         
         function renderPendingRequests() {
             const container = document.getElementById('pendingRequests');
             
-            if (gameState.pendingRequests.length === 0) {
+            if (!gameState.pendingRequests || gameState.pendingRequests.length === 0) {
                 container.innerHTML = '<div class="info-box">لا توجد طلبات حالياً</div>';
                 return;
             }
@@ -935,7 +916,7 @@
         function renderPlayersList() {
             const container = document.getElementById('playersList');
             
-            if (gameState.players.length === 0) {
+            if (!gameState.players || gameState.players.length === 0) {
                 container.innerHTML = '<div class="info-box">لا يوجد لاعبين بعد</div>';
                 return;
             }
@@ -1012,26 +993,30 @@
             };
             
             try {
-                // حفظ الطلب في JSONBin
-                const currentData = await fetch(BASE_URL + '/requests/' + roomId, {
-                    headers: {'X-Master-Key': API_KEY}
-                }).then(r => r.ok ? r.json() : null).catch(() => null);
-                
-                let requests = [];
-                if (currentData && currentData.record && currentData.record.requests) {
-                    requests = currentData.record.requests;
+                const data = await readBin();
+                if (!data.rooms) data.rooms = {};
+                if (!data.rooms[roomId]) {
+                    data.rooms[roomId] = { gameState: null, lastUpdate: Date.now() };
+                }
+                if (!data.rooms[roomId].gameState) {
+                    data.rooms[roomId].gameState = {
+                        drawnNumbers: [],
+                        remainingNumbers: [],
+                        players: [],
+                        pendingRequests: [],
+                        lastDrawnNumber: null,
+                        roomId: roomId
+                    };
                 }
                 
-                requests.push(requestData);
+                // إضافة الطلب
+                if (!data.rooms[roomId].gameState.pendingRequests) {
+                    data.rooms[roomId].gameState.pendingRequests = [];
+                }
+                data.rooms[roomId].gameState.pendingRequests.push(requestData);
+                data.rooms[roomId].lastUpdate = Date.now();
                 
-                await fetch(BASE_URL + '/requests/' + roomId, {
-                    method: 'PUT',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-Master-Key': API_KEY
-                    },
-                    body: JSON.stringify({requests: requests})
-                });
+                await writeBin(data);
                 
                 document.getElementById('registrationStatus').innerHTML = 
                     '<div class="success-box">✅ تم إرسال الطلب. انتظر موافقة المتحكم...</div>';
@@ -1047,19 +1032,17 @@
         async function checkPlayerStatus() {
             const interval = setInterval(async () => {
                 try {
-                    const response = await fetch(BASE_URL + '/player-status/' + playerId, {
-                        headers: {'X-Master-Key': API_KEY}
-                    });
+                    const data = await readBin();
+                    const status = data.playerStatus && data.playerStatus[playerId];
                     
-                    if (response.ok) {
-                        const data = await response.json();
-                        if (data.record && data.record.status === 'approved') {
-                            clearInterval(interval);
-                            showPlayerGamePanel();
-                        } else if (data.record && data.record.status === 'rejected') {
-                            clearInterval(interval);
-                            showMessage('مرفوض', 'تم رفض طلبك', 'error');
-                        }
+                    if (status && status.status === 'approved') {
+                        clearInterval(interval);
+                        showPlayerGamePanel();
+                    } else if (status && status.status === 'rejected') {
+                        clearInterval(interval);
+                        showMessage('مرفوض', 'تم رفض طلبك', 'error');
+                        document.getElementById('registrationForm').classList.remove('hidden');
+                        document.getElementById('playerGamePanel').classList.add('hidden');
                     }
                 } catch (error) {
                     console.error('فشل في التحقق:', error);
@@ -1073,21 +1056,17 @@
             
             renderPlayerGrid();
             fetchGameData();
-            setInterval(fetchGameData, 3000);
+            pollingInterval = setInterval(fetchGameData, POLL_INTERVAL);
         }
         
         async function fetchGameData() {
             try {
-                const response = await fetch(BASE_URL + '/game/' + roomId, {
-                    headers: {'X-Master-Key': API_KEY}
-                });
+                const data = await readBin();
+                const roomData = data.rooms && data.rooms[roomId];
                 
-                if (response.ok) {
-                    const data = await response.json();
-                    if (data.record) {
-                        gameData = data.record;
-                        updatePlayerUI();
-                    }
+                if (roomData && roomData.gameState) {
+                    gameData = roomData.gameState;
+                    updatePlayerUI();
                 }
             } catch (error) {
                 console.error('فشل في جلب البيانات:', error);
@@ -1143,23 +1122,38 @@
                 return;
             }
             
+            // التحقق المحلي أولاً
+            if (!gameData || !gameData.drawnNumbers) {
+                showMessage('خطأ', 'لا توجد بيانات اللعبة', 'error');
+                return;
+            }
+            
+            const allDrawn = currentPlayerNumbers.every(num => 
+                gameData.drawnNumbers.includes(num)
+            );
+            
+            if (!allDrawn) {
+                showMessage('خطأ', 'لم تكمل الأرقام بعد! بعض أرقامك لم تُسحب', 'error');
+                return;
+            }
+            
+            // إرسال إعلان الفوز
             try {
-                await fetch(BASE_URL + '/bingo-claim', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-Master-Key': API_KEY
-                    },
-                    body: JSON.stringify({
-                        playerId: playerId,
-                        playerName: currentPlayerName,
-                        markedNumbers: [...markedNumbers],
-                        roomId: roomId
-                    })
+                const data = await readBin();
+                if (!data.rooms[roomId].bingoClaims) {
+                    data.rooms[roomId].bingoClaims = [];
+                }
+                data.rooms[roomId].bingoClaims.push({
+                    playerId: playerId,
+                    playerName: currentPlayerName,
+                    markedNumbers: [...markedNumbers],
+                    timestamp: Date.now()
                 });
+                await writeBin(data);
                 
-                showMessage('تم الإرسال', 'تم إرسال طلب BINGO للمتحكم', 'success');
+                showMessage('تم الإرسال', 'تم إرسال طلب BINGO للمتحكم للتحقق', 'success');
                 
+                // المتحكم سيرى الإعلان في polling التالي
             } catch (error) {
                 showMessage('خطأ', 'فشل في إرسال الطلب', 'error');
             }
@@ -1169,8 +1163,15 @@
         function copyLink() {
             const linkInput = document.getElementById('shareLink');
             linkInput.select();
-            document.execCommand('copy');
-            showMessage('تم النسخ', 'تم نسخ الرابط', 'success');
+            
+            if (navigator.clipboard) {
+                navigator.clipboard.writeText(linkInput.value).then(() => {
+                    showMessage('تم النسخ', 'تم نسخ الرابط بنجاح', 'success');
+                });
+            } else {
+                document.execCommand('copy');
+                showMessage('تم النسخ', 'تم نسخ الرابط', 'success');
+            }
         }
         
         function shuffleArray(arr) {
@@ -1194,6 +1195,7 @@
         function showMessage(title, text, type) {
             document.getElementById('modalTitle').textContent = title;
             document.getElementById('modalText').textContent = text;
+            document.getElementById('modalTitle').style.color = type === 'error' ? '#d63031' : '#6c5ce7';
             document.getElementById('messageModal').classList.add('active');
         }
         
