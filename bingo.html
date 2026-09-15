@@ -1,0 +1,1143 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لعبة Bingo - LOVELIGO</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 10px;
+        }
+        
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            background: white;
+            padding: 20px;
+            border-radius: 20px;
+            text-align: center;
+            margin-bottom: 15px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+        }
+        
+        .header h1 {
+            color: #6c5ce7;
+            font-size: 2rem;
+        }
+        
+        .panel {
+            background: white;
+            padding: 20px;
+            border-radius: 20px;
+            margin-bottom: 15px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+        }
+        
+        .panel h2 {
+            color: #6c5ce7;
+            margin-bottom: 15px;
+            border-bottom: 3px solid #6c5ce7;
+            padding-bottom: 10px;
+        }
+        
+        .input-group {
+            margin-bottom: 15px;
+        }
+        
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #2d3436;
+        }
+        
+        .input-group input, .input-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #dfe6e9;
+            border-radius: 10px;
+            font-size: 1rem;
+        }
+        
+        .input-group input:focus, .input-group textarea:focus {
+            outline: none;
+            border-color: #6c5ce7;
+        }
+        
+        .btn {
+            padding: 15px 25px;
+            border: none;
+            border-radius: 25px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            margin: 5px;
+            transition: all 0.3s;
+            width: 100%;
+        }
+        
+        .btn-primary {
+            background: #6c5ce7;
+            color: white;
+        }
+        
+        .btn-success {
+            background: #00b894;
+            color: white;
+        }
+        
+        .btn-danger {
+            background: #d63031;
+            color: white;
+        }
+        
+        .btn-warning {
+            background: #fdcb6e;
+            color: #2d3436;
+        }
+        
+        .btn-info {
+            background: #74b9ff;
+            color: white;
+        }
+        
+        .btn:hover:not(:disabled) {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+        
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .current-number {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 30px;
+            border-radius: 20px;
+            text-align: center;
+            margin-bottom: 15px;
+        }
+        
+        .number-display {
+            font-size: 5rem;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+        
+        .letter-display {
+            font-size: 2.5rem;
+            font-weight: bold;
+        }
+        
+        .share-box {
+            background: #f0f3f9;
+            border: 3px dashed #6c5ce7;
+            border-radius: 15px;
+            padding: 15px;
+            margin: 15px 0;
+        }
+        
+        .share-box input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #dfe6e9;
+            border-radius: 10px;
+            font-family: monospace;
+            margin: 10px 0;
+            text-align: center;
+        }
+        
+        .player-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 8px;
+            margin: 15px 0;
+        }
+        
+        .grid-cell {
+            aspect-ratio: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #dfe6e9;
+            border: 3px solid #b2bec3;
+            border-radius: 10px;
+            font-weight: bold;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .grid-cell.marked {
+            background: #00b894;
+            color: white;
+            border-color: #00b894;
+            animation: pulse 0.5s;
+        }
+        
+        .grid-cell.winning {
+            background: #fdcb6e;
+            animation: winPulse 1s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+        
+        @keyframes winPulse {
+            0%, 100% { transform: scale(1); box-shadow: 0 0 0 rgba(253,203,110,0.7); }
+            50% { transform: scale(1.1); box-shadow: 0 0 20px rgba(253,203,110,0.9); }
+        }
+        
+        .numbers-log {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            max-height: 200px;
+            overflow-y: auto;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+        
+        .number-badge {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #6c5ce7;
+            color: white;
+            border-radius: 50%;
+            font-weight: bold;
+            font-size: 0.9rem;
+        }
+        
+        .player-card {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 15px;
+            margin-bottom: 10px;
+            border-right: 5px solid #6c5ce7;
+        }
+        
+        .player-numbers {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 5px;
+            margin-top: 10px;
+            font-size: 0.8rem;
+        }
+        
+        .player-numbers span {
+            background: white;
+            padding: 5px;
+            text-align: center;
+            border-radius: 5px;
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .modal.active {
+            display: flex;
+        }
+        
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            text-align: center;
+            max-width: 90%;
+            animation: slideIn 0.3s;
+        }
+        
+        @keyframes slideIn {
+            from { transform: translateY(-50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        
+        .hidden {
+            display: none !important;
+        }
+        
+        .info-box {
+            background: #e8f4f8;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 10px 0;
+            border-right: 4px solid #74b9ff;
+        }
+        
+        .error-box {
+            background: #ffe6e6;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 10px 0;
+            border-right: 4px solid #d63031;
+            color: #d63031;
+        }
+        
+        .success-box {
+            background: #e6fff0;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 10px 0;
+            border-right: 4px solid #00b894;
+            color: #00b894;
+        }
+        
+        .warning-box {
+            background: #fff9e6;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 10px 0;
+            border-right: 4px solid #fdcb6e;
+            color: #b8860b;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 30px;
+        }
+        
+        .spinner {
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid #6c5ce7;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .pending-request {
+            background: #fff9e6;
+            padding: 15px;
+            border-radius: 15px;
+            margin-bottom: 10px;
+            border: 2px solid #fdcb6e;
+        }
+        
+        .subscription-info {
+            background: linear-gradient(135deg, #6c5ce7, #a29bfe);
+            color: white;
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 15px;
+        }
+        
+        .subscription-info h3 {
+            margin-bottom: 10px;
+        }
+        
+        .status-badge {
+            display: inline-block;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 0.9rem;
+            margin-top: 5px;
+        }
+        
+        .status-pending {
+            background: #fdcb6e;
+            color: #2d3436;
+        }
+        
+        .status-approved {
+            background: #00b894;
+            color: white;
+        }
+        
+        .request-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        
+        .request-actions button {
+            flex: 1;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- الرأس -->
+        <div class="header">
+            <h1>🎮 لعبة Bingo</h1>
+            <p>LOVELIGO - النسخة المتصلة</p>
+        </div>
+        
+        <!-- تسجيل الدخول -->
+        <div id="loginPanel" class="panel">
+            <h2>🔑 تسجيل الدخول</h2>
+            <div class="info-box">
+                أدخل مفتاح الترخيص للاستمرار
+            </div>
+            <div class="input-group">
+                <label>مفتاح الترخيص:</label>
+                <input type="text" id="licenseKey" placeholder="مثال: VIP2026">
+            </div>
+            <button class="btn btn-primary" onclick="validateLicense()">دخول</button>
+            <div id="loginMessage"></div>
+        </div>
+        
+        <!-- معلومات الاشتراك -->
+        <div id="subscriptionPanel" class="panel hidden">
+            <div class="subscription-info">
+                <h3>📋 معلومات الاشتراك</h3>
+                <p>🔑 المفتاح: <span id="subKey"></span></p>
+                <p> تاريخ الانتهاء: <span id="subExpiry"></span></p>
+                <p>💚 الحالة: <span id="subStatus"></span></p>
+            </div>
+            <button class="btn btn-primary" onclick="showRoleSelection()">متابعة</button>
+        </div>
+        
+        <!-- اختيار الدور -->
+        <div id="rolePanel" class="panel hidden">
+            <h2>🎯 اختر دورك</h2>
+            <button class="btn btn-primary" onclick="selectRole('host')" style="margin-bottom: 10px;">
+                🎛️ أنا المتحكم (Host)
+            </button>
+            <button class="btn btn-success" onclick="selectRole('player')">
+                🎮 أنا لاعب (Player)
+            </button>
+        </div>
+        
+        <!-- واجهة المتحكم -->
+        <div id="hostPanel" class="hidden">
+            <!-- رابط المشاركة -->
+            <div class="panel">
+                <h2>📤 رابط المشاركة</h2>
+                <div class="share-box">
+                    <p>انسخ هذا الرابط وأرسله للاعبين:</p>
+                    <input type="text" id="shareLink" readonly>
+                    <button class="btn btn-info" onclick="copyLink()">
+                        📋 نسخ الرابط
+                    </button>
+                </div>
+            </div>
+            
+            <!-- الرقم الحالي -->
+            <div class="current-number">
+                <div>الرقم المسحوب</div>
+                <div id="hostCurrentNumber" class="number-display">--</div>
+                <div id="hostCurrentLetter" class="letter-display">-</div>
+            </div>
+            
+            <!-- أزرار التحكم -->
+            <div class="panel">
+                <h2>🎛️ التحكم</h2>
+                <button class="btn btn-primary" onclick="drawNumber()" id="drawBtn">📥 سحب رقم</button>
+                <button class="btn btn-success" onclick="newGame()" style="margin-top: 10px;">🔄 جولة جديدة</button>
+                <button class="btn btn-danger" onclick="logout()" style="margin-top: 10px;">تسجيل الخروج</button>
+            </div>
+            
+            <!-- طلبات الانضمام -->
+            <div class="panel">
+                <h2>📋 طلبات الانضمام</h2>
+                <div id="pendingRequests">
+                    <div class="loading">
+                        <div class="spinner"></div>
+                        <p>جاري تحميل الطلبات...</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- اللاعبون -->
+            <div class="panel">
+                <h2> اللاعبون المشاركون</h2>
+                <div id="playersList">
+                    <div class="info-box">لا يوجد لاعبين بعد</div>
+                </div>
+            </div>
+            
+            <!-- سجل الأرقام -->
+            <div class="panel">
+                <h2>📊 سجل الأرقام المسحوبة</h2>
+                <div id="hostNumbersLog" class="numbers-log">
+                    <p>لم يتم سحب أي رقم بعد</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- واجهة اللاعب -->
+        <div id="playerPanel" class="hidden">
+            <!-- نموذج التسجيل -->
+            <div id="registrationForm" class="panel">
+                <h2> الانضمام للعبة</h2>
+                <div class="input-group">
+                    <label>الاسم:</label>
+                    <input type="text" id="playerName" placeholder="اكتب اسمك">
+                </div>
+                <div class="input-group">
+                    <label>25 رقماً فريداً (1-75):</label>
+                    <textarea id="playerNumbers" rows="3" placeholder="مثال: 1, 5, 12, 23, 34, 45, 56, 67, 75, 3, 8, 15, 22, 30, 38, 44, 51, 59, 66, 72, 2, 10, 18, 27, 35"></textarea>
+                </div>
+                <button class="btn btn-success" onclick="submitRegistration()">📤 إرسال طلب الانضمام</button>
+                <div id="registrationStatus"></div>
+            </div>
+            
+            <!-- واجهة اللعب -->
+            <div id="playerGamePanel" class="hidden">
+                <div class="current-number">
+                    <div>آخر رقم مسحوب</div>
+                    <div id="playerCurrentNumber" class="number-display">--</div>
+                    <div id="playerCurrentLetter" class="letter-display">-</div>
+                </div>
+                
+                <div class="panel">
+                    <h2>🎯 أرقامك (اضغط للتحديد)</h2>
+                    <div class="info-box">
+                        اضغط على الرقم لوضع علامة إذا تم سحبه
+                    </div>
+                    <div id="playerGrid" class="player-grid"></div>
+                </div>
+                
+                <div class="panel" style="text-align: center;">
+                    <button class="btn btn-warning" onclick="claimBingo()" 
+                        style="font-size: 1.5rem; padding: 20px 40px;">
+                        🏆 BINGO!
+                    </button>
+                </div>
+                
+                <button class="btn btn-danger" onclick="logout()">تسجيل الخروج</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- نافذة الرسائل -->
+    <div id="messageModal" class="modal">
+        <div class="modal-content">
+            <h2 id="modalTitle"></h2>
+            <p id="modalText"></p>
+            <button class="btn btn-primary" onclick="closeModal()" style="margin-top: 15px;">إغلاق</button>
+        </div>
+    </div>
+
+    <script>
+        // ===== إعدادات JSONBin =====
+        const BIN_ID = '6aa91167ffd5d16053091105';
+        const API_KEY = '$2b$10$7YwW1Z5Z5Z5Z5Z5Z5Z5Z5e'; // استبدله بمفتاحك الحقيقي
+        const BASE_URL = `https://api.jsonbin.io/v3/b/${BIN_ID}`;
+        
+        // ===== متغيرات عامة =====
+        let currentRole = null;
+        let currentLicense = null;
+        let roomId = null;
+        let playerId = null;
+        let currentPlayerName = '';
+        let currentPlayerNumbers = [];
+        let markedNumbers = new Set();
+        let gameData = null;
+        let pollingInterval = null;
+        
+        // ===== تهيئة =====
+        window.onload = function() {
+            checkURLParams();
+        };
+        
+        function checkURLParams() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const room = urlParams.get('room');
+            if (room) {
+                roomId = room;
+                // إذا كان هناك room في الرابط، نذهب مباشرة للاعب
+                setTimeout(() => {
+                    selectRole('player');
+                }, 500);
+            }
+        }
+        
+        // ===== نظام المفاتيح من JSONBin =====
+        async function validateLicense() {
+            const keyInput = document.getElementById('licenseKey').value.trim();
+            const messageDiv = document.getElementById('loginMessage');
+            
+            if (!keyInput) {
+                messageDiv.innerHTML = '<div class="error-box">الرجاء إدخال المفتاح</div>';
+                return;
+            }
+            
+            messageDiv.innerHTML = '<div class="loading"><div class="spinner"></div><p>جاري التحقق...</p></div>';
+            
+            try {
+                // قراءة المفاتيح من JSONBin
+                const response = await fetch(BASE_URL, {
+                    headers: {
+                        'X-Master-Key': API_KEY
+                    }
+                });
+                
+                if (!response.ok) {
+                    throw new Error('فشل في الاتصال');
+                }
+                
+                const data = await response.json();
+                const keys = data.record.keys || [];
+                
+                // البحث عن المفتاح
+                const license = keys.find(k => k.key === keyInput && k.active === true);
+                
+                if (!license) {
+                    messageDiv.innerHTML = '<div class="error-box"> مفتاح غير صحيح أو غير نشط</div>';
+                    return;
+                }
+                
+                // التحقق من تاريخ الانتهاء
+                const expiryDate = new Date(license.expires);
+                const today = new Date();
+                
+                if (today > expiryDate) {
+                    messageDiv.innerHTML = '<div class="error-box">⏰ انتهت صلاحية المفتاح</div>';
+                    return;
+                }
+                
+                // التحقق من الجهاز (Device Lock)
+                const deviceId = getDeviceId();
+                if (license.deviceId && license.deviceId !== deviceId) {
+                    messageDiv.innerHTML = '<div class="error-box">📱 المفتاح مسجل على جهاز آخر</div>';
+                    return;
+                }
+                
+                // تسجيل الجهاز إذا لم يكن مسجلاً
+                if (!license.deviceId) {
+                    await registerDevice(keyInput, deviceId);
+                }
+                
+                currentLicense = license;
+                showSubscriptionInfo(keyInput, expiryDate);
+                
+            } catch (error) {
+                console.error('Error:', error);
+                messageDiv.innerHTML = '<div class="error-box">❌ خطأ في الاتصال. تأكد من الإنترنت</div>';
+            }
+        }
+        
+        async function registerDevice(key, deviceId) {
+            try {
+                const response = await fetch(BASE_URL, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Master-Key': API_KEY
+                    },
+                    body: JSON.stringify({
+                        keys: (await (await fetch(BASE_URL, {
+                            headers: {'X-Master-Key': API_KEY}
+                        })).json()).record.keys.map(k => {
+                            if (k.key === key) {
+                                return {...k, deviceId: deviceId, registeredAt: new Date().toISOString()};
+                            }
+                            return k;
+                        })
+                    })
+                });
+            } catch (error) {
+                console.error('فشل في تسجيل الجهاز:', error);
+            }
+        }
+        
+        function getDeviceId() {
+            let deviceId = localStorage.getItem('bingo_device_id');
+            if (!deviceId) {
+                deviceId = 'device_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+                localStorage.setItem('bingo_device_id', deviceId);
+            }
+            return deviceId;
+        }
+        
+        function showSubscriptionInfo(key, expiryDate) {
+            document.getElementById('subKey').textContent = key;
+            document.getElementById('subExpiry').textContent = expiryDate.toLocaleDateString('ar-SA');
+            document.getElementById('subStatus').textContent = '✅ نشط';
+            
+            document.getElementById('loginPanel').classList.add('hidden');
+            document.getElementById('subscriptionPanel').classList.remove('hidden');
+        }
+        
+        function showRoleSelection() {
+            document.getElementById('subscriptionPanel').classList.add('hidden');
+            document.getElementById('rolePanel').classList.remove('hidden');
+        }
+        
+        // ===== اختيار الدور =====
+        function selectRole(role) {
+            currentRole = role;
+            
+            if (role === 'host') {
+                roomId = 'room_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6);
+                initHostGame();
+                document.getElementById('rolePanel').classList.add('hidden');
+                document.getElementById('hostPanel').classList.remove('hidden');
+                
+                // إنشاء رابط المشاركة
+                const baseUrl = window.location.href.split('?')[0];
+                const shareUrl = `${baseUrl}?room=${roomId}`;
+                document.getElementById('shareLink').value = shareUrl;
+                
+                // بدء مراقبة الطلبات
+                startPollingRequests();
+                
+            } else {
+                // لاعب
+                if (!roomId) {
+                    const urlParams = new URLSearchParams(window.location.search);
+                    roomId = urlParams.get('room');
+                }
+                
+                if (!roomId) {
+                    showMessage('خطأ', 'يجب الدخول عبر رابط المتحكم', 'error');
+                    return;
+                }
+                
+                playerId = 'player_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6);
+                document.getElementById('rolePanel').classList.add('hidden');
+                document.getElementById('playerPanel').classList.remove('hidden');
+            }
+        }
+        
+        // ===== وظائف المتحكم =====
+        let gameState = {
+            drawnNumbers: [],
+            remainingNumbers: [],
+            players: [],
+            pendingRequests: [],
+            lastDrawnNumber: null,
+            roomId: null
+        };
+        
+        async function initHostGame() {
+            gameState = {
+                drawnNumbers: [],
+                remainingNumbers: shuffleArray(Array.from({length: 75}, (_, i) => i + 1)),
+                players: [],
+                pendingRequests: [],
+                lastDrawnNumber: null,
+                roomId: roomId
+            };
+            
+            await saveGameState();
+            updateHostUI();
+        }
+        
+        async function saveGameState() {
+            try {
+                await fetch(BASE_URL + '/game/' + roomId, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Master-Key': API_KEY
+                    },
+                    body: JSON.stringify(gameState)
+                });
+            } catch (error) {
+                console.error('فشل في حفظ الحالة:', error);
+            }
+        }
+        
+        async function drawNumber() {
+            if (gameState.remainingNumbers.length === 0) {
+                showMessage('انتهت الأرقام', 'تم سحب جميع الأرقام', 'error');
+                return;
+            }
+            
+            const number = gameState.remainingNumbers.pop();
+            gameState.drawnNumbers.push(number);
+            gameState.lastDrawnNumber = number;
+            
+            await saveGameState();
+            updateHostUI();
+        }
+        
+        async function newGame() {
+            if (!confirm('هل تريد بدء جولة جديدة؟ سيتم مسح كل شيء')) return;
+            
+            gameState = {
+                drawnNumbers: [],
+                remainingNumbers: shuffleArray(Array.from({length: 75}, (_, i) => i + 1)),
+                players: gameState.players,
+                pendingRequests: [],
+                lastDrawnNumber: null,
+                roomId: roomId
+            };
+            
+            await saveGameState();
+            updateHostUI();
+            showMessage('جولة جديدة', 'تم بدء جولة جديدة', 'success');
+        }
+        
+        function startPollingRequests() {
+            fetchPendingRequests();
+            pollingInterval = setInterval(fetchPendingRequests, 3000);
+        }
+        
+        async function fetchPendingRequests() {
+            try {
+                const response = await fetch(BASE_URL + '/requests/' + roomId, {
+                    headers: {'X-Master-Key': API_KEY}
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.record && data.record.requests) {
+                        gameState.pendingRequests = data.record.requests;
+                        renderPendingRequests();
+                    }
+                }
+            } catch (error) {
+                console.error('فشل في جلب الطلبات:', error);
+            }
+        }
+        
+        async function approvePlayer(playerId) {
+            const request = gameState.pendingRequests.find(r => r.playerId === playerId);
+            if (!request) return;
+            
+            gameState.pendingRequests = gameState.pendingRequests.filter(r => r.playerId !== playerId);
+            gameState.players.push({...request, approvedAt: new Date().toISOString()});
+            
+            await saveGameState();
+            await updatePlayerStatus(playerId, 'approved');
+            renderPendingRequests();
+            renderPlayersList();
+        }
+        
+        async function rejectPlayer(playerId) {
+            gameState.pendingRequests = gameState.pendingRequests.filter(r => r.playerId !== playerId);
+            await saveGameState();
+            await updatePlayerStatus(playerId, 'rejected');
+            renderPendingRequests();
+        }
+        
+        async function updatePlayerStatus(playerId, status) {
+            try {
+                await fetch(BASE_URL + '/player-status/' + playerId, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Master-Key': API_KEY
+                    },
+                    body: JSON.stringify({status: status, roomId: roomId})
+                });
+            } catch (error) {
+                console.error('فشل في تحديث الحالة:', error);
+            }
+        }
+        
+        function renderPendingRequests() {
+            const container = document.getElementById('pendingRequests');
+            
+            if (gameState.pendingRequests.length === 0) {
+                container.innerHTML = '<div class="info-box">لا توجد طلبات حالياً</div>';
+                return;
+            }
+            
+            container.innerHTML = gameState.pendingRequests.map(req => `
+                <div class="pending-request">
+                    <h4>👤 ${req.name}</h4>
+                    <div class="player-numbers">
+                        ${req.numbers.map(n => `<span>${n}</span>`).join('')}
+                    </div>
+                    <div class="request-actions">
+                        <button class="btn btn-success" onclick="approvePlayer('${req.playerId}')">✅ قبول</button>
+                        <button class="btn btn-danger" onclick="rejectPlayer('${req.playerId}')">❌ رفض</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        function renderPlayersList() {
+            const container = document.getElementById('playersList');
+            
+            if (gameState.players.length === 0) {
+                container.innerHTML = '<div class="info-box">لا يوجد لاعبين بعد</div>';
+                return;
+            }
+            
+            container.innerHTML = gameState.players.map(player => `
+                <div class="player-card">
+                    <h4> ${player.name}</h4>
+                    <div class="player-numbers">
+                        ${player.numbers.map(n => `<span>${n}</span>`).join('')}
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        function updateHostUI() {
+            if (gameState.lastDrawnNumber) {
+                document.getElementById('hostCurrentNumber').textContent = gameState.lastDrawnNumber;
+                document.getElementById('hostCurrentLetter').textContent = getLetterForNumber(gameState.lastDrawnNumber);
+            } else {
+                document.getElementById('hostCurrentNumber').textContent = '--';
+                document.getElementById('hostCurrentLetter').textContent = '-';
+            }
+            
+            const logContainer = document.getElementById('hostNumbersLog');
+            if (gameState.drawnNumbers.length === 0) {
+                logContainer.innerHTML = '<p>لم يتم سحب أي رقم بعد</p>';
+            } else {
+                logContainer.innerHTML = gameState.drawnNumbers.map(n => 
+                    `<div class="number-badge">${n}</div>`
+                ).join('');
+            }
+            
+            renderPlayersList();
+        }
+        
+        // ===== وظائف اللاعب =====
+        async function submitRegistration() {
+            const name = document.getElementById('playerName').value.trim();
+            const numbersText = document.getElementById('playerNumbers').value.trim();
+            
+            if (!name) {
+                showMessage('خطأ', 'يرجى إدخال الاسم', 'error');
+                return;
+            }
+            
+            const numbers = numbersText.split(/[\s,،]+/).map(n => parseInt(n)).filter(n => !isNaN(n));
+            
+            if (numbers.length !== 25) {
+                showMessage('خطأ', `يجب إدخال 25 رقماً (أدخلت ${numbers.length})`, 'error');
+                return;
+            }
+            
+            const invalidNumbers = numbers.filter(n => n < 1 || n > 75);
+            if (invalidNumbers.length > 0) {
+                showMessage('خطأ', 'الأرقام يجب أن تكون بين 1 و 75', 'error');
+                return;
+            }
+            
+            const uniqueNumbers = [...new Set(numbers)];
+            if (uniqueNumbers.length !== 25) {
+                showMessage('خطأ', 'يوجد أرقام مكررة', 'error');
+                return;
+            }
+            
+            currentPlayerName = name;
+            currentPlayerNumbers = uniqueNumbers.sort((a, b) => a - b);
+            
+            const requestData = {
+                playerId: playerId,
+                name: name,
+                numbers: currentPlayerNumbers,
+                roomId: roomId,
+                timestamp: Date.now()
+            };
+            
+            try {
+                await fetch(BASE_URL + '/requests', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Master-Key': API_KEY
+                    },
+                    body: JSON.stringify({roomId: roomId, request: requestData})
+                });
+                
+                document.getElementById('registrationStatus').innerHTML = 
+                    '<div class="success-box">✅ تم إرسال الطلب. انتظر موافقة المتحكم...</div>';
+                
+                checkPlayerStatus();
+                
+            } catch (error) {
+                showMessage('خطأ', 'فشل في إرسال الطلب', 'error');
+            }
+        }
+        
+        async function checkPlayerStatus() {
+            const interval = setInterval(async () => {
+                try {
+                    const response = await fetch(BASE_URL + '/player-status/' + playerId, {
+                        headers: {'X-Master-Key': API_KEY}
+                    });
+                    
+                    if (response.ok) {
+                        const data = await response.json();
+                        if (data.record && data.record.status === 'approved') {
+                            clearInterval(interval);
+                            showPlayerGamePanel();
+                        } else if (data.record && data.record.status === 'rejected') {
+                            clearInterval(interval);
+                            showMessage('مرفوض', 'تم رفض طلبك', 'error');
+                        }
+                    }
+                } catch (error) {
+                    console.error('فشل في التحقق:', error);
+                }
+            }, 3000);
+        }
+        
+        function showPlayerGamePanel() {
+            document.getElementById('registrationForm').classList.add('hidden');
+            document.getElementById('playerGamePanel').classList.remove('hidden');
+            
+            renderPlayerGrid();
+            fetchGameData();
+            setInterval(fetchGameData, 3000);
+        }
+        
+        async function fetchGameData() {
+            try {
+                const response = await fetch(BASE_URL + '/game/' + roomId, {
+                    headers: {'X-Master-Key': API_KEY}
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.record) {
+                        gameData = data.record;
+                        updatePlayerUI();
+                    }
+                }
+            } catch (error) {
+                console.error('فشل في جلب البيانات:', error);
+            }
+        }
+        
+        function updatePlayerUI() {
+            if (!gameData) return;
+            
+            if (gameData.lastDrawnNumber) {
+                document.getElementById('playerCurrentNumber').textContent = gameData.lastDrawnNumber;
+                document.getElementById('playerCurrentLetter').textContent = getLetterForNumber(gameData.lastDrawnNumber);
+            }
+        }
+        
+        function renderPlayerGrid() {
+            const grid = document.getElementById('playerGrid');
+            grid.innerHTML = '';
+            
+            currentPlayerNumbers.forEach(num => {
+                const cell = document.createElement('div');
+                cell.className = 'grid-cell';
+                cell.textContent = num;
+                cell.dataset.number = num;
+                cell.onclick = () => toggleNumber(num, cell);
+                grid.appendChild(cell);
+            });
+        }
+        
+        function toggleNumber(number, cell) {
+            if (!gameData || !gameData.drawnNumbers) {
+                showMessage('خطأ', 'لم يتم سحب أي رقم بعد', 'error');
+                return;
+            }
+            
+            if (!gameData.drawnNumbers.includes(number)) {
+                showMessage('❌ خطأ', 'الرقم مو طالع! لم يتم سحب هذا الرقم بعد', 'error');
+                return;
+            }
+            
+            if (markedNumbers.has(number)) {
+                markedNumbers.delete(number);
+                cell.classList.remove('marked');
+            } else {
+                markedNumbers.add(number);
+                cell.classList.add('marked');
+            }
+        }
+        
+        async function claimBingo() {
+            if (markedNumbers.size !== 25) {
+                showMessage('خطأ', `يجب تحديد جميع الأرقام (حددت ${markedNumbers.size})`, 'error');
+                return;
+            }
+            
+            try {
+                await fetch(BASE_URL + '/bingo-claim', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Master-Key': API_KEY
+                    },
+                    body: JSON.stringify({
+                        playerId: playerId,
+                        playerName: currentPlayerName,
+                        markedNumbers: [...markedNumbers],
+                        roomId: roomId
+                    })
+                });
+                
+                showMessage('تم الإرسال', 'تم إرسال طلب BINGO للمتحكم', 'success');
+                
+            } catch (error) {
+                showMessage('خطأ', 'فشل في إرسال الطلب', 'error');
+            }
+        }
+        
+        // ===== دوال مساعدة =====
+        function copyLink() {
+            const linkInput = document.getElementById('shareLink');
+            linkInput.select();
+            document.execCommand('copy');
+            showMessage('تم النسخ', 'تم نسخ الرابط', 'success');
+        }
+        
+        function shuffleArray(arr) {
+            const shuffled = [...arr];
+            for (let i = shuffled.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+            }
+            return shuffled;
+        }
+        
+        function getLetterForNumber(num) {
+            if (num >= 1 && num <= 15) return 'B';
+            if (num >= 16 && num <= 30) return 'I';
+            if (num >= 31 && num <= 45) return 'N';
+            if (num >= 46 && num <= 60) return 'G';
+            if (num >= 61 && num <= 75) return 'O';
+            return '?';
+        }
+        
+        function showMessage(title, text, type) {
+            document.getElementById('modalTitle').textContent = title;
+            document.getElementById('modalText').textContent = text;
+            document.getElementById('messageModal').classList.add('active');
+        }
+        
+        function closeModal() {
+            document.getElementById('messageModal').classList.remove('active');
+        }
+        
+        function logout() {
+            if (pollingInterval) clearInterval(pollingInterval);
+            location.reload();
+        }
+    </script>
+</body>
+</html>
