@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>لعبة Bingo - LOVELIGO</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         * {
             margin: 0;
@@ -86,6 +87,10 @@
             margin: 5px;
             transition: all 0.3s;
             width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
         }
         
         .btn-primary {
@@ -189,19 +194,9 @@
             animation: pulse 0.5s;
         }
         
-        .grid-cell.winning {
-            background: #fdcb6e;
-            animation: winPulse 1s infinite;
-        }
-        
         @keyframes pulse {
             0%, 100% { transform: scale(1); }
             50% { transform: scale(1.1); }
-        }
-        
-        @keyframes winPulse {
-            0%, 100% { transform: scale(1); box-shadow: 0 0 0 rgba(253,203,110,0.7); }
-            50% { transform: scale(1.1); box-shadow: 0 0 20px rgba(253,203,110,0.9); }
         }
         
         .numbers-log {
@@ -357,29 +352,6 @@
             margin-bottom: 15px;
         }
         
-        .subscription-info h3 {
-            margin-bottom: 10px;
-        }
-        
-        .status-badge {
-            display: inline-block;
-            padding: 5px 15px;
-            border-radius: 20px;
-            font-weight: bold;
-            font-size: 0.9rem;
-            margin-top: 5px;
-        }
-        
-        .status-pending {
-            background: #fdcb6e;
-            color: #2d3436;
-        }
-        
-        .status-approved {
-            background: #00b894;
-            color: white;
-        }
-        
         .request-actions {
             display: flex;
             gap: 10px;
@@ -388,6 +360,61 @@
         
         .request-actions button {
             flex: 1;
+        }
+        
+        /* ===== معلومات التواصل ===== */
+        .contact-section {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 25px;
+            border-radius: 20px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        
+        .contact-section h3 {
+            margin-bottom: 15px;
+            font-size: 1.3rem;
+        }
+        
+        .contact-icons {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 15px;
+        }
+        
+        .contact-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            color: white;
+            font-size: 1.8rem;
+            text-decoration: none;
+            transition: all 0.3s;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        
+        .contact-icon:hover {
+            transform: translateY(-5px) scale(1.1);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+        }
+        
+        .telegram-icon {
+            background: #0088cc;
+        }
+        
+        .instagram-icon {
+            background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
+        }
+        
+        .contact-text {
+            margin-top: 15px;
+            font-size: 0.95rem;
+            opacity: 0.95;
         }
     </style>
 </head>
@@ -409,8 +436,24 @@
                 <label>مفتاح الترخيص:</label>
                 <input type="text" id="licenseKey" placeholder="مثال: VIP2026">
             </div>
-            <button class="btn btn-primary" onclick="validateLicense()">دخول</button>
+            <button class="btn btn-primary" onclick="validateLicense()">
+                <i class="fas fa-sign-in-alt"></i> دخول
+            </button>
             <div id="loginMessage"></div>
+            
+            <!-- معلومات التواصل -->
+            <div class="contact-section">
+                <h3> لطلب مفتاح أو الاشتراك</h3>
+                <p class="contact-text">تواصل معي على:</p>
+                <div class="contact-icons">
+                    <a href="https://t.me/TF_69" target="_blank" class="contact-icon telegram-icon" title="Telegram">
+                        <i class="fab fa-telegram-plane"></i>
+                    </a>
+                    <a href="https://www.instagram.com/tf69x?stkn=cnRpMjZsbjdkczFy" target="_blank" class="contact-icon instagram-icon" title="Instagram">
+                        <i class="fab fa-instagram"></i>
+                    </a>
+                </div>
+            </div>
         </div>
         
         <!-- معلومات الاشتراك -->
@@ -418,7 +461,7 @@
             <div class="subscription-info">
                 <h3>📋 معلومات الاشتراك</h3>
                 <p>🔑 المفتاح: <span id="subKey"></span></p>
-                <p> تاريخ الانتهاء: <span id="subExpiry"></span></p>
+                <p>📅 تاريخ الانتهاء: <span id="subExpiry"></span></p>
                 <p>💚 الحالة: <span id="subStatus"></span></p>
             </div>
             <button class="btn btn-primary" onclick="showRoleSelection()">متابعة</button>
@@ -426,12 +469,12 @@
         
         <!-- اختيار الدور -->
         <div id="rolePanel" class="panel hidden">
-            <h2>🎯 اختر دورك</h2>
+            <h2> اختر دورك</h2>
             <button class="btn btn-primary" onclick="selectRole('host')" style="margin-bottom: 10px;">
-                🎛️ أنا المتحكم (Host)
+                <i class="fas fa-gamepad"></i> أنا المتحكم (Host)
             </button>
             <button class="btn btn-success" onclick="selectRole('player')">
-                🎮 أنا لاعب (Player)
+                <i class="fas fa-users"></i> أنا لاعب (Player)
             </button>
         </div>
         
@@ -439,12 +482,12 @@
         <div id="hostPanel" class="hidden">
             <!-- رابط المشاركة -->
             <div class="panel">
-                <h2>📤 رابط المشاركة</h2>
+                <h2> رابط المشاركة</h2>
                 <div class="share-box">
                     <p>انسخ هذا الرابط وأرسله للاعبين:</p>
                     <input type="text" id="shareLink" readonly>
                     <button class="btn btn-info" onclick="copyLink()">
-                        📋 نسخ الرابط
+                        <i class="fas fa-copy"></i> نسخ الرابط
                     </button>
                 </div>
             </div>
@@ -459,9 +502,15 @@
             <!-- أزرار التحكم -->
             <div class="panel">
                 <h2>🎛️ التحكم</h2>
-                <button class="btn btn-primary" onclick="drawNumber()" id="drawBtn">📥 سحب رقم</button>
-                <button class="btn btn-success" onclick="newGame()" style="margin-top: 10px;">🔄 جولة جديدة</button>
-                <button class="btn btn-danger" onclick="logout()" style="margin-top: 10px;">تسجيل الخروج</button>
+                <button class="btn btn-primary" onclick="drawNumber()" id="drawBtn">
+                    <i class="fas fa-random"></i> سحب رقم
+                </button>
+                <button class="btn btn-success" onclick="newGame()" style="margin-top: 10px;">
+                    <i class="fas fa-redo"></i> جولة جديدة
+                </button>
+                <button class="btn btn-danger" onclick="logout()" style="margin-top: 10px;">
+                    <i class="fas fa-sign-out-alt"></i> تسجيل الخروج
+                </button>
             </div>
             
             <!-- طلبات الانضمام -->
@@ -477,7 +526,7 @@
             
             <!-- اللاعبون -->
             <div class="panel">
-                <h2> اللاعبون المشاركون</h2>
+                <h2>👥 اللاعبون المشاركون</h2>
                 <div id="playersList">
                     <div class="info-box">لا يوجد لاعبين بعد</div>
                 </div>
@@ -496,7 +545,7 @@
         <div id="playerPanel" class="hidden">
             <!-- نموذج التسجيل -->
             <div id="registrationForm" class="panel">
-                <h2> الانضمام للعبة</h2>
+                <h2>📝 الانضمام للعبة</h2>
                 <div class="input-group">
                     <label>الاسم:</label>
                     <input type="text" id="playerName" placeholder="اكتب اسمك">
@@ -505,7 +554,9 @@
                     <label>25 رقماً فريداً (1-75):</label>
                     <textarea id="playerNumbers" rows="3" placeholder="مثال: 1, 5, 12, 23, 34, 45, 56, 67, 75, 3, 8, 15, 22, 30, 38, 44, 51, 59, 66, 72, 2, 10, 18, 27, 35"></textarea>
                 </div>
-                <button class="btn btn-success" onclick="submitRegistration()">📤 إرسال طلب الانضمام</button>
+                <button class="btn btn-success" onclick="submitRegistration()">
+                    <i class="fas fa-paper-plane"></i> إرسال طلب الانضمام
+                </button>
                 <div id="registrationStatus"></div>
             </div>
             
@@ -528,11 +579,13 @@
                 <div class="panel" style="text-align: center;">
                     <button class="btn btn-warning" onclick="claimBingo()" 
                         style="font-size: 1.5rem; padding: 20px 40px;">
-                        🏆 BINGO!
+                        <i class="fas fa-trophy"></i> BINGO!
                     </button>
                 </div>
                 
-                <button class="btn btn-danger" onclick="logout()">تسجيل الخروج</button>
+                <button class="btn btn-danger" onclick="logout()">
+                    <i class="fas fa-sign-out-alt"></i> تسجيل الخروج
+                </button>
             </div>
         </div>
     </div>
@@ -549,7 +602,8 @@
     <script>
         // ===== إعدادات JSONBin =====
         const BIN_ID = '6aa91167ffd5d16053091105';
-        const API_KEY = '$2b$10$7YwW1Z5Z5Z5Z5Z5Z5Z5Z5e'; // استبدله بمفتاحك الحقيقي
+        // ⚠️ مهم جداً: استبدل هذا بمفتاحك الحقيقي من JSONBin
+        const API_KEY = '$2b$10$YOUR_REAL_API_KEY_HERE'; 
         const BASE_URL = `https://api.jsonbin.io/v3/b/${BIN_ID}`;
         
         // ===== متغيرات عامة =====
@@ -573,14 +627,13 @@
             const room = urlParams.get('room');
             if (room) {
                 roomId = room;
-                // إذا كان هناك room في الرابط، نذهب مباشرة للاعب
                 setTimeout(() => {
                     selectRole('player');
                 }, 500);
             }
         }
         
-        // ===== نظام المفاتيح من JSONBin =====
+        // ===== نظام المفاتيح =====
         async function validateLicense() {
             const keyInput = document.getElementById('licenseKey').value.trim();
             const messageDiv = document.getElementById('loginMessage');
@@ -593,7 +646,6 @@
             messageDiv.innerHTML = '<div class="loading"><div class="spinner"></div><p>جاري التحقق...</p></div>';
             
             try {
-                // قراءة المفاتيح من JSONBin
                 const response = await fetch(BASE_URL, {
                     headers: {
                         'X-Master-Key': API_KEY
@@ -601,21 +653,18 @@
                 });
                 
                 if (!response.ok) {
-                    throw new Error('فشل في الاتصال');
+                    throw new Error('فشل في الاتصال بـ JSONBin');
                 }
                 
                 const data = await response.json();
                 const keys = data.record.keys || [];
-                
-                // البحث عن المفتاح
                 const license = keys.find(k => k.key === keyInput && k.active === true);
                 
                 if (!license) {
-                    messageDiv.innerHTML = '<div class="error-box"> مفتاح غير صحيح أو غير نشط</div>';
+                    messageDiv.innerHTML = '<div class="error-box">❌ مفتاح غير صحيح أو غير نشط</div>';
                     return;
                 }
                 
-                // التحقق من تاريخ الانتهاء
                 const expiryDate = new Date(license.expires);
                 const today = new Date();
                 
@@ -624,14 +673,12 @@
                     return;
                 }
                 
-                // التحقق من الجهاز (Device Lock)
                 const deviceId = getDeviceId();
                 if (license.deviceId && license.deviceId !== deviceId) {
                     messageDiv.innerHTML = '<div class="error-box">📱 المفتاح مسجل على جهاز آخر</div>';
                     return;
                 }
                 
-                // تسجيل الجهاز إذا لم يكن مسجلاً
                 if (!license.deviceId) {
                     await registerDevice(keyInput, deviceId);
                 }
@@ -641,28 +688,30 @@
                 
             } catch (error) {
                 console.error('Error:', error);
-                messageDiv.innerHTML = '<div class="error-box">❌ خطأ في الاتصال. تأكد من الإنترنت</div>';
+                messageDiv.innerHTML = '<div class="error-box">❌ خطأ في الاتصال. تأكد من الإنترنت ومفتاح API</div>';
             }
         }
         
         async function registerDevice(key, deviceId) {
             try {
-                const response = await fetch(BASE_URL, {
+                const currentData = await (await fetch(BASE_URL, {
+                    headers: {'X-Master-Key': API_KEY}
+                })).json();
+                
+                const updatedKeys = currentData.record.keys.map(k => {
+                    if (k.key === key) {
+                        return {...k, deviceId: deviceId, registeredAt: new Date().toISOString()};
+                    }
+                    return k;
+                });
+                
+                await fetch(BASE_URL, {
                     method: 'PUT',
                     headers: {
                         'Content-Type': 'application/json',
                         'X-Master-Key': API_KEY
                     },
-                    body: JSON.stringify({
-                        keys: (await (await fetch(BASE_URL, {
-                            headers: {'X-Master-Key': API_KEY}
-                        })).json()).record.keys.map(k => {
-                            if (k.key === key) {
-                                return {...k, deviceId: deviceId, registeredAt: new Date().toISOString()};
-                            }
-                            return k;
-                        })
-                    })
+                    body: JSON.stringify({keys: updatedKeys})
                 });
             } catch (error) {
                 console.error('فشل في تسجيل الجهاز:', error);
@@ -702,16 +751,13 @@
                 document.getElementById('rolePanel').classList.add('hidden');
                 document.getElementById('hostPanel').classList.remove('hidden');
                 
-                // إنشاء رابط المشاركة
                 const baseUrl = window.location.href.split('?')[0];
                 const shareUrl = `${baseUrl}?room=${roomId}`;
                 document.getElementById('shareLink').value = shareUrl;
                 
-                // بدء مراقبة الطلبات
                 startPollingRequests();
                 
             } else {
-                // لاعب
                 if (!roomId) {
                     const urlParams = new URLSearchParams(window.location.search);
                     roomId = urlParams.get('room');
@@ -814,10 +860,18 @@
                     if (data.record && data.record.requests) {
                         gameState.pendingRequests = data.record.requests;
                         renderPendingRequests();
+                    } else {
+                        // لا توجد طلبات
+                        document.getElementById('pendingRequests').innerHTML = 
+                            '<div class="info-box">لا توجد طلبات حالياً</div>';
                     }
+                } else {
+                    console.error('فشل في جلب الطلبات:', response.status);
                 }
             } catch (error) {
-                console.error('فشل في جلب الطلبات:', error);
+                console.error('خطأ في جلب الطلبات:', error);
+                document.getElementById('pendingRequests').innerHTML = 
+                    '<div class="error-box">خطأ في تحميل الطلبات</div>';
             }
         }
         
@@ -888,7 +942,7 @@
             
             container.innerHTML = gameState.players.map(player => `
                 <div class="player-card">
-                    <h4> ${player.name}</h4>
+                    <h4>🎮 ${player.name}</h4>
                     <div class="player-numbers">
                         ${player.numbers.map(n => `<span>${n}</span>`).join('')}
                     </div>
@@ -958,13 +1012,25 @@
             };
             
             try {
-                await fetch(BASE_URL + '/requests', {
-                    method: 'POST',
+                // حفظ الطلب في JSONBin
+                const currentData = await fetch(BASE_URL + '/requests/' + roomId, {
+                    headers: {'X-Master-Key': API_KEY}
+                }).then(r => r.ok ? r.json() : null).catch(() => null);
+                
+                let requests = [];
+                if (currentData && currentData.record && currentData.record.requests) {
+                    requests = currentData.record.requests;
+                }
+                
+                requests.push(requestData);
+                
+                await fetch(BASE_URL + '/requests/' + roomId, {
+                    method: 'PUT',
                     headers: {
                         'Content-Type': 'application/json',
                         'X-Master-Key': API_KEY
                     },
-                    body: JSON.stringify({roomId: roomId, request: requestData})
+                    body: JSON.stringify({requests: requests})
                 });
                 
                 document.getElementById('registrationStatus').innerHTML = 
@@ -973,7 +1039,8 @@
                 checkPlayerStatus();
                 
             } catch (error) {
-                showMessage('خطأ', 'فشل في إرسال الطلب', 'error');
+                console.error('Error:', error);
+                showMessage('خطأ', 'فشل في إرسال الطلب. تأكد من الاتصال', 'error');
             }
         }
         
