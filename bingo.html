@@ -98,6 +98,7 @@
         .btn-danger { background: #d63031; color: white; }
         .btn-warning { background: #fdcb6e; color: #2d3436; }
         .btn-info { background: #74b9ff; color: white; }
+        .btn-secondary { background: #636e72; color: white; }
         
         .btn:hover:not(:disabled) {
             transform: translateY(-3px);
@@ -379,19 +380,322 @@
             opacity: 0.95;
         }
         
-        .winner-announcement {
+        /* ===== إشعار BINGO ===== */
+        .bingo-alert {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.85);
+            z-index: 2000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            animation: fadeIn 0.3s;
+        }
+        
+        .bingo-alert.active {
+            display: flex;
+        }
+        
+        .bingo-alert-content {
             background: linear-gradient(135deg, #f39c12, #e74c3c);
+            padding: 40px 30px;
+            border-radius: 25px;
+            text-align: center;
+            max-width: 90%;
+            width: 400px;
             color: white;
+            animation: bounceIn 0.5s;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+        }
+        
+        @keyframes bounceIn {
+            0% { transform: scale(0.3); opacity: 0; }
+            50% { transform: scale(1.05); }
+            70% { transform: scale(0.9); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        .bingo-alert-content h2 {
+            font-size: 2.5rem;
+            margin-bottom: 15px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .bingo-alert-content p {
+            font-size: 1.3rem;
+            margin-bottom: 25px;
+        }
+        
+        .bingo-alert-content .winner-name {
+            font-size: 1.8rem;
+            font-weight: bold;
+            margin: 15px 0;
+            padding: 10px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 10px;
+        }
+        
+        .bingo-alert-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        
+        .bingo-alert-buttons button {
+            flex: 1;
+            padding: 15px;
+            border: none;
+            border-radius: 15px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .bingo-alert-buttons .btn-view {
+            background: white;
+            color: #e74c3c;
+        }
+        
+        .bingo-alert-buttons .btn-skip {
+            background: rgba(255,255,255,0.3);
+            color: white;
+            border: 2px solid white;
+        }
+        
+        .bingo-alert-buttons button:hover {
+            transform: translateY(-2px);
+        }
+        
+        /* ===== زر السجل ===== */
+        .records-btn {
+            background: linear-gradient(135deg, #6c5ce7, #a29bfe);
+            color: white;
+            padding: 15px 25px;
+            border: none;
+            border-radius: 15px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 15px;
+            box-shadow: 0 5px 15px rgba(108, 92, 231, 0.3);
+            transition: all 0.3s;
+        }
+        
+        .records-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(108, 92, 231, 0.4);
+        }
+        
+        .records-count {
+            background: white;
+            color: #6c5ce7;
+            padding: 3px 10px;
+            border-radius: 15px;
+            font-size: 0.9rem;
+        }
+        
+        /* ===== نافذة السجل ===== */
+        .records-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            z-index: 1500;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .records-modal.active {
+            display: flex;
+        }
+        
+        .records-modal-content {
+            background: white;
+            border-radius: 20px;
+            max-width: 90%;
+            width: 500px;
+            max-height: 80vh;
+            overflow-y: auto;
+            animation: slideIn 0.3s;
+        }
+        
+        .records-modal-header {
+            background: linear-gradient(135deg, #6c5ce7, #a29bfe);
+            color: white;
+            padding: 20px;
+            border-radius: 20px 20px 0 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .records-modal-header h3 {
+            font-size: 1.3rem;
+        }
+        
+        .close-records {
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            font-size: 1.2rem;
+            cursor: pointer;
+        }
+        
+        .records-modal-body {
+            padding: 20px;
+            max-height: 60vh;
+            overflow-y: auto;
+        }
+        
+        .record-player {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 15px;
+            margin-bottom: 15px;
+            border-right: 5px solid #6c5ce7;
+        }
+        
+        .record-player h4 {
+            color: #6c5ce7;
+            margin-bottom: 10px;
+            font-size: 1.1rem;
+        }
+        
+        .record-player .numbers-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 5px;
+        }
+        
+        .record-player .numbers-grid span {
+            background: white;
+            padding: 5px;
+            text-align: center;
+            border-radius: 5px;
+            font-size: 0.85rem;
+        }
+        
+        /* ===== إعدادات اللعبة ===== */
+        .settings-box {
+            background: #f0f3f9;
             padding: 20px;
             border-radius: 15px;
             margin: 15px 0;
-            text-align: center;
-            animation: winPulse 1s infinite;
+            border: 2px solid #6c5ce7;
         }
         
-        @keyframes winPulse {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.02); }
+        .settings-box h3 {
+            color: #6c5ce7;
+            margin-bottom: 15px;
+        }
+        
+        .settings-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        
+        .settings-row label {
+            font-weight: bold;
+            color: #2d3436;
+        }
+        
+        .settings-row input[type="number"] {
+            width: 100px;
+            padding: 10px;
+            border: 2px solid #dfe6e9;
+            border-radius: 10px;
+            text-align: center;
+            font-size: 1.1rem;
+            font-weight: bold;
+        }
+        
+        .settings-row input[type="number"]:focus {
+            outline: none;
+            border-color: #6c5ce7;
+        }
+        
+        .settings-hint {
+            font-size: 0.85rem;
+            color: #636e72;
+            margin-top: 5px;
+        }
+        
+        /* ===== عرض أرقام اللاعب الفائز ===== */
+        .winner-details {
+            display: none;
+            background: white;
+            padding: 20px;
+            border-radius: 20px;
+            margin-top: 15px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+            border: 3px solid #f39c12;
+        }
+        
+        .winner-details.active {
+            display: block;
+            animation: slideIn 0.3s;
+        }
+        
+        .winner-details h3 {
+            color: #e74c3c;
+            margin-bottom: 15px;
+            text-align: center;
+            font-size: 1.3rem;
+        }
+        
+        .winner-numbers-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 8px;
+            margin: 15px 0;
+        }
+        
+        .winner-numbers-grid span {
+            background: #f39c12;
+            color: white;
+            padding: 10px;
+            text-align: center;
+            border-radius: 10px;
+            font-weight: bold;
+        }
+        
+        .winner-numbers-grid span.marked {
+            background: #00b894;
+        }
+        
+        .winner-numbers-grid span.unmarked {
+            background: #d63031;
+            opacity: 0.7;
+        }
+        
+        @media (max-width: 480px) {
+            .number-display { font-size: 3.5rem; }
+            .bingo-alert-content h2 { font-size: 2rem; }
+            .bingo-alert-content p { font-size: 1.1rem; }
         }
     </style>
 </head>
@@ -416,7 +720,7 @@
             <div id="loginMessage"></div>
             
             <div class="contact-section">
-                <h3> لطلب مفتاح أو الاشتراك</h3>
+                <h3>🔑 لطلب مفتاح أو الاشتراك</h3>
                 <p class="contact-text">تواصل معي على:</p>
                 <div class="contact-icons">
                     <a href="https://t.me/TF_69" target="_blank" class="contact-icon telegram-icon" title="Telegram">
@@ -432,10 +736,10 @@
         <!-- معلومات الاشتراك -->
         <div id="subscriptionPanel" class="panel hidden">
             <div class="subscription-info">
-                <h3> معلومات الاشتراك</h3>
+                <h3>📋 معلومات الاشتراك</h3>
                 <p>🔑 المفتاح: <span id="subKey"></span></p>
                 <p>📅 تاريخ الانتهاء: <span id="subExpiry"></span></p>
-                <p> الحالة: <span id="subStatus"></span></p>
+                <p>💚 الحالة: <span id="subStatus"></span></p>
             </div>
             <button class="btn btn-primary" onclick="showRoleSelection()">متابعة</button>
         </div>
@@ -460,6 +764,29 @@
                     <input type="text" id="shareLink" readonly>
                     <button class="btn btn-info" onclick="copyLink()">
                         <i class="fas fa-copy"></i> نسخ الرابط
+                    </button>
+                </div>
+            </div>
+            
+            <!-- إعدادات اللعبة -->
+            <div class="panel">
+                <h2>️ إعدادات اللعبة</h2>
+                <div class="settings-box">
+                    <h3>🎯 شروط الفوز</h3>
+                    <div class="settings-row">
+                        <label>عدد الأرقام المطلوبة للفوز:</label>
+                        <input type="number" id="winNumbersCount" value="25" min="5" max="90">
+                    </div>
+                    <p class="settings-hint">💡 الحد الأقصى: 90 رقم. اللاعب يفوز عند إكمال هذا العدد</p>
+                    
+                    <div class="settings-row" style="margin-top: 15px;">
+                        <label>نطاق الأرقام (1 إلى):</label>
+                        <input type="number" id="maxNumber" value="90" min="25" max="90" readonly>
+                    </div>
+                    <p class="settings-hint"> الأرقام تُسحب من 1 إلى 90</p>
+                    
+                    <button class="btn btn-primary" onclick="applySettings()" style="margin-top: 10px;">
+                        <i class="fas fa-check"></i> تطبيق الإعدادات
                     </button>
                 </div>
             </div>
@@ -493,12 +820,12 @@
                 </div>
             </div>
             
-            <div class="panel">
-                <h2> اللاعبون المشاركون</h2>
-                <div id="playersList">
-                    <div class="info-box">لا يوجد لاعبين بعد</div>
-                </div>
-            </div>
+            <!-- زر سجل اللاعبين -->
+            <button class="records-btn" onclick="openRecordsModal()">
+                <i class="fas fa-folder-open"></i> 
+                سجل اللاعبين المشاركين
+                <span class="records-count" id="playersCount">0</span>
+            </button>
             
             <div class="panel">
                 <h2>📊 سجل الأرقام المسحوبة</h2>
@@ -507,19 +834,28 @@
                 </div>
             </div>
             
-            <div id="winnerAnnouncement"></div>
+            <!-- تفاصيل الفائز -->
+            <div id="winnerDetails" class="winner-details">
+                <h3> تفاصيل اللاعب الفائز</h3>
+                <p id="winnerPlayerName" style="text-align: center; font-size: 1.3rem; margin-bottom: 10px;"></p>
+                <p id="winnerMarkedCount" style="text-align: center; color: #636e72;"></p>
+                <div id="winnerNumbersGrid" class="winner-numbers-grid"></div>
+                <button class="btn btn-secondary" onclick="closeWinnerDetails()" style="margin-top: 15px;">
+                    <i class="fas fa-times"></i> إغلاق التفاصيل
+                </button>
+            </div>
         </div>
         
         <!-- واجهة اللاعب -->
         <div id="playerPanel" class="hidden">
             <div id="registrationForm" class="panel">
-                <h2>📝 الانضمام للعبة</h2>
+                <h2> الانضمام للعبة</h2>
                 <div class="input-group">
                     <label>الاسم:</label>
                     <input type="text" id="playerName" placeholder="اكتب اسمك">
                 </div>
                 <div class="input-group">
-                    <label>25 رقماً فريداً (1-75):</label>
+                    <label>25 رقماً فريداً (1-90):</label>
                     <textarea id="playerNumbers" rows="3" placeholder="مثال: 1, 5, 12, 23, 34, 45, 56, 67, 75, 3, 8, 15, 22, 30, 38, 44, 51, 59, 66, 72, 2, 10, 18, 27, 35"></textarea>
                 </div>
                 <button class="btn btn-success" onclick="submitRegistration()">
@@ -535,10 +871,24 @@
                     <div id="playerCurrentLetter" class="letter-display">-</div>
                 </div>
                 
+                <!-- سجل الأرقام المسحوبة للاعب -->
                 <div class="panel">
-                    <h2> أرقامك (اضغط للتحديد)</h2>
+                    <h2>📊 سجل الأرقام المسحوبة</h2>
+                    <div class="info-box">
+                        راجع الأرقام المسحوبة لتحديد أرقامك
+                    </div>
+                    <div id="playerNumbersLog" class="numbers-log">
+                        <p>لم يتم سحب أي رقم بعد</p>
+                    </div>
+                </div>
+                
+                <div class="panel">
+                    <h2>🎯 أرقامك (اضغط للتحديد)</h2>
                     <div class="info-box">اضغط على الرقم لوضع علامة إذا تم سحبه</div>
                     <div id="playerGrid" class="player-grid"></div>
+                    <p style="text-align: center; margin-top: 10px; color: #636e72;">
+                        محدد: <span id="markedCount">0</span> / <span id="requiredCount">25</span>
+                    </p>
                 </div>
                 
                 <div class="panel" style="text-align: center;">
@@ -554,6 +904,40 @@
         </div>
     </div>
     
+    <!-- إشعار BINGO للمتحكم -->
+    <div id="bingoAlert" class="bingo-alert">
+        <div class="bingo-alert-content">
+            <h2>🏆 BINGO! 🏆</h2>
+            <p>لديك فائز!</p>
+            <div class="winner-name" id="bingoWinnerName">-</div>
+            <p>أكمل جميع الأرقام المطلوبة</p>
+            <div class="bingo-alert-buttons">
+                <button class="btn-view" onclick="viewWinnerDetails()">
+                    <i class="fas fa-eye"></i> عرض التفاصيل
+                </button>
+                <button class="btn-skip" onclick="skipBingoAlert()">
+                    <i class="fas fa-forward"></i> تخطي
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- نافذة سجل اللاعبين -->
+    <div id="recordsModal" class="records-modal">
+        <div class="records-modal-content">
+            <div class="records-modal-header">
+                <h3><i class="fas fa-users"></i> سجل اللاعبين المشاركين</h3>
+                <button class="close-records" onclick="closeRecordsModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="records-modal-body" id="recordsModalBody">
+                <p>لا يوجد لاعبين بعد</p>
+            </div>
+        </div>
+    </div>
+    
+    <!-- نافذة الرسائل -->
     <div id="messageModal" class="modal">
         <div class="modal-content">
             <h2 id="modalTitle"></h2>
@@ -567,7 +951,7 @@
         const BIN_ID = '6aa91167ffd5d16053091105';
         const API_KEY = '$2a$10$RITxbUC8tIk02/FZkOGeYenJCF0HLCbx9UTYcJnTX02kpyCjpCXXS';
         const BASE_URL = `https://api.jsonbin.io/v3/b/${BIN_ID}`;
-        const POLL_INTERVAL = 5000; // 5 ثواني
+        const POLL_INTERVAL = 5000;
         
         // ===== متغيرات عامة =====
         let currentRole = null;
@@ -580,6 +964,9 @@
         let gameData = null;
         let pollingInterval = null;
         let isProcessing = false;
+        let winNumbersRequired = 25;
+        let maxNumber = 90;
+        let pendingBingoClaim = null;
         
         // ===== تهيئة =====
         window.onload = function() {
@@ -611,6 +998,9 @@
         }
         
         async function writeBin(data) {
+            if (isProcessing) return false;
+            isProcessing = true;
+            
             try {
                 const response = await fetch(BASE_URL, {
                     method: 'PUT',
@@ -625,6 +1015,8 @@
             } catch (error) {
                 console.error('خطأ في الكتابة:', error);
                 throw error;
+            } finally {
+                isProcessing = false;
             }
         }
         
@@ -741,17 +1133,23 @@
             players: [],
             pendingRequests: [],
             lastDrawnNumber: null,
-            roomId: null
+            roomId: null,
+            winNumbersRequired: 25,
+            maxNumber: 90,
+            bingoClaims: []
         };
         
         async function initHostGame() {
             gameState = {
                 drawnNumbers: [],
-                remainingNumbers: shuffleArray(Array.from({length: 75}, (_, i) => i + 1)),
+                remainingNumbers: shuffleArray(Array.from({length: maxNumber}, (_, i) => i + 1)),
                 players: [],
                 pendingRequests: [],
                 lastDrawnNumber: null,
-                roomId: roomId
+                roomId: roomId,
+                winNumbersRequired: winNumbersRequired,
+                maxNumber: maxNumber,
+                bingoClaims: []
             };
             
             await saveGameState();
@@ -777,6 +1175,22 @@
             }
         }
         
+        // ===== تطبيق الإعدادات =====
+        function applySettings() {
+            const newWinCount = parseInt(document.getElementById('winNumbersCount').value);
+            
+            if (isNaN(newWinCount) || newWinCount < 5 || newWinCount > maxNumber) {
+                showMessage('خطأ', `عدد الأرقام يجب أن يكون بين 5 و ${maxNumber}`, 'error');
+                return;
+            }
+            
+            winNumbersRequired = newWinCount;
+            gameState.winNumbersRequired = winNumbersRequired;
+            
+            showMessage('تم التطبيق', `تم تحديث الإعدادات: الفوز عند إكمال ${winNumbersRequired} رقم`, 'success');
+            updateHostUI();
+        }
+        
         async function drawNumber() {
             if (gameState.remainingNumbers.length === 0) {
                 showMessage('انتهت الأرقام', 'تم سحب جميع الأرقام', 'error');
@@ -796,16 +1210,19 @@
             
             gameState = {
                 drawnNumbers: [],
-                remainingNumbers: shuffleArray(Array.from({length: 75}, (_, i) => i + 1)),
+                remainingNumbers: shuffleArray(Array.from({length: maxNumber}, (_, i) => i + 1)),
                 players: gameState.players,
                 pendingRequests: [],
                 lastDrawnNumber: null,
-                roomId: roomId
+                roomId: roomId,
+                winNumbersRequired: winNumbersRequired,
+                maxNumber: maxNumber,
+                bingoClaims: []
             };
             
             await saveGameState();
             updateHostUI();
-            document.getElementById('winnerAnnouncement').innerHTML = '';
+            document.getElementById('winnerDetails').classList.remove('active');
             showMessage('جولة جديدة', 'تم بدء جولة جديدة', 'success');
         }
         
@@ -820,16 +1237,16 @@
                 const roomData = data.rooms && data.rooms[roomId];
                 
                 if (roomData && roomData.gameState) {
-                    const oldPending = gameState.pendingRequests.length;
+                    const oldBingoClaims = gameState.bingoClaims ? gameState.bingoClaims.length : 0;
                     gameState = roomData.gameState;
                     
-                    // إذا كانت هناك طلبات جديدة، اعرضها
-                    if (gameState.pendingRequests.length > oldPending) {
-                        // يمكن إضافة صوت تنبيه هنا
+                    // التحقق من طلبات BINGO الجديدة
+                    if (gameState.bingoClaims && gameState.bingoClaims.length > oldBingoClaims) {
+                        const newClaim = gameState.bingoClaims[gameState.bingoClaims.length - 1];
+                        showBingoAlert(newClaim);
                     }
                     
                     renderPendingRequests();
-                    renderPlayersList();
                     updateHostUI();
                 } else {
                     document.getElementById('pendingRequests').innerHTML = 
@@ -838,6 +1255,61 @@
             } catch (error) {
                 console.error('خطأ في جلب الطلبات:', error);
             }
+        }
+        
+        // ===== إشعار BINGO =====
+        function showBingoAlert(claim) {
+            pendingBingoClaim = claim;
+            document.getElementById('bingoWinnerName').textContent = '🎮 ' + claim.playerName;
+            document.getElementById('bingoAlert').classList.add('active');
+        }
+        
+        function skipBingoAlert() {
+            document.getElementById('bingoAlert').classList.remove('active');
+            pendingBingoClaim = null;
+        }
+        
+        function viewWinnerDetails() {
+            document.getElementById('bingoAlert').classList.remove('active');
+            
+            if (!pendingBingoClaim) return;
+            
+            const winner = pendingBingoClaim;
+            const player = gameState.players.find(p => p.playerId === winner.playerId);
+            
+            if (!player) {
+                showMessage('خطأ', 'لم يتم العثور على بيانات اللاعب', 'error');
+                return;
+            }
+            
+            document.getElementById('winnerPlayerName').textContent = '🎮 ' + player.name;
+            document.getElementById('winnerMarkedCount').textContent = 
+                `الأرقام المحددة: ${winner.markedNumbers.length} / ${winNumbersRequired}`;
+            
+            const grid = document.getElementById('winnerNumbersGrid');
+            grid.innerHTML = '';
+            
+            player.numbers.forEach(num => {
+                const span = document.createElement('span');
+                span.textContent = num;
+                
+                if (winner.markedNumbers.includes(num)) {
+                    span.classList.add('marked');
+                } else {
+                    span.classList.add('unmarked');
+                }
+                
+                grid.appendChild(span);
+            });
+            
+            document.getElementById('winnerDetails').classList.add('active');
+            document.getElementById('winnerDetails').scrollIntoView({ behavior: 'smooth' });
+            
+            pendingBingoClaim = null;
+        }
+        
+        function closeWinnerDetails() {
+            document.getElementById('winnerDetails').classList.remove('active');
         }
         
         async function approvePlayer(reqPlayerId) {
@@ -851,7 +1323,6 @@
             
             await saveGameState();
             
-            // تحديث حالة اللاعب
             try {
                 const data = await readBin();
                 if (!data.playerStatus) data.playerStatus = {};
@@ -866,7 +1337,7 @@
             }
             
             renderPendingRequests();
-            renderPlayersList();
+            updateHostUI();
         }
         
         async function rejectPlayer(reqPlayerId) {
@@ -901,31 +1372,13 @@
             
             container.innerHTML = gameState.pendingRequests.map(req => `
                 <div class="pending-request">
-                    <h4>👤 ${req.name}</h4>
+                    <h4> ${req.name}</h4>
                     <div class="player-numbers">
                         ${req.numbers.map(n => `<span>${n}</span>`).join('')}
                     </div>
                     <div class="request-actions">
                         <button class="btn btn-success" onclick="approvePlayer('${req.playerId}')">✅ قبول</button>
                         <button class="btn btn-danger" onclick="rejectPlayer('${req.playerId}')">❌ رفض</button>
-                    </div>
-                </div>
-            `).join('');
-        }
-        
-        function renderPlayersList() {
-            const container = document.getElementById('playersList');
-            
-            if (!gameState.players || gameState.players.length === 0) {
-                container.innerHTML = '<div class="info-box">لا يوجد لاعبين بعد</div>';
-                return;
-            }
-            
-            container.innerHTML = gameState.players.map(player => `
-                <div class="player-card">
-                    <h4>🎮 ${player.name}</h4>
-                    <div class="player-numbers">
-                        ${player.numbers.map(n => `<span>${n}</span>`).join('')}
                     </div>
                 </div>
             `).join('');
@@ -949,7 +1402,35 @@
                 ).join('');
             }
             
-            renderPlayersList();
+            const playersCount = gameState.players ? gameState.players.length : 0;
+            document.getElementById('playersCount').textContent = playersCount;
+            
+            document.getElementById('winNumbersCount').value = gameState.winNumbersRequired || 25;
+        }
+        
+        // ===== نافذة السجل =====
+        function openRecordsModal() {
+            const modal = document.getElementById('recordsModal');
+            const body = document.getElementById('recordsModalBody');
+            
+            if (!gameState.players || gameState.players.length === 0) {
+                body.innerHTML = '<p style="text-align: center; padding: 30px; color: #636e72;">لا يوجد لاعبين بعد</p>';
+            } else {
+                body.innerHTML = gameState.players.map(player => `
+                    <div class="record-player">
+                        <h4> ${player.name}</h4>
+                        <div class="numbers-grid">
+                            ${player.numbers.map(n => `<span>${n}</span>`).join('')}
+                        </div>
+                    </div>
+                `).join('');
+            }
+            
+            modal.classList.add('active');
+        }
+        
+        function closeRecordsModal() {
+            document.getElementById('recordsModal').classList.remove('active');
         }
         
         // ===== وظائف اللاعب =====
@@ -969,9 +1450,9 @@
                 return;
             }
             
-            const invalidNumbers = numbers.filter(n => n < 1 || n > 75);
+            const invalidNumbers = numbers.filter(n => n < 1 || n > 90);
             if (invalidNumbers.length > 0) {
-                showMessage('خطأ', 'الأرقام يجب أن تكون بين 1 و 75', 'error');
+                showMessage('خطأ', 'الأرقام يجب أن تكون بين 1 و 90', 'error');
                 return;
             }
             
@@ -1005,11 +1486,13 @@
                         players: [],
                         pendingRequests: [],
                         lastDrawnNumber: null,
-                        roomId: roomId
+                        roomId: roomId,
+                        winNumbersRequired: 25,
+                        maxNumber: 90,
+                        bingoClaims: []
                     };
                 }
                 
-                // إضافة الطلب
                 if (!data.rooms[roomId].gameState.pendingRequests) {
                     data.rooms[roomId].gameState.pendingRequests = [];
                 }
@@ -1080,6 +1563,20 @@
                 document.getElementById('playerCurrentNumber').textContent = gameData.lastDrawnNumber;
                 document.getElementById('playerCurrentLetter').textContent = getLetterForNumber(gameData.lastDrawnNumber);
             }
+            
+            const required = gameData.winNumbersRequired || 25;
+            document.getElementById('requiredCount').textContent = required;
+            document.getElementById('markedCount').textContent = markedNumbers.size;
+            
+            // تحديث سجل الأرقام المسحوبة
+            const logContainer = document.getElementById('playerNumbersLog');
+            if (gameData.drawnNumbers && gameData.drawnNumbers.length > 0) {
+                logContainer.innerHTML = gameData.drawnNumbers.map(n => 
+                    `<div class="number-badge">${n}</div>`
+                ).join('');
+            } else {
+                logContainer.innerHTML = '<p>لم يتم سحب أي رقم بعد</p>';
+            }
         }
         
         function renderPlayerGrid() {
@@ -1114,15 +1611,18 @@
                 markedNumbers.add(number);
                 cell.classList.add('marked');
             }
+            
+            document.getElementById('markedCount').textContent = markedNumbers.size;
         }
         
         async function claimBingo() {
-            if (markedNumbers.size !== 25) {
-                showMessage('خطأ', `يجب تحديد جميع الأرقام (حددت ${markedNumbers.size})`, 'error');
+            const required = gameData ? (gameData.winNumbersRequired || 25) : 25;
+            
+            if (markedNumbers.size < required) {
+                showMessage('خطأ', `يجب تحديد ${required} رقم على الأقل (حددت ${markedNumbers.size})`, 'error');
                 return;
             }
             
-            // التحقق المحلي أولاً
             if (!gameData || !gameData.drawnNumbers) {
                 showMessage('خطأ', 'لا توجد بيانات اللعبة', 'error');
                 return;
@@ -1137,23 +1637,22 @@
                 return;
             }
             
-            // إرسال إعلان الفوز
             try {
                 const data = await readBin();
-                if (!data.rooms[roomId].bingoClaims) {
-                    data.rooms[roomId].bingoClaims = [];
+                if (!data.rooms[roomId].gameState.bingoClaims) {
+                    data.rooms[roomId].gameState.bingoClaims = [];
                 }
-                data.rooms[roomId].bingoClaims.push({
+                data.rooms[roomId].gameState.bingoClaims.push({
                     playerId: playerId,
                     playerName: currentPlayerName,
                     markedNumbers: [...markedNumbers],
                     timestamp: Date.now()
                 });
+                data.rooms[roomId].lastUpdate = Date.now();
                 await writeBin(data);
                 
                 showMessage('تم الإرسال', 'تم إرسال طلب BINGO للمتحكم للتحقق', 'success');
                 
-                // المتحكم سيرى الإعلان في polling التالي
             } catch (error) {
                 showMessage('خطأ', 'فشل في إرسال الطلب', 'error');
             }
@@ -1189,6 +1688,7 @@
             if (num >= 31 && num <= 45) return 'N';
             if (num >= 46 && num <= 60) return 'G';
             if (num >= 61 && num <= 75) return 'O';
+            if (num >= 76 && num <= 90) return 'X';
             return '?';
         }
         
@@ -1209,4 +1709,4 @@
         }
     </script>
 </body>
-</html>
+                        </html>
