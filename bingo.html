@@ -388,7 +388,6 @@
             opacity: 0.95;
         }
         
-        /* ===== إشعار BINGO ===== */
         .bingo-alert {
             position: fixed;
             top: 0;
@@ -403,9 +402,7 @@
             animation: fadeIn 0.3s;
         }
         
-        .bingo-alert.active {
-            display: flex;
-        }
+        .bingo-alert.active { display: flex; }
         
         .bingo-alert-content {
             background: linear-gradient(135deg, #f39c12, #e74c3c);
@@ -478,7 +475,6 @@
             transform: translateY(-2px);
         }
         
-        /* ===== زر السجل ===== */
         .records-btn {
             background: linear-gradient(135deg, #6c5ce7, #a29bfe);
             color: white;
@@ -511,7 +507,6 @@
             font-size: 0.9rem;
         }
         
-        /* ===== نافذة السجل ===== */
         .records-modal {
             display: none;
             position: fixed;
@@ -525,9 +520,7 @@
             justify-content: center;
         }
         
-        .records-modal.active {
-            display: flex;
-        }
+        .records-modal.active { display: flex; }
         
         .records-modal-content {
             background: white;
@@ -549,9 +542,7 @@
             align-items: center;
         }
         
-        .records-modal-header h3 {
-            font-size: 1.3rem;
-        }
+        .records-modal-header h3 { font-size: 1.3rem; }
         
         .close-records {
             background: rgba(255,255,255,0.2);
@@ -598,7 +589,6 @@
             font-size: 0.85rem;
         }
         
-        /* ===== إعدادات اللعبة المصغرة ===== */
         .settings-compact {
             background: #f0f3f9;
             padding: 12px 15px;
@@ -641,7 +631,6 @@
             margin-top: 5px;
         }
         
-        /* ===== عرض أرقام اللاعب الفائز ===== */
         .winner-details {
             display: none;
             background: white;
@@ -680,10 +669,7 @@
             font-weight: bold;
         }
         
-        .winner-numbers-grid span.marked {
-            background: #00b894;
-        }
-        
+        .winner-numbers-grid span.marked { background: #00b894; }
         .winner-numbers-grid span.unmarked {
             background: #d63031;
             opacity: 0.7;
@@ -703,7 +689,6 @@
             <p>LOVELIGO - النسخة المتصلة</p>
         </div>
         
-        <!-- تسجيل الدخول -->
         <div id="loginPanel" class="panel">
             <h2>🔑 تسجيل الدخول</h2>
             <div class="info-box">أدخل مفتاح الترخيص للاستمرار</div>
@@ -730,20 +715,18 @@
             </div>
         </div>
         
-        <!-- معلومات الاشتراك -->
         <div id="subscriptionPanel" class="panel hidden">
             <div class="subscription-info">
-                <h3>📋 معلومات الاشتراك</h3>
+                <h3> معلومات الاشتراك</h3>
                 <p>🔑 المفتاح: <span id="subKey"></span></p>
                 <p>📅 تاريخ الانتهاء: <span id="subExpiry"></span></p>
-                <p>💚 الحالة: <span id="subStatus"></span></p>
+                <p> الحالة: <span id="subStatus"></span></p>
             </div>
             <button class="btn btn-primary" onclick="showRoleSelection()">متابعة</button>
         </div>
         
-        <!-- اختيار الدور -->
         <div id="rolePanel" class="panel hidden">
-            <h2> اختر دورك</h2>
+            <h2>🎯 اختر دورك</h2>
             <button class="btn btn-primary" onclick="selectRole('host')" style="margin-bottom: 10px;">
                 <i class="fas fa-gamepad"></i> أنا المتحكم (Host)
             </button>
@@ -752,7 +735,6 @@
             </button>
         </div>
         
-        <!-- واجهة المتحكم -->
         <div id="hostPanel" class="hidden">
             <div class="panel">
                 <h2>📤 رابط المشاركة</h2>
@@ -765,9 +747,8 @@
                 </div>
             </div>
             
-            <!-- إعدادات اللعبة المصغرة -->
             <div class="panel">
-                <h2>⚙️ إعدادات اللعبة</h2>
+                <h2>️ إعدادات اللعبة</h2>
                 <div class="settings-compact">
                     <label>🎯 عدد الأرقام للفوز:</label>
                     <select id="winNumbersSelect" onchange="onWinCountChange()">
@@ -799,7 +780,7 @@
             </div>
             
             <div class="panel">
-                <h2>📋 طلبات الانضمام</h2>
+                <h2> طلبات الانضمام</h2>
                 <div id="pendingRequests">
                     <div class="loading">
                         <div class="spinner"></div>
@@ -808,7 +789,6 @@
                 </div>
             </div>
             
-            <!-- زر سجل اللاعبين -->
             <button class="records-btn" onclick="openRecordsModal()">
                 <i class="fas fa-folder-open"></i> 
                 سجل اللاعبين المشاركين
@@ -822,7 +802,6 @@
                 </div>
             </div>
             
-            <!-- تفاصيل الفائز -->
             <div id="winnerDetails" class="winner-details">
                 <h3>🏆 تفاصيل اللاعب الفائز</h3>
                 <p id="winnerPlayerName" style="text-align: center; font-size: 1.3rem; margin-bottom: 10px;"></p>
@@ -834,7 +813,6 @@
             </div>
         </div>
         
-        <!-- واجهة اللاعب -->
         <div id="playerPanel" class="hidden">
             <div id="registrationForm" class="panel">
                 <h2>📝 الانضمام للعبة</h2>
@@ -859,12 +837,9 @@
                     <div id="playerCurrentLetter" class="letter-display">-</div>
                 </div>
                 
-                <!-- سجل الأرقام المسحوبة للاعب -->
                 <div class="panel">
                     <h2>📊 سجل الأرقام المسحوبة</h2>
-                    <div class="info-box">
-                        راجع الأرقام المسحوبة لتحديد أرقامك
-                    </div>
+                    <div class="info-box">راجع الأرقام المسحوبة لتحديد أرقامك</div>
                     <div id="playerNumbersLog" class="numbers-log">
                         <p>لم يتم سحب أي رقم بعد</p>
                     </div>
@@ -892,7 +867,6 @@
         </div>
     </div>
     
-    <!-- إشعار BINGO للمتحكم -->
     <div id="bingoAlert" class="bingo-alert">
         <div class="bingo-alert-content">
             <h2>🏆 BINGO! 🏆</h2>
@@ -910,7 +884,6 @@
         </div>
     </div>
     
-    <!-- نافذة سجل اللاعبين -->
     <div id="recordsModal" class="records-modal">
         <div class="records-modal-content">
             <div class="records-modal-header">
@@ -925,7 +898,6 @@
         </div>
     </div>
     
-    <!-- نافذة الرسائل -->
     <div id="messageModal" class="modal">
         <div class="modal-content">
             <h2 id="modalTitle"></h2>
@@ -935,14 +907,12 @@
     </div>
 
     <script>
-        // ===== إعدادات JSONBin =====
         const BIN_ID = '6aa91167ffd5d16053091105';
         const API_KEY = '$2a$10$RITxbUC8tIk02/FZkOGeYenJCF0HLCbx9UTYcJnTX02kpyCjpCXXS';
         const BASE_URL = `https://api.jsonbin.io/v3/b/${BIN_ID}`;
-        const POLL_INTERVAL = 3000;
+        const POLL_INTERVAL = 2000;
         const MAX_NUMBER = 90;
         
-        // ===== متغيرات عامة =====
         let currentRole = null;
         let currentLicense = null;
         let roomId = null;
@@ -958,7 +928,6 @@
         let localGameState = null;
         let processedRequests = new Set();
         
-        // ===== تهيئة =====
         window.onload = function() {
             checkURLParams();
         };
@@ -972,7 +941,6 @@
             }
         }
         
-        // ===== دوال JSONBin =====
         async function readBin() {
             try {
                 const response = await fetch(BASE_URL, {
@@ -1010,7 +978,6 @@
             }
         }
         
-        // ===== نظام المفاتيح =====
         async function validateLicense() {
             const keyInput = document.getElementById('licenseKey').value.trim();
             const messageDiv = document.getElementById('loginMessage');
@@ -1036,7 +1003,7 @@
                 const today = new Date();
                 
                 if (today > expiryDate) {
-                    messageDiv.innerHTML = '<div class="error-box"> انتهت صلاحية المفتاح</div>';
+                    messageDiv.innerHTML = '<div class="error-box">⏰ انتهت صلاحية المفتاح</div>';
                     return;
                 }
                 
@@ -1083,7 +1050,6 @@
             document.getElementById('rolePanel').classList.remove('hidden');
         }
         
-        // ===== اختيار الدور =====
         function selectRole(role) {
             currentRole = role;
             
@@ -1117,7 +1083,6 @@
             }
         }
         
-        // ===== تحديث نموذج اللاعب بناءً على الإعدادات =====
         function updatePlayerForm() {
             const label = document.getElementById('playerNumbersLabel');
             const textarea = document.getElementById('playerNumbers');
@@ -1125,7 +1090,6 @@
             textarea.placeholder = `مثال: أدخل ${winNumbersRequired} رقماً مفصولة بفواصل`;
         }
         
-        // ===== وظائف المتحكم =====
         async function initHostGame() {
             localGameState = {
                 drawnNumbers: [],
@@ -1162,7 +1126,6 @@
             }
         }
         
-        // ===== تغيير عدد الأرقام للفوز =====
         function onWinCountChange() {
             const newCount = parseInt(document.getElementById('winNumbersSelect').value);
             winNumbersRequired = newCount;
@@ -1287,7 +1250,7 @@
         
         function showBingoAlert(claim) {
             pendingBingoClaim = claim;
-            document.getElementById('bingoWinnerName').textContent = ' ' + claim.playerName;
+            document.getElementById('bingoWinnerName').textContent = '🎮 ' + claim.playerName;
             document.getElementById('bingoAlert').classList.add('active');
         }
         
@@ -1417,7 +1380,7 @@
                 
                 return `
                 <div class="pending-request">
-                    <h4> ${req.name}</h4>
+                    <h4>👤 ${req.name}</h4>
                     <div class="player-numbers">
                         ${req.numbers.map(n => `<span>${n}</span>`).join('')}
                     </div>
@@ -1481,7 +1444,6 @@
             document.getElementById('recordsModal').classList.remove('active');
         }
         
-        // ===== وظائف اللاعب =====
         async function submitRegistration() {
             const name = document.getElementById('playerName').value.trim();
             const numbersText = document.getElementById('playerNumbers').value.trim();
@@ -1598,6 +1560,8 @@
                 if (roomData && roomData.gameState) {
                     gameData = roomData.gameState;
                     updatePlayerUI();
+                } else {
+                    console.log('لم يتم العثور على بيانات الغرفة:', roomId);
                 }
             } catch (error) {
                 console.error('فشل في جلب البيانات:', error);
@@ -1605,18 +1569,25 @@
         }
         
         function updatePlayerUI() {
-            if (!gameData) return;
+            if (!gameData) {
+                console.log('gameData فارغة');
+                return;
+            }
             
-            if (gameData.lastDrawnNumber) {
+            console.log('تحديث واجهة اللاعب:', gameData);
+            
+            if (gameData.lastDrawnNumber !== null && gameData.lastDrawnNumber !== undefined) {
                 document.getElementById('playerCurrentNumber').textContent = gameData.lastDrawnNumber;
                 document.getElementById('playerCurrentLetter').textContent = getLetterForNumber(gameData.lastDrawnNumber);
+            } else {
+                document.getElementById('playerCurrentNumber').textContent = '--';
+                document.getElementById('playerCurrentLetter').textContent = '-';
             }
             
             const required = gameData.winNumbersRequired || 25;
             document.getElementById('requiredCount').textContent = required;
             document.getElementById('markedCount').textContent = markedNumbers.size;
             
-            // تحديث سجل الأرقام المسحوبة (مهم جداً)
             const logContainer = document.getElementById('playerNumbersLog');
             if (gameData.drawnNumbers && gameData.drawnNumbers.length > 0) {
                 logContainer.innerHTML = gameData.drawnNumbers.map(n => 
@@ -1706,7 +1677,6 @@
             }
         }
         
-        // ===== دوال مساعدة =====
         function copyLink() {
             const linkInput = document.getElementById('shareLink');
             linkInput.select();
