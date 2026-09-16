@@ -117,6 +117,7 @@
             border-radius: 20px;
             text-align: center;
             margin-bottom: 15px;
+            min-height: 200px;
         }
         
         .number-display {
@@ -191,6 +192,7 @@
             padding: 10px;
             background: #f8f9fa;
             border-radius: 10px;
+            min-height: 60px;
         }
         
         .number-badge {
@@ -204,6 +206,12 @@
             border-radius: 50%;
             font-weight: bold;
             font-size: 0.9rem;
+            animation: fadeIn 0.3s;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0); }
+            to { opacity: 1; transform: scale(1); }
         }
         
         .player-card {
@@ -416,11 +424,6 @@
             50% { transform: scale(1.05); }
             70% { transform: scale(0.9); }
             100% { transform: scale(1); opacity: 1; }
-        }
-        
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
         }
         
         .bingo-alert-content h2 {
@@ -732,8 +735,8 @@
             <div class="subscription-info">
                 <h3>📋 معلومات الاشتراك</h3>
                 <p>🔑 المفتاح: <span id="subKey"></span></p>
-                <p>📅 تاريخ الانتهاء: <span id="subExpiry"></span></p>
-                <p>💚 الحالة: <span id="subStatus"></span></p>
+                <p> تاريخ الانتهاء: <span id="subExpiry"></span></p>
+                <p> الحالة: <span id="subStatus"></span></p>
             </div>
             <button class="btn btn-primary" onclick="showRoleSelection()">متابعة</button>
         </div>
@@ -764,7 +767,7 @@
             
             <!-- إعدادات اللعبة المصغرة -->
             <div class="panel">
-                <h2>⚙️ إعدادات اللعبة</h2>
+                <h2>️ إعدادات اللعبة</h2>
                 <div class="settings-compact">
                     <label>🎯 عدد الأرقام للفوز:</label>
                     <select id="winNumbersSelect" onchange="onWinCountChange()">
@@ -772,7 +775,7 @@
                         <option value="20">20 رقم</option>
                         <option value="25" selected>25 رقم</option>
                     </select>
-                    <p class="settings-hint">💡 اللاعب يفوز عند إكمال هذا العدد من الأرقام</p>
+                    <p class="settings-hint"> اللاعب يفوز عند إكمال هذا العدد من الأرقام</p>
                 </div>
             </div>
             
@@ -936,7 +939,7 @@
         const BIN_ID = '6aa91167ffd5d16053091105';
         const API_KEY = '$2a$10$RITxbUC8tIk02/FZkOGeYenJCF0HLCbx9UTYcJnTX02kpyCjpCXXS';
         const BASE_URL = `https://api.jsonbin.io/v3/b/${BIN_ID}`;
-        const POLL_INTERVAL = 5000;
+        const POLL_INTERVAL = 3000; // 3 ثواني
         const MAX_NUMBER = 90;
         
         // ===== متغيرات عامة =====
@@ -952,7 +955,8 @@
         let isProcessing = false;
         let winNumbersRequired = 25;
         let pendingBingoClaim = null;
-        let localGameState = null; // الحالة المحلية للمتحكم
+        let localGameState = null;
+        let processedRequests = new Set(); // تتبع الطلبات المعالجة
         
         // ===== تهيئة =====
         window.onload = function() {
@@ -1002,7 +1006,7 @@
                 console.error('خطأ في الكتابة:', error);
                 throw error;
             } finally {
-                isProcessing = false;
+                setTimeout(() => { isProcessing = false; }, 500);
             }
         }
         
@@ -1032,7 +1036,7 @@
                 const today = new Date();
                 
                 if (today > expiryDate) {
-                    messageDiv.innerHTML = '<div class="error-box"> انتهت صلاحية المفتاح</div>';
+                    messageDiv.innerHTML = '<div class="error-box">⏰ انتهت صلاحية المفتاح</div>';
                     return;
                 }
                 
@@ -1164,8 +1168,10 @@
             winNumbersRequired = newCount;
             if (localGameState) {
                 localGameState.winNumbersRequired = winNumbersRequired;
+                saveGameState();
             }
             updatePlayerForm();
+            showMessage('تم التحديث', `تم تغيير عدد الأرقام المطلوبة للفوز إلى ${winNumbersRequired}`, 'success');
         }
         
         async function drawNumber() {
@@ -1186,10 +1192,13 @@
         async function newGame() {
             if (!confirm('هل تريد بدء جولة جديدة؟ سيتم مسح كل شيء')) return;
             
+            // مسح البيانات القديمة من JSONBin
+            await clearGameData();
+            
             localGameState = {
                 drawnNumbers: [],
                 remainingNumbers: shuffleArray(Array.from({length: MAX_NUMBER}, (_, i) => i + 1)),
-                players: localGameState ? localGameState.players : [],
+                players: [],
                 pendingRequests: [],
                 lastDrawnNumber: null,
                 roomId: roomId,
@@ -1201,7 +1210,29 @@
             await saveGameState();
             updateHostUI();
             document.getElementById('winnerDetails').classList.remove('active');
+            processedRequests.clear();
             showMessage('جولة جديدة', 'تم بدء جولة جديدة', 'success');
+        }
+        
+        // ===== مسح بيانات اللعبة من JSONBin =====
+        async function clearGameData() {
+            try {
+                const data = await readBin();
+                if (data.rooms && data.rooms[roomId]) {
+                    delete data.rooms[roomId];
+                }
+                if (data.playerStatus) {
+                    // مسح حالة اللاعبين في هذه الغرفة
+                    Object.keys(data.playerStatus).forEach(key => {
+                        if (data.playerStatus[key].roomId === roomId) {
+                            delete data.playerStatus[key];
+                        }
+                    });
+                }
+                await writeBin(data);
+            } catch (error) {
+                console.error('فشل في مسح البيانات:', error);
+            }
         }
         
         function startPollingRequests() {
@@ -1215,22 +1246,41 @@
                 const roomData = data.rooms && data.rooms[roomId];
                 
                 if (roomData && roomData.gameState) {
+                    const serverState = roomData.gameState;
+                    
                     // التحقق من طلبات BINGO الجديدة
                     const oldBingoClaims = localGameState && localGameState.bingoClaims ? localGameState.bingoClaims.length : 0;
-                    const newBingoClaims = roomData.gameState.bingoClaims || [];
+                    const newBingoClaims = serverState.bingoClaims || [];
                     
                     if (newBingoClaims.length > oldBingoClaims) {
                         const newClaim = newBingoClaims[newBingoClaims.length - 1];
                         showBingoAlert(newClaim);
                     }
                     
-                    // تحديث الطلبات المعلقة فقط (لا نستبدل الحالة المحلية بالكامل)
+                    // تحديث الطلبات المعلقة فقط (بدون استبدال الحالة المحلية)
                     if (localGameState) {
-                        localGameState.pendingRequests = roomData.gameState.pendingRequests || [];
+                        // تحديث الطلبات المعلقة
+                        if (serverState.pendingRequests) {
+                            localGameState.pendingRequests = serverState.pendingRequests.filter(req => {
+                                // تجنب معالجة نفس الطلب مرتين
+                                const requestId = req.playerId + '_' + req.timestamp;
+                                if (!processedRequests.has(requestId)) {
+                                    return true;
+                                }
+                                return false;
+                            });
+                        }
+                        
+                        // تحديث bingo claims
                         localGameState.bingoClaims = newBingoClaims;
-                        // تحديث الأرقام المسحوبة والرقم الحالي من السيرفر (للمزامنة)
-                        localGameState.drawnNumbers = roomData.gameState.drawnNumbers || [];
-                        localGameState.lastDrawnNumber = roomData.gameState.lastDrawnNumber || null;
+                        
+                        // الاحتفاظ بالأرقام المسحوبة محلياً (لا نحذفها)
+                        if (serverState.drawnNumbers && serverState.drawnNumbers.length > 0) {
+                            localGameState.drawnNumbers = serverState.drawnNumbers;
+                        }
+                        if (serverState.lastDrawnNumber) {
+                            localGameState.lastDrawnNumber = serverState.lastDrawnNumber;
+                        }
                     }
                     
                     renderPendingRequests();
@@ -1269,7 +1319,7 @@
                 return;
             }
             
-            document.getElementById('winnerPlayerName').textContent = '🎮 ' + player.name;
+            document.getElementById('winnerPlayerName').textContent = ' ' + player.name;
             document.getElementById('winnerMarkedCount').textContent = 
                 `الأرقام المحددة: ${winner.markedNumbers.length} / ${winNumbersRequired}`;
             
@@ -1305,6 +1355,10 @@
             const request = localGameState.pendingRequests.find(r => r.playerId === reqPlayerId);
             if (!request) return;
             
+            // وضع علامة على الطلب كمعالج
+            const requestId = request.playerId + '_' + request.timestamp;
+            processedRequests.add(requestId);
+            
             // إزالة من الطلبات المعلقة محلياً فوراً
             localGameState.pendingRequests = localGameState.pendingRequests.filter(r => r.playerId !== reqPlayerId);
             // إضافة إلى اللاعبين المقبولين
@@ -1334,6 +1388,13 @@
         
         async function rejectPlayer(reqPlayerId) {
             if (isProcessing || !localGameState) return;
+            
+            const request = localGameState.pendingRequests.find(r => r.playerId === reqPlayerId);
+            if (!request) return;
+            
+            // وضع علامة على الطلب كمعالج
+            const requestId = request.playerId + '_' + request.timestamp;
+            processedRequests.add(requestId);
             
             // إزالة من الطلبات المعلقة محلياً فوراً
             localGameState.pendingRequests = localGameState.pendingRequests.filter(r => r.playerId !== reqPlayerId);
@@ -1367,7 +1428,15 @@
                 return;
             }
             
-            container.innerHTML = localGameState.pendingRequests.map(req => `
+            container.innerHTML = localGameState.pendingRequests.map(req => {
+                const requestId = req.playerId + '_' + req.timestamp;
+                const isProcessed = processedRequests.has(requestId);
+                
+                if (isProcessed) {
+                    return ''; // عدم عرض الطلبات المعالجة
+                }
+                
+                return `
                 <div class="pending-request">
                     <h4>👤 ${req.name}</h4>
                     <div class="player-numbers">
@@ -1378,7 +1447,12 @@
                         <button class="btn btn-danger" onclick="rejectPlayer('${req.playerId}')">❌ رفض</button>
                     </div>
                 </div>
-            `).join('');
+            `}).filter(html => html).join('');
+            
+            // إذا لم يتبق أي طلبات غير معالجة
+            if (container.innerHTML === '') {
+                container.innerHTML = '<div class="info-box">لا توجد طلبات حالياً</div>';
+            }
         }
         
         function updateHostUI() {
@@ -1565,7 +1639,7 @@
             document.getElementById('requiredCount').textContent = required;
             document.getElementById('markedCount').textContent = markedNumbers.size;
             
-            // تحديث سجل الأرقام المسحوبة
+            // تحديث سجل الأرقام المسحوبة (مهم جداً)
             const logContainer = document.getElementById('playerNumbersLog');
             if (gameData.drawnNumbers && gameData.drawnNumbers.length > 0) {
                 logContainer.innerHTML = gameData.drawnNumbers.map(n => 
@@ -1591,7 +1665,7 @@
         }
         
         function toggleNumber(number, cell) {
-            if (!gameData || !gameData.drawnNumbers) {
+            if (!gameData || !gameData.drawnNumbers || gameData.drawnNumbers.length === 0) {
                 showMessage('خطأ', 'لم يتم سحب أي رقم بعد', 'error');
                 return;
             }
