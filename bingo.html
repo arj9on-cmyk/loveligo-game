@@ -735,15 +735,15 @@
             <div class="subscription-info">
                 <h3>📋 معلومات الاشتراك</h3>
                 <p>🔑 المفتاح: <span id="subKey"></span></p>
-                <p> تاريخ الانتهاء: <span id="subExpiry"></span></p>
-                <p> الحالة: <span id="subStatus"></span></p>
+                <p>📅 تاريخ الانتهاء: <span id="subExpiry"></span></p>
+                <p>💚 الحالة: <span id="subStatus"></span></p>
             </div>
             <button class="btn btn-primary" onclick="showRoleSelection()">متابعة</button>
         </div>
         
         <!-- اختيار الدور -->
         <div id="rolePanel" class="panel hidden">
-            <h2>🎯 اختر دورك</h2>
+            <h2> اختر دورك</h2>
             <button class="btn btn-primary" onclick="selectRole('host')" style="margin-bottom: 10px;">
                 <i class="fas fa-gamepad"></i> أنا المتحكم (Host)
             </button>
@@ -767,7 +767,7 @@
             
             <!-- إعدادات اللعبة المصغرة -->
             <div class="panel">
-                <h2>️ إعدادات اللعبة</h2>
+                <h2>⚙️ إعدادات اللعبة</h2>
                 <div class="settings-compact">
                     <label>🎯 عدد الأرقام للفوز:</label>
                     <select id="winNumbersSelect" onchange="onWinCountChange()">
@@ -775,7 +775,7 @@
                         <option value="20">20 رقم</option>
                         <option value="25" selected>25 رقم</option>
                     </select>
-                    <p class="settings-hint"> اللاعب يفوز عند إكمال هذا العدد من الأرقام</p>
+                    <p class="settings-hint">💡 اللاعب يفوز عند إكمال هذا العدد من الأرقام</p>
                 </div>
             </div>
             
@@ -939,7 +939,7 @@
         const BIN_ID = '6aa91167ffd5d16053091105';
         const API_KEY = '$2a$10$RITxbUC8tIk02/FZkOGeYenJCF0HLCbx9UTYcJnTX02kpyCjpCXXS';
         const BASE_URL = `https://api.jsonbin.io/v3/b/${BIN_ID}`;
-        const POLL_INTERVAL = 3000; // 3 ثواني
+        const POLL_INTERVAL = 3000;
         const MAX_NUMBER = 90;
         
         // ===== متغيرات عامة =====
@@ -956,7 +956,7 @@
         let winNumbersRequired = 25;
         let pendingBingoClaim = null;
         let localGameState = null;
-        let processedRequests = new Set(); // تتبع الطلبات المعالجة
+        let processedRequests = new Set();
         
         // ===== تهيئة =====
         window.onload = function() {
@@ -1036,7 +1036,7 @@
                 const today = new Date();
                 
                 if (today > expiryDate) {
-                    messageDiv.innerHTML = '<div class="error-box">⏰ انتهت صلاحية المفتاح</div>';
+                    messageDiv.innerHTML = '<div class="error-box"> انتهت صلاحية المفتاح</div>';
                     return;
                 }
                 
@@ -1192,7 +1192,6 @@
         async function newGame() {
             if (!confirm('هل تريد بدء جولة جديدة؟ سيتم مسح كل شيء')) return;
             
-            // مسح البيانات القديمة من JSONBin
             await clearGameData();
             
             localGameState = {
@@ -1214,7 +1213,6 @@
             showMessage('جولة جديدة', 'تم بدء جولة جديدة', 'success');
         }
         
-        // ===== مسح بيانات اللعبة من JSONBin =====
         async function clearGameData() {
             try {
                 const data = await readBin();
@@ -1222,7 +1220,6 @@
                     delete data.rooms[roomId];
                 }
                 if (data.playerStatus) {
-                    // مسح حالة اللاعبين في هذه الغرفة
                     Object.keys(data.playerStatus).forEach(key => {
                         if (data.playerStatus[key].roomId === roomId) {
                             delete data.playerStatus[key];
@@ -1248,7 +1245,6 @@
                 if (roomData && roomData.gameState) {
                     const serverState = roomData.gameState;
                     
-                    // التحقق من طلبات BINGO الجديدة
                     const oldBingoClaims = localGameState && localGameState.bingoClaims ? localGameState.bingoClaims.length : 0;
                     const newBingoClaims = serverState.bingoClaims || [];
                     
@@ -1257,12 +1253,9 @@
                         showBingoAlert(newClaim);
                     }
                     
-                    // تحديث الطلبات المعلقة فقط (بدون استبدال الحالة المحلية)
                     if (localGameState) {
-                        // تحديث الطلبات المعلقة
                         if (serverState.pendingRequests) {
                             localGameState.pendingRequests = serverState.pendingRequests.filter(req => {
-                                // تجنب معالجة نفس الطلب مرتين
                                 const requestId = req.playerId + '_' + req.timestamp;
                                 if (!processedRequests.has(requestId)) {
                                     return true;
@@ -1271,10 +1264,8 @@
                             });
                         }
                         
-                        // تحديث bingo claims
                         localGameState.bingoClaims = newBingoClaims;
                         
-                        // الاحتفاظ بالأرقام المسحوبة محلياً (لا نحذفها)
                         if (serverState.drawnNumbers && serverState.drawnNumbers.length > 0) {
                             localGameState.drawnNumbers = serverState.drawnNumbers;
                         }
@@ -1294,10 +1285,9 @@
             }
         }
         
-        // ===== إشعار BINGO =====
         function showBingoAlert(claim) {
             pendingBingoClaim = claim;
-            document.getElementById('bingoWinnerName').textContent = '🎮 ' + claim.playerName;
+            document.getElementById('bingoWinnerName').textContent = ' ' + claim.playerName;
             document.getElementById('bingoAlert').classList.add('active');
         }
         
@@ -1319,7 +1309,7 @@
                 return;
             }
             
-            document.getElementById('winnerPlayerName').textContent = ' ' + player.name;
+            document.getElementById('winnerPlayerName').textContent = '🎮 ' + player.name;
             document.getElementById('winnerMarkedCount').textContent = 
                 `الأرقام المحددة: ${winner.markedNumbers.length} / ${winNumbersRequired}`;
             
@@ -1355,23 +1345,17 @@
             const request = localGameState.pendingRequests.find(r => r.playerId === reqPlayerId);
             if (!request) return;
             
-            // وضع علامة على الطلب كمعالج
             const requestId = request.playerId + '_' + request.timestamp;
             processedRequests.add(requestId);
             
-            // إزالة من الطلبات المعلقة محلياً فوراً
             localGameState.pendingRequests = localGameState.pendingRequests.filter(r => r.playerId !== reqPlayerId);
-            // إضافة إلى اللاعبين المقبولين
             localGameState.players.push({...request, approvedAt: new Date().toISOString()});
             
-            // تحديث الواجهة فوراً
             renderPendingRequests();
             updateHostUI();
             
-            // حفظ في JSONBin
             await saveGameState();
             
-            // تحديث حالة اللاعب
             try {
                 const data = await readBin();
                 if (!data.playerStatus) data.playerStatus = {};
@@ -1392,20 +1376,15 @@
             const request = localGameState.pendingRequests.find(r => r.playerId === reqPlayerId);
             if (!request) return;
             
-            // وضع علامة على الطلب كمعالج
             const requestId = request.playerId + '_' + request.timestamp;
             processedRequests.add(requestId);
             
-            // إزالة من الطلبات المعلقة محلياً فوراً
             localGameState.pendingRequests = localGameState.pendingRequests.filter(r => r.playerId !== reqPlayerId);
             
-            // تحديث الواجهة فوراً
             renderPendingRequests();
             
-            // حفظ في JSONBin
             await saveGameState();
             
-            // تحديث حالة اللاعب
             try {
                 const data = await readBin();
                 if (!data.playerStatus) data.playerStatus = {};
@@ -1433,12 +1412,12 @@
                 const isProcessed = processedRequests.has(requestId);
                 
                 if (isProcessed) {
-                    return ''; // عدم عرض الطلبات المعالجة
+                    return '';
                 }
                 
                 return `
                 <div class="pending-request">
-                    <h4>👤 ${req.name}</h4>
+                    <h4> ${req.name}</h4>
                     <div class="player-numbers">
                         ${req.numbers.map(n => `<span>${n}</span>`).join('')}
                     </div>
@@ -1449,7 +1428,6 @@
                 </div>
             `}).filter(html => html).join('');
             
-            // إذا لم يتبق أي طلبات غير معالجة
             if (container.innerHTML === '') {
                 container.innerHTML = '<div class="info-box">لا توجد طلبات حالياً</div>';
             }
@@ -1479,7 +1457,6 @@
             document.getElementById('playersCount').textContent = playersCount;
         }
         
-        // ===== نافذة السجل =====
         function openRecordsModal() {
             const modal = document.getElementById('recordsModal');
             const body = document.getElementById('recordsModalBody');
@@ -1780,4 +1757,4 @@
         }
     </script>
 </body>
-</html>
+    </html>
