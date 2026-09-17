@@ -280,10 +280,10 @@
         </div>
     </div>
     
-    <!-- إشعار BINGO محسّن للمتحكم -->
+    <!-- إشعار BINGO المنبثق للمتحكم -->
     <div id="bingoAlert" class="bingo-alert">
         <div class="bingo-alert-content">
-            <h2>🏆 BINGO! 🏆</h2>
+            <h2> BINGO! 🏆</h2>
             <p style="font-size: 1.5rem; margin: 20px 0;">لدينا فائز!</p>
             <div class="winner-name" id="bingoWinnerName">-</div>
             <p style="font-size: 1.2rem;">أكمل جميع الأرقام المطلوبة!</p>
@@ -345,6 +345,8 @@
         let roomRef = null;
         let playerApproved = false;
         let connectionStatus = 'offline';
+        let lastHandledClaimTimestamp = 0;
+        let currentBingoClaim = null;
         
         // ===== التحقق من الاتصال =====
         function checkConnection() {
@@ -520,7 +522,7 @@
                     roomId: roomId,
                     winNumbersRequired: 20,
                     maxNumber: 90,
-                    bingoClaims: [],
+                    bingoClaims: {},
                     createdAt: Date.now(),
                     gameActive: true
                 };
@@ -620,6 +622,8 @@
             if (!roomRef) return;
             
             try {
+                lastHandledClaimTimestamp = 0;
+                currentBingoClaim = null;
                 await roomRef.remove();
                 localStorage.removeItem('bingo_numbers_' + roomId);
                 await initHostGame();
@@ -643,6 +647,7 @@
                 console.log('🔄 تحديث من Firebase:', state);
                 
                 if (state) {
+                    gameData = state;
                     updateHostUI(state);
                     // ✅ تحويل object إلى array
                     const pendingRequestsArray = state.pendingRequests ? Object.values(state.pendingRequests) : [];
@@ -650,9 +655,16 @@
                     renderPendingRequests(pendingRequestsArray);
                     updatePlayersCount(state.players ? state.players.length : 0);
                     
-                    if (state.bingoClaims && state.bingoClaims.length > 0) {
-                        const lastClaim = state.bingoClaims[state.bingoClaims.length - 1];
-                        showBingoAlert(lastClaim);
+                    // ✅ معالجة طلبات Bingo وإظهار النافذة المنبثقة فوراً
+                    if (state.bingoClaims) {
+                        const claimsArray = Object.values(state.bingoClaims);
+                        if (claimsArray.length > 0) {
+                            const lastClaim = claimsArray[claimsArray.length - 1];
+                            if (lastClaim && lastClaim.timestamp > lastHandledClaimTimestamp) {
+                                lastHandledClaimTimestamp = lastClaim.timestamp;
+                                showBingoAlert(lastClaim);
+                            }
+                        }
                     }
                 }
             }, (error) => {
@@ -811,6 +823,8 @@
         }
         
         function showBingoAlert(claim) {
+            if (!claim) return;
+            currentBingoClaim = claim;
             console.log('🏆 BINGO! الفائز:', claim.playerName);
             document.getElementById('bingoWinnerName').textContent = '🎮 ' + claim.playerName;
             document.getElementById('bingoAlert').classList.add('active');
@@ -822,6 +836,30 @@
         
         function viewWinnerDetails() {
             document.getElementById('bingoAlert').classList.remove('active');
+            if (currentBingoClaim) {
+                const detailsDiv = document.getElementById('winnerDetails');
+                document.getElementById('winnerPlayerName').textContent = '🎮 ' + currentBingoClaim.playerName;
+                
+                const grid = document.getElementById('winnerNumbersGrid');
+                grid.innerHTML = '';
+                
+                const playerNumbers = currentBingoClaim.markedNumbers || [];
+                const drawnNumbers = (gameData && gameData.drawnNumbers) ? gameData.drawnNumbers : [];
+                
+                playerNumbers.forEach(num => {
+                    const span = document.createElement('span');
+                    span.textContent = num;
+                    if (drawnNumbers.includes(num)) {
+                        span.className = 'marked';
+                    } else {
+                        span.className = 'unmarked';
+                    }
+                    grid.appendChild(span);
+                });
+                
+                detailsDiv.classList.add('active');
+                detailsDiv.scrollIntoView({ behavior: 'smooth' });
+            }
         }
         
         function closeWinnerDetails() {
