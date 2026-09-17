@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>لعبة Bingo v5.0 - Firebase - LOVELIGO</title>
+    <title>لعبة Bingo v5.1 - Firebase - LOVELIGO</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, sans-serif; }
@@ -96,11 +96,11 @@
     </style>
 </head>
 <body>
-    <div id="connectionStatus" class="connection-status offline">🔴 غير متصل</div>
+    <div id="connectionStatus" class="connection-status offline"> غير متصل</div>
     
     <div class="container">
         <div class="header">
-            <div class="version-badge"> الإصدار v5.0 - Firebase (بدون حدود)</div>
+            <div class="version-badge">🎮 الإصدار v5.1 - Firebase (بدون حدود)</div>
             <h1>لعبة Bingo</h1>
             <p>LOVELIGO - النسخة المتصلة</p>
         </div>
@@ -169,7 +169,7 @@
             </div>
             
             <div class="panel">
-                <h2>📋 طلبات الانضمام</h2>
+                <h2> طلبات الانضمام</h2>
                 <div id="pendingRequests">
                     <div class="loading">
                         <div class="spinner"></div>
@@ -192,7 +192,7 @@
             </div>
             
             <div id="winnerDetails" class="winner-details">
-                <h3> تفاصيل اللاعب الفائز</h3>
+                <h3>🏆 تفاصيل اللاعب الفائز</h3>
                 <p id="winnerPlayerName" style="text-align: center; font-size: 1.3rem; margin-bottom: 10px;"></p>
                 <div id="winnerNumbersGrid" class="winner-numbers-grid"></div>
                 <button class="btn btn-secondary" onclick="closeWinnerDetails()" style="margin-top: 15px;">إغلاق</button>
@@ -232,7 +232,7 @@
                 </div>
                 
                 <div class="panel">
-                    <h2>🎯 أرقامك (اضغط للتحديد)</h2>
+                    <h2> أرقامك (اضغط للتحديد)</h2>
                     <div class="info-box">اضغط على الرقم لوضع علامة إذا تم سحبه</div>
                     <div id="playerGrid" class="player-grid"></div>
                     <p style="text-align: center; margin-top: 10px; color: #636e72;">
@@ -255,7 +255,7 @@
     
     <div id="bingoAlert" class="bingo-alert">
         <div class="bingo-alert-content">
-            <h2> BINGO! 🏆</h2>
+            <h2>🏆 BINGO! 🏆</h2>
             <p>لديك فائز!</p>
             <div class="winner-name" id="bingoWinnerName">-</div>
             <div class="bingo-alert-buttons">
@@ -268,8 +268,8 @@
     <div id="recordsModal" class="records-modal">
         <div class="records-modal-content">
             <div class="records-modal-header">
-                <h3>📁 سجل اللاعبين</h3>
-                <button class="close-records" onclick="closeRecordsModal()">✕</button>
+                <h3> سجل اللاعبين</h3>
+                <button class="close-records" onclick="closeRecordsModal()"></button>
             </div>
             <div class="records-modal-body" id="recordsModalBody"></div>
         </div>
@@ -303,7 +303,7 @@
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
         
-        console.log('🎮 Bingo Game v5.0 - Firebase');
+        console.log('🎮 Bingo Game v5.1 - Firebase');
         
         // ===== المتغيرات =====
         let currentRole = null;
@@ -326,7 +326,7 @@
                     console.log('✅ متصل بـ Firebase');
                 } else {
                     setConnectionStatus('offline');
-                    console.log('❌ غير متصل بـ Firebase');
+                    console.log(' غير متصل بـ Firebase');
                 }
             });
         }
@@ -336,16 +336,16 @@
             const el = document.getElementById('connectionStatus');
             if (status === 'online') {
                 el.className = 'connection-status online';
-                el.textContent = '🟢 متصل';
+                el.textContent = ' متصل';
             } else {
                 el.className = 'connection-status offline';
-                el.textContent = ' غير متصل';
+                el.textContent = '🔴 غير متصل';
             }
         }
         
         // ===== عند تحميل الصفحة =====
         window.onload = function() {
-            console.log(' تم تحميل الصفحة - v5.0');
+            console.log(' تم تحميل الصفحة - v5.1');
             checkConnection();
             
             const urlParams = new URLSearchParams(window.location.search);
@@ -381,7 +381,7 @@
             }
         };
         
-        // ===== نظام المفاتيح =====
+        // ===== نظام المفاتيح - ✅ تم التعديل ليتوافق مع الهيكل Keys/keys =====
         async function validateLicense() {
             const keyInput = document.getElementById('licenseKey').value.trim();
             const messageDiv = document.getElementById('loginMessage');
@@ -394,11 +394,15 @@
             messageDiv.innerHTML = '<div class="loading"><div class="spinner"></div><p>جاري التحقق...</p></div>';
             
             try {
-                const snapshot = await database.ref('keys/' + keyInput).once('value');
+                // ✅ البحث في المسار الصحيح: Keys/keys/
+                const snapshot = await database.ref('Keys/keys/' + keyInput).once('value');
                 const license = snapshot.val();
                 
+                console.log('🔑 التحقق من المفتاح:', keyInput);
+                console.log('📊 نتيجة البحث:', license);
+                
                 if (!license || !license.active) {
-                    messageDiv.innerHTML = '<div class="error-box"> مفتاح غير صحيح</div>';
+                    messageDiv.innerHTML = '<div class="error-box">❌ مفتاح غير صحيح</div>';
                     return;
                 }
                 
@@ -415,13 +419,15 @@
                 }
                 
                 if (!license.deviceId) {
-                    await database.ref('keys/' + keyInput).update({ deviceId: deviceId });
+                    await database.ref('Keys/keys/' + keyInput).update({ deviceId: deviceId });
                 }
                 
+                console.log('✅ تم تسجيل الدخول بنجاح');
                 document.getElementById('loginPanel').classList.add('hidden');
                 document.getElementById('rolePanel').classList.remove('hidden');
                 
             } catch (error) {
+                console.error('❌ خطأ:', error);
                 messageDiv.innerHTML = '<div class="error-box">❌ خطأ: ' + error.message + '</div>';
             }
         }
@@ -583,7 +589,7 @@
             });
             
             await roomRef.update({ pendingRequests: state.pendingRequests });
-            console.log(' تم رفض اللاعب:', reqPlayerId);
+            console.log('❌ تم رفض اللاعب:', reqPlayerId);
         }
         
         function updateHostUI(state) {
@@ -610,7 +616,7 @@
             
             container.innerHTML = requests.map(req => `
                 <div class="pending-request">
-                    <h4>👤 ${req.name}</h4>
+                    <h4> ${req.name}</h4>
                     <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:5px;margin:10px 0;font-size:0.8rem;">
                         ${req.numbers.map(n => `<span style="background:white;padding:5px;text-align:center;border-radius:5px;">${n}</span>`).join('')}
                     </div>
@@ -656,7 +662,7 @@
         }
         
         function showBingoAlert(claim) {
-            document.getElementById('bingoWinnerName').textContent = '🎮 ' + claim.playerName;
+            document.getElementById('bingoWinnerName').textContent = ' ' + claim.playerName;
             document.getElementById('bingoAlert').classList.add('active');
         }
         
@@ -666,7 +672,6 @@
         
         function viewWinnerDetails() {
             document.getElementById('bingoAlert').classList.remove('active');
-            // يمكن إضافة تفاصيل أكثر هنا
         }
         
         function closeWinnerDetails() {
@@ -679,17 +684,12 @@
             
             roomRef = database.ref('rooms/' + roomId);
             
-            // الاستماع للتغييرات في الوقت الفعلي
             roomRef.on('value', (snapshot) => {
                 const state = snapshot.val();
                 
                 if (state) {
                     gameData = state;
-                    
-                    // التحقق من الموافقة
                     checkPlayerApproval(state);
-                    
-                    // تحديث الواجهة
                     updatePlayerUI(state);
                 }
             });
@@ -698,7 +698,6 @@
         function checkPlayerApproval(state) {
             if (playerApproved) return;
             
-            // التحقق من playerStatus
             database.ref('playerStatus/' + playerId).once('value').then(snapshot => {
                 const status = snapshot.val();
                 
@@ -711,7 +710,6 @@
                 }
             });
             
-            // التحقق من قائمة اللاعبين
             if (state.players) {
                 const found = state.players.find(p => p.playerId === playerId || p.name === currentPlayerName);
                 if (found) {
@@ -792,7 +790,6 @@
                 
                 document.getElementById('registrationStatus').innerHTML = '<div class="success-box">✅ تم إرسال الطلب. انتظر موافقة المتحكم...</div>';
                 
-                // البدء في التحقق من الموافقة
                 checkPlayerApprovalFromRegistration();
                 
             } catch (error) {
@@ -926,4 +923,4 @@
         }
     </script>
 </body>
-                                                                               </html>
+</html>
