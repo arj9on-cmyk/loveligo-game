@@ -3,12 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>لعبة Bingo - LOVELIGO</title>
+    <title>لعبة Bingo v2.0 - LOVELIGO</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, sans-serif; }
         body { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; padding: 10px; }
         .container { max-width: 600px; margin: 0 auto; }
+        .version-badge { 
+            background: linear-gradient(135deg, #f39c12, #e74c3c); 
+            color: white; 
+            padding: 8px 20px; 
+            border-radius: 20px; 
+            display: inline-block; 
+            font-weight: bold;
+            margin: 10px 0;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.3);
+        }
         .header { background: white; padding: 20px; border-radius: 20px; text-align: center; margin-bottom: 15px; box-shadow: 0 5px 20px rgba(0,0,0,0.2); }
         .header h1 { color: #6c5ce7; font-size: 2rem; }
         .panel { background: white; padding: 20px; border-radius: 20px; margin-bottom: 15px; box-shadow: 0 5px 20px rgba(0,0,0,0.2); }
@@ -16,7 +26,7 @@
         .input-group { margin-bottom: 15px; }
         .input-group label { display: block; margin-bottom: 8px; font-weight: bold; color: #2d3436; }
         .input-group input, .input-group textarea { width: 100%; padding: 12px; border: 2px solid #dfe6e9; border-radius: 10px; font-size: 1rem; }
-        .input-group input:focus, .input-group textarea:focus { outline: none; border-color: #6c5ce7; }
+        ..input-group input:focus, .input-group textarea:focus { outline: none; border-color: #6c5ce7; }
         .btn { padding: 15px 25px; border: none; border-radius: 25px; font-size: 1rem; font-weight: bold; cursor: pointer; margin: 5px; transition: all 0.3s; width: 100%; display: flex; align-items: center; justify-content: center; gap: 10px; }
         .btn-primary { background: #6c5ce7; color: white; }
         .btn-success { background: #00b894; color: white; }
@@ -94,7 +104,8 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1> لعبة Bingo</h1>
+            <div class="version-badge">🎮 الإصدار v2.0 - الإصلاح النهائي</div>
+            <h1>لعبة Bingo</h1>
             <p>LOVELIGO - النسخة المتصلة</p>
         </div>
         
@@ -165,7 +176,7 @@
             </div>
             
             <div class="panel">
-                <h2>📋 طلبات الانضمام</h2>
+                <h2> طلبات الانضمام</h2>
                 <div id="pendingRequests">
                     <div class="loading">
                         <div class="spinner"></div>
@@ -257,7 +268,7 @@
             <p>لديك فائز!</p>
             <div class="winner-name" id="bingoWinnerName">-</div>
             <div class="bingo-alert-buttons">
-                <button class="btn-view" onclick="viewWinnerDetails()">👁️ عرض التفاصيل</button>
+                <button class="btn-view" onclick="viewWinnerDetails()">️ عرض التفاصيل</button>
                 <button class="btn-skip" onclick="skipBingoAlert()">️ تخطي</button>
             </div>
         </div>
@@ -284,6 +295,9 @@
     </div>
 
     <script>
+        // ===== الإصدار v2.0 =====
+        console.log(' Bingo Game v2.0 - الإصلاح النهائي');
+        
         // ===== الإعدادات =====
         const BIN_ID = '6aa91167ffd5d16053091105';
         const API_KEY = '$2a$10$RITxbUC8tIk02/FZkOGeYenJCF0HLCbx9UTYcJnTX02kpyCjpCXXS';
@@ -308,17 +322,21 @@
         
         // ===== عند تحميل الصفحة =====
         window.onload = function() {
+            console.log('📱 تم تحميل الصفحة');
             const urlParams = new URLSearchParams(window.location.search);
             const room = urlParams.get('room');
             
             if (room) {
+                console.log('🔗 رابط لاعب - roomId:', room);
                 roomId = room;
                 document.getElementById('loginPanel').classList.add('hidden');
                 document.getElementById('rolePanel').classList.add('hidden');
                 document.getElementById('playerPanel').classList.remove('hidden');
                 playerId = 'player_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6);
+                console.log('🎮 playerId:', playerId);
                 startPlayerPolling();
             } else {
+                console.log('🔑 رابط أساسي - إظهار تسجيل الدخول');
                 document.getElementById('loginPanel').classList.remove('hidden');
             }
         };
@@ -331,15 +349,19 @@
                 });
                 if (!response.ok) throw new Error('فشل في القراءة');
                 const data = await response.json();
+                console.log('📖 تم القراءة من JSONBin');
                 return data.record;
             } catch (error) {
-                console.error('خطأ في القراءة:', error);
+                console.error('❌ خطأ في القراءة:', error);
                 throw error;
             }
         }
         
         async function writeBin(data) {
-            if (isProcessing) return false;
+            if (isProcessing) {
+                console.log('⏳ عملية كتابة جارية، انتظر...');
+                return false;
+            }
             isProcessing = true;
             try {
                 const response = await fetch(BASE_URL, {
@@ -348,9 +370,10 @@
                     body: JSON.stringify(data)
                 });
                 if (!response.ok) throw new Error('فشل في الكتابة');
+                console.log('✏️ تم الكتابة في JSONBin');
                 return true;
             } catch (error) {
-                console.error('خطأ في الكتابة:', error);
+                console.error('❌ خطأ في الكتابة:', error);
                 throw error;
             } finally {
                 setTimeout(() => { isProcessing = false; }, 500);
@@ -396,6 +419,7 @@
                     await writeBin(data);
                 }
                 
+                console.log('✅ تم تسجيل الدخول بنجاح');
                 document.getElementById('loginPanel').classList.add('hidden');
                 document.getElementById('rolePanel').classList.remove('hidden');
                 
@@ -416,19 +440,24 @@
         // ===== اختيار الدور =====
         function selectRole(role) {
             currentRole = role;
+            console.log('🎯 تم اختيار الدور:', role);
             
             if (role === 'host') {
                 roomId = 'room_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6);
+                console.log(' تم إنشاء roomId:', roomId);
                 initHostGame();
                 document.getElementById('rolePanel').classList.add('hidden');
                 document.getElementById('hostPanel').classList.remove('hidden');
                 
                 const baseUrl = window.location.href.split('?')[0];
-                document.getElementById('shareLink').value = `${baseUrl}?room=${roomId}`;
+                const shareUrl = `${baseUrl}?room=${roomId}`;
+                document.getElementById('shareLink').value = shareUrl;
+                console.log('🔗 رابط المشاركة:', shareUrl);
                 
                 startHostPolling();
             } else {
                 playerId = 'player_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6);
+                console.log('🎮 playerId:', playerId);
                 document.getElementById('rolePanel').classList.add('hidden');
                 document.getElementById('playerPanel').classList.remove('hidden');
             }
@@ -447,12 +476,17 @@
                 maxNumber: MAX_NUMBER,
                 bingoClaims: []
             };
+            console.log('🎮 تم تهيئة اللعبة:', localGameState);
             await saveGameState();
             updateHostUI();
         }
         
         async function saveGameState() {
-            if (isProcessing) return;
+            if (isProcessing) {
+                console.log('⏳ حفظ جاري، انتظر...');
+                return;
+            }
+            console.log('💾 جاري حفظ الحالة...');
             isProcessing = true;
             try {
                 const data = await readBin();
@@ -462,16 +496,21 @@
                     lastUpdate: Date.now() 
                 };
                 await writeBin(data);
-                console.log('تم حفظ الحالة:', localGameState);
+                console.log('✅ تم حفظ الحالة بنجاح');
+                console.log('📊 الأرقام المسحوبة:', localGameState.drawnNumbers);
+                console.log('🔢 آخر رقم:', localGameState.lastDrawnNumber);
             } catch (error) {
-                console.error('فشل في الحفظ:', error);
+                console.error('❌ فشل في الحفظ:', error);
             } finally {
                 isProcessing = false;
             }
         }
         
         async function drawNumber() {
-            if (!localGameState) return;
+            if (!localGameState) {
+                console.error('❌ localGameState غير معرف');
+                return;
+            }
             if (localGameState.remainingNumbers.length === 0) {
                 showMessage('انتهت الأرقام', 'تم سحب جميع الأرقام', 'error');
                 return;
@@ -481,8 +520,9 @@
             localGameState.drawnNumbers.push(number);
             localGameState.lastDrawnNumber = number;
             
-            console.log('تم سحب الرقم:', number);
-            console.log('الأرقام المسحوبة:', localGameState.drawnNumbers);
+            console.log('🎲 تم سحب الرقم:', number);
+            console.log('📊 إجمالي الأرقام المسحوبة:', localGameState.drawnNumbers);
+            console.log('🔢 آخر رقم:', localGameState.lastDrawnNumber);
             
             await saveGameState();
             updateHostUI();
@@ -490,6 +530,7 @@
         
         async function newGame() {
             if (!confirm('هل تريد بدء جولة جديدة؟')) return;
+            console.log(' بدء جولة جديدة');
             await clearGameData();
             initHostGame();
             document.getElementById('winnerDetails').classList.remove('active');
@@ -500,20 +541,23 @@
         async function clearGameData() {
             try {
                 const data = await readBin();
-                if (data.rooms && data.rooms[roomId]) delete data.rooms[roomId];
+                if (data.rooms && data.rooms[roomId]) {
+                    delete data.rooms[roomId];
+                    console.log('🗑️ تم مسح بيانات الغرفة');
+                }
                 if (data.playerStatus) {
                     Object.keys(data.playerStatus).forEach(key => {
                         if (data.playerStatus[key].roomId === roomId) delete data.playerStatus[key];
                     });
                 }
                 await writeBin(data);
-                console.log('تم مسح بيانات الغرفة');
             } catch (error) {
-                console.error('فشل في المسح:', error);
+                console.error('❌ فشل في المسح:', error);
             }
         }
         
         function startHostPolling() {
+            console.log('⏰ بدء المراقبة كل', POLL_INTERVAL, 'مللي ثانية');
             fetchPendingRequests();
             pollingInterval = setInterval(fetchPendingRequests, POLL_INTERVAL);
         }
@@ -525,10 +569,12 @@
                 
                 if (roomData && roomData.gameState) {
                     const serverState = roomData.gameState;
+                    console.log('📡 بيانات من السيرفر:', serverState);
                     
                     const oldBingoClaims = localGameState && localGameState.bingoClaims ? localGameState.bingoClaims.length : 0;
                     const newBingoClaims = serverState.bingoClaims || [];
                     if (newBingoClaims.length > oldBingoClaims) {
+                        console.log(' تم اكتشاف BINGO جديد');
                         showBingoAlert(newBingoClaims[newBingoClaims.length - 1]);
                     }
                     
@@ -540,9 +586,13 @@
                             });
                         }
                         localGameState.bingoClaims = newBingoClaims;
-                        if (serverState.drawnNumbers) localGameState.drawnNumbers = serverState.drawnNumbers;
+                        if (serverState.drawnNumbers) {
+                            localGameState.drawnNumbers = serverState.drawnNumbers;
+                            console.log('📊 تحديث الأرقام المسحوبة:', localGameState.drawnNumbers);
+                        }
                         if (serverState.lastDrawnNumber !== null && serverState.lastDrawnNumber !== undefined) {
                             localGameState.lastDrawnNumber = serverState.lastDrawnNumber;
+                            console.log('🔢 تحديث آخر رقم:', localGameState.lastDrawnNumber);
                         }
                     }
                     
@@ -550,7 +600,7 @@
                     updateHostUI();
                 }
             } catch (error) {
-                console.error('خطأ في جلب الطلبات:', error);
+                console.error('❌ خطأ في جلب الطلبات:', error);
             }
         }
         
@@ -609,6 +659,7 @@
                 if (!data.playerStatus) data.playerStatus = {};
                 data.playerStatus[reqPlayerId] = { status: 'approved', roomId: roomId, timestamp: Date.now() };
                 await writeBin(data);
+                console.log('✅ تم قبول اللاعب:', reqPlayerId);
             } catch (error) { console.error(error); }
         }
         
@@ -628,6 +679,7 @@
                 if (!data.playerStatus) data.playerStatus = {};
                 data.playerStatus[reqPlayerId] = { status: 'rejected', roomId: roomId, timestamp: Date.now() };
                 await writeBin(data);
+                console.log('❌ تم رفض اللاعب:', reqPlayerId);
             } catch (error) { console.error(error); }
         }
         
@@ -688,36 +740,42 @@
         
         // ===== وظائف اللاعب =====
         function startPlayerPolling() {
+            console.log('⏰ بدء مراقبة البيانات كل', POLL_INTERVAL, 'مللي ثانية');
             fetchGameData();
             pollingInterval = setInterval(fetchGameData, POLL_INTERVAL);
         }
         
         async function fetchGameData() {
             try {
+                console.log('📡 جاري جلب البيانات من roomId:', roomId);
                 const data = await readBin();
                 const roomData = data.rooms && data.rooms[roomId];
                 
                 if (roomData && roomData.gameState) {
                     gameData = roomData.gameState;
-                    console.log('بيانات اللعبة:', gameData);
+                    console.log('✅ تم جلب البيانات بنجاح');
+                    console.log('📊 drawnNumbers:', gameData.drawnNumbers);
+                    console.log('🔢 lastDrawnNumber:', gameData.lastDrawnNumber);
                     updatePlayerUI();
                 } else {
-                    console.log('لم يتم العثور على الغرفة:', roomId);
+                    console.log('⚠️ لم يتم العثور على الغرفة:', roomId);
+                    console.log('البيانات المتاحة:', data.rooms ? Object.keys(data.rooms) : 'لا توجد غرف');
                 }
             } catch (error) {
-                console.error('فشل في جلب البيانات:', error);
+                console.error('❌ فشل في جلب البيانات:', error);
             }
         }
         
         function updatePlayerUI() {
             if (!gameData) {
-                console.log('gameData فارغة');
+                console.log('⚠️ gameData فارغة');
                 return;
             }
             
-            console.log('تحديث واجهة اللاعب');
+            console.log('🎨 تحديث واجهة اللاعب');
             console.log('lastDrawnNumber:', gameData.lastDrawnNumber);
             console.log('drawnNumbers:', gameData.drawnNumbers);
+            console.log('drawnNumbers.length:', gameData.drawnNumbers ? gameData.drawnNumbers.length : 0);
             
             const numEl = document.getElementById('playerCurrentNumber');
             const letterEl = document.getElementById('playerCurrentLetter');
@@ -725,20 +783,20 @@
             if (gameData.lastDrawnNumber !== null && gameData.lastDrawnNumber !== undefined && gameData.lastDrawnNumber !== '') {
                 numEl.textContent = gameData.lastDrawnNumber;
                 letterEl.textContent = getLetterForNumber(gameData.lastDrawnNumber);
-                console.log('تم تحديث الرقم:', gameData.lastDrawnNumber);
+                console.log('✅ تم تحديث الرقم الحالي:', gameData.lastDrawnNumber);
             } else {
                 numEl.textContent = '--';
                 letterEl.textContent = '-';
-                console.log('لا يوجد رقم مسحوب');
+                console.log('⚠️ لا يوجد رقم مسحوب');
             }
             
             const logContainer = document.getElementById('playerNumbersLog');
             if (gameData.drawnNumbers && gameData.drawnNumbers.length > 0) {
                 logContainer.innerHTML = gameData.drawnNumbers.map(n => `<div class="number-badge">${n}</div>`).join('');
-                console.log('تم تحديث السجل:', gameData.drawnNumbers.length, 'أرقام');
+                console.log('✅ تم تحديث السجل:', gameData.drawnNumbers.length, 'أرقام');
             } else {
                 logContainer.innerHTML = '<p>لم يتم سحب أي رقم بعد</p>';
-                console.log('لا توجد أرقام مسحوبة');
+                console.log('⚠️ لا توجد أرقام في السجل');
             }
             
             document.getElementById('requiredCount').textContent = WIN_COUNT;
@@ -786,11 +844,12 @@
                 data.rooms[roomId].gameState.pendingRequests.push(requestData);
                 data.rooms[roomId].lastUpdate = Date.now();
                 await writeBin(data);
+                console.log('✅ تم إرسال طلب الانضمام');
                 
                 document.getElementById('registrationStatus').innerHTML = '<div class="success-box">✅ تم إرسال الطلب. انتظر موافقة المتحكم...</div>';
                 checkPlayerStatus();
             } catch (error) {
-                console.error('Error:', error);
+                console.error('❌ Error:', error);
                 showMessage('خطأ', 'فشل في إرسال الطلب', 'error');
             }
         }
@@ -802,9 +861,11 @@
                     const status = data.playerStatus && data.playerStatus[playerId];
                     if (status && status.status === 'approved') {
                         clearInterval(interval);
+                        console.log('✅ تم قبول اللاعب');
                         showPlayerGamePanel();
                     } else if (status && status.status === 'rejected') {
                         clearInterval(interval);
+                        console.log('❌ تم رفض اللاعب');
                         showMessage('مرفوض', 'تم رفض طلبك', 'error');
                     }
                 } catch (error) { console.error(error); }
@@ -866,6 +927,7 @@
                     playerId: playerId, playerName: currentPlayerName, markedNumbers: [...markedNumbers], timestamp: Date.now()
                 });
                 await writeBin(data);
+                console.log('🏆 تم إرسال طلب BINGO');
                 showMessage('تم الإرسال', 'تم إرسال طلب BINGO', 'success');
             } catch (error) { showMessage('خطأ', 'فشل في الإرسال', 'error'); }
         }
@@ -918,4 +980,4 @@
         }
     </script>
 </body>
-</html>
+    </html>
