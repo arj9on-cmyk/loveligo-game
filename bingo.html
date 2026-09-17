@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>لعبة Bingo v3.2 - LOVELIGO</title>
+    <title>لعبة Bingo v3.3 - LOVELIGO</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, sans-serif; }
@@ -47,6 +47,7 @@
         .info-box { background: #e8f4f8; padding: 15px; border-radius: 10px; margin: 10px 0; border-right: 4px solid #74b9ff; }
         .error-box { background: #ffe6e6; padding: 15px; border-radius: 10px; margin: 10px 0; border-right: 4px solid #d63031; color: #d63031; }
         .success-box { background: #e6fff0; padding: 15px; border-radius: 10px; margin: 10px 0; border-right: 4px solid #00b894; color: #00b894; }
+        .warning-box { background: #fff9e6; padding: 15px; border-radius: 10px; margin: 10px 0; border-right: 4px solid #fdcb6e; color: #b8860b; }
         .loading { text-align: center; padding: 30px; }
         .spinner { border: 5px solid #f3f3f3; border-top: 5px solid #6c5ce7; border-radius: 50%; width: 50px; height: 50px; animation: spin 1s linear infinite; margin: 0 auto 15px; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
@@ -89,13 +90,18 @@
         .winner-numbers-grid span { background: #f39c12; color: white; padding: 10px; text-align: center; border-radius: 10px; font-weight: bold; }
         .winner-numbers-grid span.marked { background: #00b894; }
         .winner-numbers-grid span.unmarked { background: #d63031; opacity: 0.7; }
+        .connection-status { position: fixed; top: 10px; right: 10px; padding: 8px 15px; border-radius: 20px; font-size: 0.9rem; font-weight: bold; z-index: 3000; }
+        .connection-status.online { background: #00b894; color: white; }
+        .connection-status.offline { background: #d63031; color: white; }
         @media (max-width: 480px) { .number-display { font-size: 3.5rem; } }
     </style>
 </head>
 <body>
+    <div id="connectionStatus" class="connection-status offline">🔴 غير متصل</div>
+    
     <div class="container">
         <div class="header">
-            <div class="version-badge">🎮 الإصدار v3.2 - إصلاح خطأ الإرسال</div>
+            <div class="version-badge">🎮 الإصدار v3.3 - إصلاح الاتصال</div>
             <h1>لعبة Bingo</h1>
             <p>LOVELIGO - النسخة المتصلة</p>
         </div>
@@ -134,7 +140,7 @@
         
         <div id="hostPanel" class="hidden">
             <div class="panel">
-                <h2> رابط المشاركة</h2>
+                <h2>📤 رابط المشاركة</h2>
                 <div class="share-box">
                     <p>انسخ هذا الرابط وأرسله للاعبين:</p>
                     <input type="text" id="shareLink" readonly>
@@ -274,18 +280,17 @@
         <div class="modal-content">
             <h2 id="modalTitle"></h2>
             <p id="modalText"></p>
-            <p id="modalErrorDetail" style="font-size: 0.8rem; color: #636e72; margin-top: 10px; word-break: break-all;"></p>
             <button class="btn btn-primary" onclick="closeModal()" style="margin-top: 15px;">إغلاق</button>
         </div>
     </div>
 
     <script>
-        console.log('🎮 Bingo Game v3.2');
+        console.log('🎮 Bingo Game v3.3');
         
         const BIN_ID = '6aa91167ffd5d16053091105';
         const API_KEY = '$2a$10$RITxbUC8tIk02/FZkOGeYenJCF0HLCbx9UTYcJnTX02kpyCjpCXXS';
         const BASE_URL = `https://api.jsonbin.io/v3/b/${BIN_ID}`;
-        const POLL_INTERVAL = 1500;
+        const POLL_INTERVAL = 2000;
         const MAX_NUMBER = 90;
         const WIN_COUNT = 20;
         
@@ -302,14 +307,50 @@
         let localGameState = null;
         let processedRequests = new Set();
         let playerApproved = false;
+        let connectionStatus = 'offline';
         
-        window.onload = function() {
-            console.log('📱 تم تحميل الصفحة - v3.2');
+        // ===== التحقق من الاتصال =====
+        async function checkConnection() {
+            try {
+                const response = await fetch(`${BASE_URL}?t=${Date.now()}`, {
+                    method: 'GET',
+                    headers: { 'X-Master-Key': API_KEY },
+                    cache: 'no-store'
+                });
+                
+                if (response.ok) {
+                    connectionStatus = 'online';
+                    document.getElementById('connectionStatus').className = 'connection-status online';
+                    document.getElementById('connectionStatus').textContent = '🟢 متصل';
+                    console.log('✅ الاتصال بـ JSONBin ناجح');
+                    return true;
+                } else {
+                    throw new Error('HTTP ' + response.status);
+                }
+            } catch (error) {
+                connectionStatus = 'offline';
+                document.getElementById('connectionStatus').className = 'connection-status offline';
+                document.getElementById('connectionStatus').textContent = '🔴 غير متصل';
+                console.error('❌ فشل الاتصال بـ JSONBin:', error.message);
+                return false;
+            }
+        }
+        
+        window.onload = async function() {
+            console.log('📱 تم تحميل الصفحة - v3.3');
+            
+            // ✅ التحقق من الاتصال أولاً
+            const isConnected = await checkConnection();
+            if (!isConnected) {
+                showMessage('خطأ في الاتصال', 'لا يمكن الاتصال بـ JSONBin. تأكد من الإنترنت وحاول مرة أخرى.', 'error');
+                return;
+            }
+            
             const urlParams = new URLSearchParams(window.location.search);
             const room = urlParams.get('room');
             
             if (room) {
-                console.log('🔗 رابط لاعب - roomId:', room);
+                console.log(' رابط لاعب - roomId:', room);
                 roomId = room;
                 
                 playerId = localStorage.getItem('bingo_playerId_' + roomId);
@@ -344,25 +385,37 @@
                     },
                     cache: 'no-store'
                 });
-                if (!response.ok) throw new Error('HTTP ' + response.status);
+                
+                if (!response.ok) {
+                    throw new Error('HTTP ' + response.status);
+                }
+                
                 const data = await response.json();
+                
+                // تحديث حالة الاتصال
+                if (connectionStatus === 'offline') {
+                    connectionStatus = 'online';
+                    document.getElementById('connectionStatus').className = 'connection-status online';
+                    document.getElementById('connectionStatus').textContent = ' متصل';
+                }
+                
                 return data.record;
             } catch (error) {
+                connectionStatus = 'offline';
+                document.getElementById('connectionStatus').className = 'connection-status offline';
+                document.getElementById('connectionStatus').textContent = '🔴 غير متصل';
                 console.error('❌ خطأ في القراءة:', error);
                 throw error;
             }
         }
         
-        // ✅ دالة writeBin محسّنة مع retry
         async function writeBin(data, retryCount = 0) {
             if (isProcessing) {
-                console.log('⏳ انتظار...');
                 await new Promise(r => setTimeout(r, 1000));
             }
             
             isProcessing = true;
             try {
-                console.log('️ جاري الكتابة... (محاولة ' + (retryCount + 1) + ')');
                 const response = await fetch(BASE_URL, {
                     method: 'PUT',
                     headers: { 
@@ -373,23 +426,26 @@
                 });
                 
                 if (!response.ok) {
-                    const errorText = await response.text();
-                    throw new Error('HTTP ' + response.status + ': ' + errorText);
+                    throw new Error('HTTP ' + response.status);
                 }
                 
-                console.log('✅ تم الكتابة بنجاح');
+                if (connectionStatus === 'offline') {
+                    connectionStatus = 'online';
+                    document.getElementById('connectionStatus').className = 'connection-status online';
+                    document.getElementById('connectionStatus').textContent = '🟢 متصل';
+                }
+                
                 return true;
             } catch (error) {
-                console.error('❌ خطأ في الكتابة:', error.message);
-                
-                // ✅ retry تلقائي حتى 3 مرات
                 if (retryCount < 3) {
-                    console.log(' إعادة المحاولة بعد 2 ثانية...');
                     await new Promise(r => setTimeout(r, 2000));
                     isProcessing = false;
                     return writeBin(data, retryCount + 1);
                 }
                 
+                connectionStatus = 'offline';
+                document.getElementById('connectionStatus').className = 'connection-status offline';
+                document.getElementById('connectionStatus').textContent = '🔴 غير متصل';
                 throw error;
             } finally {
                 isProcessing = false;
@@ -438,7 +494,7 @@
                 document.getElementById('rolePanel').classList.remove('hidden');
                 
             } catch (error) {
-                messageDiv.innerHTML = '<div class="error-box">❌ خطأ: ' + error.message + '</div>';
+                messageDiv.innerHTML = '<div class="error-box">❌ خطأ في الاتصال: ' + error.message + '</div>';
             }
         }
         
@@ -705,7 +761,7 @@
             } else {
                 body.innerHTML = localGameState.players.map(player => `
                     <div class="record-player">
-                        <h4> ${player.name}</h4>
+                        <h4>🎮 ${player.name}</h4>
                         <div class="numbers-grid">${player.numbers.map(n => `<span>${n}</span>`).join('')}</div>
                     </div>
                 `).join('');
@@ -761,7 +817,6 @@
             document.getElementById('markedCount').textContent = markedNumbers.size;
         }
         
-        // ✅ دالة submitRegistration محسّنة مع عرض الخطأ بالتفصيل
         async function submitRegistration() {
             const name = document.getElementById('playerName').value.trim();
             const numbersText = document.getElementById('playerNumbers').value.trim();
@@ -787,16 +842,10 @@
             const requestData = { playerId: playerId, name: name, numbers: currentPlayerNumbers, roomId: roomId, timestamp: Date.now() };
             
             try {
-                console.log('📤 جاري إرسال الطلب...');
-                console.log('roomId:', roomId);
-                console.log('playerId:', playerId);
-                
                 const data = await readBin();
-                console.log('📖 تم قراءة البيانات');
                 
                 if (!data.rooms) data.rooms = {};
                 
-                // ✅ إذا الغرفة غير موجودة، أنشئها
                 if (!data.rooms[roomId]) {
                     data.rooms[roomId] = { 
                         gameState: {
@@ -812,7 +861,6 @@
                         }, 
                         lastUpdate: Date.now() 
                     };
-                    console.log('🆕 تم إنشاء الغرفة');
                 }
                 
                 if (!data.rooms[roomId].gameState) {
@@ -830,17 +878,14 @@
                 data.rooms[roomId].gameState.pendingRequests.push(requestData);
                 data.rooms[roomId].lastUpdate = Date.now();
                 
-                console.log('💾 جاري الحفظ...');
                 await writeBin(data);
-                console.log('✅ تم الحفظ بنجاح');
                 
                 document.getElementById('registrationStatus').innerHTML = '<div class="success-box">✅ تم إرسال الطلب. انتظر موافقة المتحكم...</div>';
                 checkPlayerStatus();
                 
             } catch (error) {
-                console.error('❌ خطأ مفصل:', error);
-                // ✅ عرض الخطأ بالتفصيل
-                showMessage('خطأ في الإرسال', 'فشل: ' + error.message, 'error', true);
+                console.error('❌ خطأ:', error);
+                showMessage('خطأ في الإرسال', 'فشل: ' + error.message, 'error');
             }
         }
         
@@ -927,7 +972,7 @@
                 });
                 await writeBin(data);
                 showMessage('تم الإرسال', 'تم إرسال طلب BINGO', 'success');
-            } catch (error) { showMessage('خطأ', 'فشل: ' + error.message, 'error', true); }
+            } catch (error) { showMessage('خطأ', 'فشل: ' + error.message, 'error'); }
         }
         
         function copyLink() {
@@ -960,20 +1005,10 @@
             return '?';
         }
         
-        // ✅ showMessage محسّنة لعرض تفاصيل الخطأ
-        function showMessage(title, text, type, showDetail = false) {
+        function showMessage(title, text, type) {
             document.getElementById('modalTitle').textContent = title;
             document.getElementById('modalText').textContent = text;
             document.getElementById('modalTitle').style.color = type === 'error' ? '#d63031' : '#6c5ce7';
-            
-            const detailEl = document.getElementById('modalErrorDetail');
-            if (showDetail && type === 'error') {
-                detailEl.textContent = text;
-                detailEl.style.display = 'block';
-            } else {
-                detailEl.style.display = 'none';
-            }
-            
             document.getElementById('messageModal').classList.add('active');
         }
         
