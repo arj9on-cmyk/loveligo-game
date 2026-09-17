@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>لعبة Bingo v2.0 - LOVELIGO</title>
+    <title>لعبة Bingo v3.0 - LOVELIGO</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, sans-serif; }
@@ -12,12 +12,13 @@
         .version-badge { 
             background: linear-gradient(135deg, #f39c12, #e74c3c); 
             color: white; 
-            padding: 8px 20px; 
+            padding: 10px 20px; 
             border-radius: 20px; 
             display: inline-block; 
             font-weight: bold;
             margin: 10px 0;
             box-shadow: 0 3px 10px rgba(0,0,0,0.3);
+            font-size: 1.1rem;
         }
         .header { background: white; padding: 20px; border-radius: 20px; text-align: center; margin-bottom: 15px; box-shadow: 0 5px 20px rgba(0,0,0,0.2); }
         .header h1 { color: #6c5ce7; font-size: 2rem; }
@@ -26,7 +27,7 @@
         .input-group { margin-bottom: 15px; }
         .input-group label { display: block; margin-bottom: 8px; font-weight: bold; color: #2d3436; }
         .input-group input, .input-group textarea { width: 100%; padding: 12px; border: 2px solid #dfe6e9; border-radius: 10px; font-size: 1rem; }
-        ..input-group input:focus, .input-group textarea:focus { outline: none; border-color: #6c5ce7; }
+        .input-group input:focus, .input-group textarea:focus { outline: none; border-color: #6c5ce7; }
         .btn { padding: 15px 25px; border: none; border-radius: 25px; font-size: 1rem; font-weight: bold; cursor: pointer; margin: 5px; transition: all 0.3s; width: 100%; display: flex; align-items: center; justify-content: center; gap: 10px; }
         .btn-primary { background: #6c5ce7; color: white; }
         .btn-success { background: #00b894; color: white; }
@@ -104,7 +105,7 @@
 <body>
     <div class="container">
         <div class="header">
-            <div class="version-badge">🎮 الإصدار v2.0 - الإصلاح النهائي</div>
+            <div class="version-badge">🎮 الإصدار v3.0 - إصلاح مشكلة الكاش</div>
             <h1>لعبة Bingo</h1>
             <p>LOVELIGO - النسخة المتصلة</p>
         </div>
@@ -115,7 +116,7 @@
             <div class="info-box">أدخل مفتاح الترخيص للاستمرار</div>
             <div class="input-group">
                 <label>مفتاح الترخيص:</label>
-                <input type="text" id="licenseKey" placeholder="مثال: VIP2026">
+                <input type="text" id="licenseKey" placeholder="مثال: ali1">
             </div>
             <button class="btn btn-primary" onclick="validateLicense()">
                 <i class="fas fa-sign-in-alt"></i> دخول
@@ -134,7 +135,7 @@
         
         <!-- اختيار الدور -->
         <div id="rolePanel" class="panel hidden">
-            <h2>🎯 اختر دورك</h2>
+            <h2> اختر دورك</h2>
             <button class="btn btn-primary" onclick="selectRole('host')" style="margin-bottom: 10px;">
                 <i class="fas fa-gamepad"></i> أنا المتحكم (Host)
             </button>
@@ -163,7 +164,7 @@
             </div>
             
             <div class="panel">
-                <h2>️ التحكم</h2>
+                <h2>🎛️ التحكم</h2>
                 <button class="btn btn-primary" onclick="drawNumber()">
                     <i class="fas fa-random"></i> سحب رقم
                 </button>
@@ -176,7 +177,7 @@
             </div>
             
             <div class="panel">
-                <h2> طلبات الانضمام</h2>
+                <h2>📋 طلبات الانضمام</h2>
                 <div id="pendingRequests">
                     <div class="loading">
                         <div class="spinner"></div>
@@ -209,7 +210,7 @@
         <!-- واجهة اللاعب -->
         <div id="playerPanel" class="hidden">
             <div id="registrationForm" class="panel">
-                <h2> الانضمام للعبة</h2>
+                <h2>📝 الانضمام للعبة</h2>
                 <div class="input-group">
                     <label>الاسم:</label>
                     <input type="text" id="playerName" placeholder="اكتب اسمك">
@@ -268,8 +269,8 @@
             <p>لديك فائز!</p>
             <div class="winner-name" id="bingoWinnerName">-</div>
             <div class="bingo-alert-buttons">
-                <button class="btn-view" onclick="viewWinnerDetails()">️ عرض التفاصيل</button>
-                <button class="btn-skip" onclick="skipBingoAlert()">️ تخطي</button>
+                <button class="btn-view" onclick="viewWinnerDetails()">👁️ عرض التفاصيل</button>
+                <button class="btn-skip" onclick="skipBingoAlert()">⏭️ تخطي</button>
             </div>
         </div>
     </div>
@@ -278,7 +279,7 @@
     <div id="recordsModal" class="records-modal">
         <div class="records-modal-content">
             <div class="records-modal-header">
-                <h3>📁 سجل اللاعبين</h3>
+                <h3> سجل اللاعبين</h3>
                 <button class="close-records" onclick="closeRecordsModal()">✕</button>
             </div>
             <div class="records-modal-body" id="recordsModalBody"></div>
@@ -295,14 +296,14 @@
     </div>
 
     <script>
-        // ===== الإصدار v2.0 =====
-        console.log(' Bingo Game v2.0 - الإصلاح النهائي');
+        // ===== الإصدار v3.0 =====
+        console.log('🎮 Bingo Game v3.0 - إصلاح مشكلة الكاش');
         
         // ===== الإعدادات =====
         const BIN_ID = '6aa91167ffd5d16053091105';
         const API_KEY = '$2a$10$RITxbUC8tIk02/FZkOGeYenJCF0HLCbx9UTYcJnTX02kpyCjpCXXS';
         const BASE_URL = `https://api.jsonbin.io/v3/b/${BIN_ID}`;
-        const POLL_INTERVAL = 2000;
+        const POLL_INTERVAL = 1500; // أسرع - 1.5 ثانية
         const MAX_NUMBER = 90;
         const WIN_COUNT = 20;
         
@@ -319,15 +320,16 @@
         let pendingBingoClaim = null;
         let localGameState = null;
         let processedRequests = new Set();
+        let lastReadTime = 0; // تتبع آخر قراءة
         
         // ===== عند تحميل الصفحة =====
         window.onload = function() {
-            console.log('📱 تم تحميل الصفحة');
+            console.log('📱 تم تحميل الصفحة - v3.0');
             const urlParams = new URLSearchParams(window.location.search);
             const room = urlParams.get('room');
             
             if (room) {
-                console.log('🔗 رابط لاعب - roomId:', room);
+                console.log(' رابط لاعب - roomId:', room);
                 roomId = room;
                 document.getElementById('loginPanel').classList.add('hidden');
                 document.getElementById('rolePanel').classList.add('hidden');
@@ -341,15 +343,23 @@
             }
         };
         
-        // ===== دوال JSONBin =====
+        // ===== دوال JSONBin - مع إصلاح الكاش =====
         async function readBin() {
             try {
-                const response = await fetch(BASE_URL, {
-                    headers: { 'X-Master-Key': API_KEY }
+                //  الحل: إضافة timestamp لمنع الكاش
+                const url = `${BASE_URL}?t=${Date.now()}`;
+                const response = await fetch(url, {
+                    headers: { 
+                        'X-Master-Key': API_KEY,
+                        'Cache-Control': 'no-cache, no-store, must-revalidate',
+                        'Pragma': 'no-cache'
+                    },
+                    cache: 'no-store'
                 });
-                if (!response.ok) throw new Error('فشل في القراءة');
+                if (!response.ok) throw new Error('فشل في القراءة: ' + response.status);
                 const data = await response.json();
-                console.log('📖 تم القراءة من JSONBin');
+                lastReadTime = Date.now();
+                console.log('📖 تم القراءة من JSONBin - الوقت:', new Date().toLocaleTimeString());
                 return data.record;
             } catch (error) {
                 console.error('❌ خطأ في القراءة:', error);
@@ -366,17 +376,20 @@
             try {
                 const response = await fetch(BASE_URL, {
                     method: 'PUT',
-                    headers: { 'Content-Type': 'application/json', 'X-Master-Key': API_KEY },
+                    headers: { 
+                        'Content-Type': 'application/json', 
+                        'X-Master-Key': API_KEY 
+                    },
                     body: JSON.stringify(data)
                 });
-                if (!response.ok) throw new Error('فشل في الكتابة');
-                console.log('✏️ تم الكتابة في JSONBin');
+                if (!response.ok) throw new Error('فشل في الكتابة: ' + response.status);
+                console.log('️ تم الكتابة في JSONBin - الوقت:', new Date().toLocaleTimeString());
                 return true;
             } catch (error) {
                 console.error('❌ خطأ في الكتابة:', error);
                 throw error;
             } finally {
-                setTimeout(() => { isProcessing = false; }, 500);
+                setTimeout(() => { isProcessing = false; }, 800);
             }
         }
         
@@ -410,7 +423,7 @@
                 
                 const deviceId = getDeviceId();
                 if (license.deviceId && license.deviceId !== deviceId) {
-                    messageDiv.innerHTML = '<div class="error-box"> المفتاح مسجل على جهاز آخر</div>';
+                    messageDiv.innerHTML = '<div class="error-box">📱 المفتاح مسجل على جهاز آخر</div>';
                     return;
                 }
                 
@@ -424,7 +437,7 @@
                 document.getElementById('rolePanel').classList.remove('hidden');
                 
             } catch (error) {
-                messageDiv.innerHTML = '<div class="error-box">❌ خطأ في الاتصال</div>';
+                messageDiv.innerHTML = '<div class="error-box">❌ خطأ في الاتصال: ' + error.message + '</div>';
             }
         }
         
@@ -457,7 +470,7 @@
                 startHostPolling();
             } else {
                 playerId = 'player_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6);
-                console.log('🎮 playerId:', playerId);
+                console.log(' playerId:', playerId);
                 document.getElementById('rolePanel').classList.add('hidden');
                 document.getElementById('playerPanel').classList.remove('hidden');
             }
@@ -476,7 +489,7 @@
                 maxNumber: MAX_NUMBER,
                 bingoClaims: []
             };
-            console.log('🎮 تم تهيئة اللعبة:', localGameState);
+            console.log('🎮 تم تهيئة اللعبة');
             await saveGameState();
             updateHostUI();
         }
@@ -487,18 +500,19 @@
                 return;
             }
             console.log('💾 جاري حفظ الحالة...');
+            console.log('📊 الأرقام المسحوبة:', localGameState.drawnNumbers);
+            console.log(' آخر رقم:', localGameState.lastDrawnNumber);
+            
             isProcessing = true;
             try {
                 const data = await readBin();
                 if (!data.rooms) data.rooms = {};
                 data.rooms[roomId] = { 
-                    gameState: localGameState, 
+                    gameState: JSON.parse(JSON.stringify(localGameState)), // نسخة عميقة
                     lastUpdate: Date.now() 
                 };
                 await writeBin(data);
                 console.log('✅ تم حفظ الحالة بنجاح');
-                console.log('📊 الأرقام المسحوبة:', localGameState.drawnNumbers);
-                console.log('🔢 آخر رقم:', localGameState.lastDrawnNumber);
             } catch (error) {
                 console.error('❌ فشل في الحفظ:', error);
             } finally {
@@ -526,6 +540,9 @@
             
             await saveGameState();
             updateHostUI();
+            
+            // عرض تنبيه
+            showMessage('تم السحب', `تم سحب الرقم ${number}`, 'success');
         }
         
         async function newGame() {
@@ -574,7 +591,7 @@
                     const oldBingoClaims = localGameState && localGameState.bingoClaims ? localGameState.bingoClaims.length : 0;
                     const newBingoClaims = serverState.bingoClaims || [];
                     if (newBingoClaims.length > oldBingoClaims) {
-                        console.log(' تم اكتشاف BINGO جديد');
+                        console.log('🏆 تم اكتشاف BINGO جديد');
                         showBingoAlert(newBingoClaims[newBingoClaims.length - 1]);
                     }
                     
@@ -588,11 +605,9 @@
                         localGameState.bingoClaims = newBingoClaims;
                         if (serverState.drawnNumbers) {
                             localGameState.drawnNumbers = serverState.drawnNumbers;
-                            console.log('📊 تحديث الأرقام المسحوبة:', localGameState.drawnNumbers);
                         }
                         if (serverState.lastDrawnNumber !== null && serverState.lastDrawnNumber !== undefined) {
                             localGameState.lastDrawnNumber = serverState.lastDrawnNumber;
-                            console.log('🔢 تحديث آخر رقم:', localGameState.lastDrawnNumber);
                         }
                     }
                     
@@ -623,7 +638,7 @@
             const player = localGameState.players.find(p => p.playerId === winner.playerId);
             if (!player) { showMessage('خطأ', 'لم يتم العثور على اللاعب', 'error'); return; }
             
-            document.getElementById('winnerPlayerName').textContent = '🎮 ' + player.name;
+            document.getElementById('winnerPlayerName').textContent = ' ' + player.name;
             const grid = document.getElementById('winnerNumbersGrid');
             grid.innerHTML = '';
             player.numbers.forEach(num => {
@@ -691,7 +706,7 @@
             }
             container.innerHTML = localGameState.pendingRequests.map(req => `
                 <div class="pending-request">
-                    <h4> ${req.name}</h4>
+                    <h4>👤 ${req.name}</h4>
                     <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:5px;margin:10px 0;font-size:0.8rem;">
                         ${req.numbers.map(n => `<span style="background:white;padding:5px;text-align:center;border-radius:5px;">${n}</span>`).join('')}
                     </div>
@@ -756,10 +771,11 @@
                     console.log('✅ تم جلب البيانات بنجاح');
                     console.log('📊 drawnNumbers:', gameData.drawnNumbers);
                     console.log('🔢 lastDrawnNumber:', gameData.lastDrawnNumber);
+                    console.log('📏 عدد الأرقام:', gameData.drawnNumbers ? gameData.drawnNumbers.length : 0);
                     updatePlayerUI();
                 } else {
                     console.log('⚠️ لم يتم العثور على الغرفة:', roomId);
-                    console.log('البيانات المتاحة:', data.rooms ? Object.keys(data.rooms) : 'لا توجد غرف');
+                    console.log('الغرف المتاحة:', data.rooms ? Object.keys(data.rooms) : 'لا توجد غرف');
                 }
             } catch (error) {
                 console.error('❌ فشل في جلب البيانات:', error);
@@ -980,4 +996,4 @@
         }
     </script>
 </body>
-    </html>
+</html>
