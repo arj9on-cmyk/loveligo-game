@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>لعبة Bingo v5.2 - Firebase - LOVELIGO</title>
+    <title>لعبة Bingo v5.3 - Firebase - LOVELIGO</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, sans-serif; }
@@ -96,17 +96,17 @@
     </style>
 </head>
 <body>
-    <div id="connectionStatus" class="connection-status offline">🔴 غير متصل</div>
+    <div id="connectionStatus" class="connection-status offline"> غير متصل</div>
     
     <div class="container">
         <div class="header">
-            <div class="version-badge">🎮 الإصدار v5.2 - Firebase (بدون حدود)</div>
+            <div class="version-badge">🎮 الإصدار v5.3 - Firebase (بدون حدود)</div>
             <h1>لعبة Bingo</h1>
             <p>LOVELIGO - النسخة المتصلة</p>
         </div>
         
         <div id="loginPanel" class="panel">
-            <h2>🔑 تسجيل الدخول</h2>
+            <h2> تسجيل الدخول</h2>
             <div class="info-box">أدخل مفتاح الترخيص للاستمرار</div>
             <div class="input-group">
                 <label>مفتاح الترخيص:</label>
@@ -128,7 +128,7 @@
         </div>
         
         <div id="rolePanel" class="panel hidden">
-            <h2> اختر دورك</h2>
+            <h2>🎯 اختر دورك</h2>
             <button class="btn btn-primary" onclick="selectRole('host')" style="margin-bottom: 10px;">
                 <i class="fas fa-gamepad"></i> أنا المتحكم (Host)
             </button>
@@ -156,7 +156,7 @@
             </div>
             
             <div class="panel">
-                <h2>️ التحكم</h2>
+                <h2>🎛️ التحكم</h2>
                 <button class="btn btn-primary" onclick="drawNumber()">
                     <i class="fas fa-random"></i> سحب رقم
                 </button>
@@ -232,7 +232,7 @@
                 </div>
                 
                 <div class="panel">
-                    <h2> أرقامك (اضغط للتحديد)</h2>
+                    <h2>🎯 أرقامك (اضغط للتحديد)</h2>
                     <div class="info-box">اضغط على الرقم لوضع علامة إذا تم سحبه</div>
                     <div id="playerGrid" class="player-grid"></div>
                     <p style="text-align: center; margin-top: 10px; color: #636e72;">
@@ -255,11 +255,11 @@
     
     <div id="bingoAlert" class="bingo-alert">
         <div class="bingo-alert-content">
-            <h2> BINGO! 🏆</h2>
+            <h2>🏆 BINGO! 🏆</h2>
             <p>لديك فائز!</p>
             <div class="winner-name" id="bingoWinnerName">-</div>
             <div class="bingo-alert-buttons">
-                <button class="btn-view" onclick="viewWinnerDetails()">👁️ عرض التفاصيل</button>
+                <button class="btn-view" onclick="viewWinnerDetails()">️ عرض التفاصيل</button>
                 <button class="btn-skip" onclick="skipBingoAlert()">⏭️ تخطي</button>
             </div>
         </div>
@@ -303,7 +303,7 @@
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
         
-        console.log('🎮 Bingo Game v5.2 - Firebase');
+        console.log('🎮 Bingo Game v5.3 - Firebase');
         
         // ===== المتغيرات العامة =====
         let currentRole = null;
@@ -345,14 +345,14 @@
         
         // ===== عند تحميل الصفحة =====
         window.onload = function() {
-            console.log('📱 تم تحميل الصفحة - v5.2');
+            console.log(' تم تحميل الصفحة - v5.3');
             checkConnection();
             
             const urlParams = new URLSearchParams(window.location.search);
             const room = urlParams.get('room');
             
             if (room) {
-                console.log(' رابط لاعب - roomId:', room);
+                console.log('🔗 رابط لاعب - roomId:', room);
                 roomId = room;
                 
                 // استخدام playerId ثابت
@@ -397,7 +397,6 @@
             messageDiv.innerHTML = '<div class="loading"><div class="spinner"></div><p>جاري التحقق...</p></div>';
             
             try {
-                // ✅ البحث في المسار الصحيح: Keys/keys/
                 const snapshot = await database.ref('Keys/keys/' + keyInput).once('value');
                 const license = snapshot.val();
                 
@@ -411,13 +410,13 @@
                 
                 const expiryDate = new Date(license.expires);
                 if (new Date() > expiryDate) {
-                    messageDiv.innerHTML = '<div class="error-box"> انتهت الصلاحية</div>';
+                    messageDiv.innerHTML = '<div class="error-box">⏰ انتهت الصلاحية</div>';
                     return;
                 }
                 
                 const deviceId = getDeviceId();
                 if (license.deviceId && license.deviceId !== deviceId) {
-                    messageDiv.innerHTML = '<div class="error-box"> المفتاح مسجل على جهاز آخر</div>';
+                    messageDiv.innerHTML = '<div class="error-box">📱 المفتاح مسجل على جهاز آخر</div>';
                     return;
                 }
                 
@@ -474,13 +473,27 @@
         // ===== وظائف المتحكم =====
         async function initHostGame() {
             if (!roomRef) {
-                console.error('❌ roomRef غير معرّف!');
+                console.error(' roomRef غير معرّف!');
+                showMessage('خطأ', 'لم يتم تهيئة الغرفة', 'error');
                 return;
+            }
+            
+            console.log('🎮 جاري إنشاء اللعبة...');
+            
+            // ✅ إنشاء مصفوفة الأرقام بشكل صحيح
+            const numbers = [];
+            for (let i = 1; i <= 90; i++) {
+                numbers.push(i);
+            }
+            // خلط الأرقام
+            for (let i = numbers.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [numbers[i], numbers[j]] = [numbers[j], numbers[i]];
             }
             
             const gameState = {
                 drawnNumbers: [],
-                remainingNumbers: shuffleArray(Array.from({length: 90}, (_, i) => i + 1)),
+                remainingNumbers: numbers,
                 players: [],
                 pendingRequests: [],
                 lastDrawnNumber: null,
@@ -494,9 +507,11 @@
             try {
                 await roomRef.set(gameState);
                 console.log('🎮 تم إنشاء اللعبة بنجاح');
+                console.log('📊 الأرقام المتبقية:', numbers.length);
                 updateHostUI(gameState);
             } catch (error) {
-                console.error(' فشل في إنشاء اللعبة:', error);
+                console.error('❌ فشل في إنشاء اللعبة:', error);
+                showMessage('خطأ', 'فشل في إنشاء اللعبة: ' + error.message, 'error');
             }
         }
         
@@ -508,11 +523,14 @@
             }
             
             try {
+                console.log(' جاري سحب رقم...');
                 const snapshot = await roomRef.once('value');
                 const state = snapshot.val();
                 
+                console.log(' حالة اللعبة:', state);
+                
                 if (!state) {
-                    showMessage('خطأ', 'الغرفة غير موجودة', 'error');
+                    showMessage('خطأ', 'الغرفة غير موجودة. اضغط "جولة جديدة"', 'error');
                     return;
                 }
                 
@@ -532,7 +550,8 @@
                 });
                 
                 console.log('🎲 تم سحب الرقم:', number);
-                console.log('📊 إجمالي الأرقام:', state.drawnNumbers);
+                console.log('📊 إجمالي الأرقام المسحوبة:', state.drawnNumbers.length);
+                console.log('📊 الأرقام المتبقية:', state.remainingNumbers.length);
                 
             } catch (error) {
                 console.error('❌ فشل في سحب الرقم:', error);
@@ -541,7 +560,7 @@
         }
         
         async function newGame() {
-            if (!confirm('هل تريد بدء جولة جديدة؟')) return;
+            if (!confirm('هل تريد بدء جولة جديدة؟ سيتم مسح كل شيء')) return;
             if (!roomRef) return;
             
             try {
@@ -550,7 +569,7 @@
                 document.getElementById('winnerDetails').classList.remove('active');
                 showMessage('جولة جديدة', 'تم بدء جولة جديدة', 'success');
             } catch (error) {
-                console.error('❌ فشل في بدء جولة جديدة:', error);
+                console.error(' فشل في بدء جولة جديدة:', error);
             }
         }
         
@@ -564,7 +583,7 @@
             
             roomRef.on('value', (snapshot) => {
                 const state = snapshot.val();
-                console.log(' تحديث من Firebase:', state);
+                console.log('🔄 تحديث من Firebase:', state);
                 
                 if (state) {
                     updateHostUI(state);
@@ -616,7 +635,7 @@
                 
                 console.log('✅ تم قبول اللاعب:', reqPlayerId);
             } catch (error) {
-                console.error(' فشل في قبول اللاعب:', error);
+                console.error('❌ فشل في قبول اللاعب:', error);
             }
         }
         
@@ -668,7 +687,7 @@
             
             container.innerHTML = requests.map(req => `
                 <div class="pending-request">
-                    <h4>👤 ${req.name}</h4>
+                    <h4> ${req.name}</h4>
                     <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:5px;margin:10px 0;font-size:0.8rem;">
                         ${req.numbers.map(n => `<span style="background:white;padding:5px;text-align:center;border-radius:5px;">${n}</span>`).join('')}
                     </div>
@@ -951,15 +970,6 @@
             }
         }
         
-        function shuffleArray(arr) {
-            const shuffled = [...arr];
-            for (let i = shuffled.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
-            }
-            return shuffled;
-        }
-        
         function getLetterForNumber(num) {
             if (num >= 1 && num <= 15) return 'B';
             if (num >= 16 && num <= 30) return 'I';
@@ -992,4 +1002,4 @@
         }
     </script>
 </body>
-    </html>
+</html>
