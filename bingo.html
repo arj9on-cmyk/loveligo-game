@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>لعبة Bingo v5.5 - Firebase - LOVELIGO</title>
+    <title>لعبة Bingo v5.6 - Firebase - LOVELIGO</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, sans-serif; }
@@ -100,7 +100,7 @@
     
     <div class="container">
         <div class="header">
-            <div class="version-badge">🎮 الإصدار v5.5 - Firebase (بدون حدود)</div>
+            <div class="version-badge"> الإصدار v5.6 - Firebase (إصلاح الطلبات)</div>
             <h1>لعبة Bingo</h1>
             <p>LOVELIGO - النسخة المتصلة</p>
         </div>
@@ -139,7 +139,7 @@
         
         <div id="hostPanel" class="hidden">
             <div class="panel">
-                <h2>📤 رابط المشاركة</h2>
+                <h2> رابط المشاركة</h2>
                 <div class="share-box">
                     <p>انسخ هذا الرابط وأرسله للاعبين:</p>
                     <input type="text" id="shareLink" readonly>
@@ -201,7 +201,7 @@
         
         <div id="playerPanel" class="hidden">
             <div id="registrationForm" class="panel">
-                <h2>📝 الانضمام للعبة</h2>
+                <h2> الانضمام للعبة</h2>
                 <div class="input-group">
                     <label>الاسم:</label>
                     <input type="text" id="playerName" placeholder="اكتب اسمك">
@@ -224,7 +224,7 @@
                 </div>
                 
                 <div class="panel">
-                    <h2> سجل الأرقام المسحوبة</h2>
+                    <h2>📊 سجل الأرقام المسحوبة</h2>
                     <div class="info-box">راجع الأرقام المسحوبة لتحديد أرقامك</div>
                     <div id="playerNumbersLog" class="numbers-log">
                         <p>لم يتم سحب أي رقم بعد</p>
@@ -268,8 +268,8 @@
     <div id="recordsModal" class="records-modal">
         <div class="records-modal-content">
             <div class="records-modal-header">
-                <h3>📁 سجل اللاعبين</h3>
-                <button class="close-records" onclick="closeRecordsModal()">✕</button>
+                <h3> سجل اللاعبين</h3>
+                <button class="close-records" onclick="closeRecordsModal()"></button>
             </div>
             <div class="records-modal-body" id="recordsModalBody"></div>
         </div>
@@ -303,7 +303,7 @@
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
         
-        console.log('🎮 Bingo Game v5.5 - Firebase');
+        console.log('🎮 Bingo Game v5.6 - Firebase');
         
         // ===== المتغيرات العامة =====
         let currentRole = null;
@@ -345,14 +345,14 @@
         
         // ===== عند تحميل الصفحة =====
         window.onload = function() {
-            console.log('📱 تم تحميل الصفحة - v5.5');
+            console.log('📱 تم تحميل الصفحة - v5.6');
             checkConnection();
             
             const urlParams = new URLSearchParams(window.location.search);
             const room = urlParams.get('room');
             
             if (room) {
-                console.log(' رابط لاعب - roomId:', room);
+                console.log('🔗 رابط لاعب - roomId:', room);
                 roomId = room;
                 
                 // استخدام playerId ثابت
@@ -361,7 +361,7 @@
                     playerId = 'player_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6);
                     localStorage.setItem('bingo_playerId_' + roomId, playerId);
                 }
-                console.log('🎮 playerId:', playerId);
+                console.log(' playerId:', playerId);
                 
                 document.getElementById('loginPanel').classList.add('hidden');
                 document.getElementById('rolePanel').classList.add('hidden');
@@ -401,7 +401,7 @@
                 const license = snapshot.val();
                 
                 console.log('🔑 التحقق من المفتاح:', keyInput);
-                console.log(' نتيجة البحث:', license);
+                console.log('📊 نتيجة البحث:', license);
                 
                 if (!license || !license.active) {
                     messageDiv.innerHTML = '<div class="error-box">❌ مفتاح غير صحيح</div>';
@@ -481,13 +481,12 @@
             console.log('🎮 جاري إنشاء اللعبة...');
             
             try {
-                // ✅ إنشاء هيكل بسيط وموثوق
                 const gameState = {
                     drawnNumbers: [],
                     remainingNumbersCount: 90,
                     nextNumberIndex: 0,
                     players: [],
-                    pendingRequests: [],
+                    pendingRequests: {},
                     lastDrawnNumber: null,
                     roomId: roomId,
                     winNumbersRequired: 20,
@@ -499,23 +498,19 @@
                 
                 console.log('📊 جاري حفظ اللعبة...');
                 
-                // ✅ حفظ البيانات
                 await roomRef.set(gameState);
                 
                 console.log('✅ تم إنشاء اللعبة بنجاح');
                 
-                // ✅ إنشاء قائمة الأرقام المخزنة محلياً
                 const allNumbers = [];
                 for (let i = 1; i <= 90; i++) {
                     allNumbers.push(i);
                 }
-                // خلط الأرقام
                 for (let i = allNumbers.length - 1; i > 0; i--) {
                     const j = Math.floor(Math.random() * (i + 1));
                     [allNumbers[i], allNumbers[j]] = [allNumbers[j], allNumbers[i]];
                 }
                 
-                // حفظ الأرقام في localStorage كاحتياطي
                 localStorage.setItem('bingo_numbers_' + roomId, JSON.stringify(allNumbers));
                 
                 updateHostUI(gameState);
@@ -536,11 +531,10 @@
             try {
                 console.log('🎲 جاري سحب رقم...');
                 
-                // ✅ قراءة البيانات الحالية
                 const snapshot = await roomRef.once('value');
                 const state = snapshot.val();
                 
-                console.log(' حالة اللعبة:', state);
+                console.log('📊 حالة اللعبة:', state);
                 
                 if (!state) {
                     console.error('❌ الغرفة غير موجودة!');
@@ -548,14 +542,12 @@
                     return;
                 }
                 
-                // ✅ التحقق من وجود الأرقام
                 if (!state.remainingNumbersCount || state.remainingNumbersCount <= 0) {
-                    console.log('⚠️ لا توجد أرقام متبقية');
+                    console.log('️ لا توجد أرقام متبقية');
                     showMessage('انتهت الأرقام', 'تم سحب جميع الأرقام', 'error');
                     return;
                 }
                 
-                // ✅ الحصول على الرقم من localStorage
                 const storedNumbers = localStorage.getItem('bingo_numbers_' + roomId);
                 if (!storedNumbers) {
                     console.error('❌ لم يتم العثور على الأرقام في localStorage');
@@ -579,7 +571,6 @@
                 console.log('🎲 تم سحب الرقم:', number);
                 console.log('📊 currentIndex:', currentIndex, 'of', numbers.length);
                 
-                // ✅ تحديث Firebase
                 await roomRef.update({
                     drawnNumbers: newDrawnNumbers,
                     lastDrawnNumber: number,
@@ -606,7 +597,7 @@
                 document.getElementById('winnerDetails').classList.remove('active');
                 showMessage('جولة جديدة', 'تم بدء جولة جديدة', 'success');
             } catch (error) {
-                console.error('❌ فشل في بدء جولة جديدة:', error);
+                console.error(' فشل في بدء جولة جديدة:', error);
             }
         }
         
@@ -624,10 +615,12 @@
                 
                 if (state) {
                     updateHostUI(state);
-                    renderPendingRequests(state.pendingRequests || []);
+                    // ✅ تحويل object إلى array
+                    const pendingRequestsArray = state.pendingRequests ? Object.values(state.pendingRequests) : [];
+                    console.log('📋 الطلبات المعلقة:', pendingRequestsArray);
+                    renderPendingRequests(pendingRequestsArray);
                     updatePlayersCount(state.players ? state.players.length : 0);
                     
-                    // التحقق من BINGO جديد
                     if (state.bingoClaims && state.bingoClaims.length > 0) {
                         const lastClaim = state.bingoClaims[state.bingoClaims.length - 1];
                         showBingoAlert(lastClaim);
@@ -647,11 +640,22 @@
                 
                 if (!state) return;
                 
-                const request = (state.pendingRequests || []).find(r => r.playerId === reqPlayerId);
-                if (!request) return;
+                // ✅ تحويل object إلى array
+                const pendingRequestsArray = state.pendingRequests ? Object.values(state.pendingRequests) : [];
+                const request = pendingRequestsArray.find(r => r.playerId === reqPlayerId);
                 
-                // إزالة من الطلبات المعلقة
-                state.pendingRequests = (state.pendingRequests || []).filter(r => r.playerId !== reqPlayerId);
+                if (!request) {
+                    console.error('❌ لم يتم العثور على اللاعب:', reqPlayerId);
+                    return;
+                }
+                
+                // ✅ إزالة اللاعب من pendingRequests
+                const updatedPendingRequests = {};
+                for (const key in state.pendingRequests) {
+                    if (state.pendingRequests[key].playerId !== reqPlayerId) {
+                        updatedPendingRequests[key] = state.pendingRequests[key];
+                    }
+                }
                 
                 // إضافة إلى اللاعبين
                 state.players = state.players || [];
@@ -666,7 +670,7 @@
                 });
                 
                 await roomRef.update({
-                    pendingRequests: state.pendingRequests,
+                    pendingRequests: updatedPendingRequests,
                     players: state.players
                 });
                 
@@ -685,7 +689,13 @@
                 
                 if (!state) return;
                 
-                state.pendingRequests = (state.pendingRequests || []).filter(r => r.playerId !== reqPlayerId);
+                // ✅ إزالة اللاعب من pendingRequests
+                const updatedPendingRequests = {};
+                for (const key in state.pendingRequests) {
+                    if (state.pendingRequests[key].playerId !== reqPlayerId) {
+                        updatedPendingRequests[key] = state.pendingRequests[key];
+                    }
+                }
                 
                 await database.ref('playerStatus/' + reqPlayerId).set({
                     status: 'rejected',
@@ -693,8 +703,8 @@
                     timestamp: Date.now()
                 });
                 
-                await roomRef.update({ pendingRequests: state.pendingRequests });
-                console.log('❌ تم رفض اللاعب:', reqPlayerId);
+                await roomRef.update({ pendingRequests: updatedPendingRequests });
+                console.log(' تم رفض اللاعب:', reqPlayerId);
             } catch (error) {
                 console.error('❌ فشل في رفض اللاعب:', error);
             }
@@ -716,6 +726,8 @@
         
         function renderPendingRequests(requests) {
             const container = document.getElementById('pendingRequests');
+            
+            console.log(' عرض الطلبات:', requests);
             
             if (!requests || requests.length === 0) {
                 container.innerHTML = '<div class="info-box">لا توجد طلبات حالياً</div>';
@@ -797,15 +809,12 @@
             
             roomRef.on('value', (snapshot) => {
                 const state = snapshot.val();
-                console.log('📡 تحديث من Firebase:', state);
+                console.log(' تحديث من Firebase:', state);
                 
                 if (state) {
                     gameData = state;
                     
-                    // التحقق من الموافقة
                     checkPlayerApproval(state);
-                    
-                    // تحديث الواجهة
                     updatePlayerUI(state);
                 }
             }, (error) => {
@@ -816,7 +825,6 @@
         function checkPlayerApproval(state) {
             if (playerApproved) return;
             
-            // التحقق من playerStatus
             database.ref('playerStatus/' + playerId).once('value').then(snapshot => {
                 const status = snapshot.val();
                 
@@ -830,7 +838,6 @@
                 }
             });
             
-            // التحقق من قائمة اللاعبين
             if (state.players) {
                 const found = state.players.find(p => p.playerId === playerId || p.name === currentPlayerName);
                 if (found) {
@@ -914,7 +921,6 @@
                 
                 document.getElementById('registrationStatus').innerHTML = '<div class="success-box">✅ تم إرسال الطلب. انتظر موافقة المتحكم...</div>';
                 
-                // البدء في التحقق من الموافقة
                 checkPlayerApprovalFromRegistration();
                 
             } catch (error) {
