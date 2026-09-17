@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>لعبة Bingo v5.1 - Firebase - LOVELIGO</title>
+    <title>لعبة Bingo v5.2 - Firebase - LOVELIGO</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, sans-serif; }
@@ -96,11 +96,11 @@
     </style>
 </head>
 <body>
-    <div id="connectionStatus" class="connection-status offline"> غير متصل</div>
+    <div id="connectionStatus" class="connection-status offline">🔴 غير متصل</div>
     
     <div class="container">
         <div class="header">
-            <div class="version-badge">🎮 الإصدار v5.1 - Firebase (بدون حدود)</div>
+            <div class="version-badge">🎮 الإصدار v5.2 - Firebase (بدون حدود)</div>
             <h1>لعبة Bingo</h1>
             <p>LOVELIGO - النسخة المتصلة</p>
         </div>
@@ -128,7 +128,7 @@
         </div>
         
         <div id="rolePanel" class="panel hidden">
-            <h2>🎯 اختر دورك</h2>
+            <h2> اختر دورك</h2>
             <button class="btn btn-primary" onclick="selectRole('host')" style="margin-bottom: 10px;">
                 <i class="fas fa-gamepad"></i> أنا المتحكم (Host)
             </button>
@@ -156,7 +156,7 @@
             </div>
             
             <div class="panel">
-                <h2>🎛️ التحكم</h2>
+                <h2>️ التحكم</h2>
                 <button class="btn btn-primary" onclick="drawNumber()">
                     <i class="fas fa-random"></i> سحب رقم
                 </button>
@@ -169,7 +169,7 @@
             </div>
             
             <div class="panel">
-                <h2> طلبات الانضمام</h2>
+                <h2>📋 طلبات الانضمام</h2>
                 <div id="pendingRequests">
                     <div class="loading">
                         <div class="spinner"></div>
@@ -255,7 +255,7 @@
     
     <div id="bingoAlert" class="bingo-alert">
         <div class="bingo-alert-content">
-            <h2>🏆 BINGO! 🏆</h2>
+            <h2> BINGO! 🏆</h2>
             <p>لديك فائز!</p>
             <div class="winner-name" id="bingoWinnerName">-</div>
             <div class="bingo-alert-buttons">
@@ -268,8 +268,8 @@
     <div id="recordsModal" class="records-modal">
         <div class="records-modal-content">
             <div class="records-modal-header">
-                <h3> سجل اللاعبين</h3>
-                <button class="close-records" onclick="closeRecordsModal()"></button>
+                <h3>📁 سجل اللاعبين</h3>
+                <button class="close-records" onclick="closeRecordsModal()">✕</button>
             </div>
             <div class="records-modal-body" id="recordsModalBody"></div>
         </div>
@@ -303,9 +303,9 @@
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
         
-        console.log('🎮 Bingo Game v5.1 - Firebase');
+        console.log('🎮 Bingo Game v5.2 - Firebase');
         
-        // ===== المتغيرات =====
+        // ===== المتغيرات العامة =====
         let currentRole = null;
         let roomId = null;
         let playerId = null;
@@ -326,7 +326,7 @@
                     console.log('✅ متصل بـ Firebase');
                 } else {
                     setConnectionStatus('offline');
-                    console.log(' غير متصل بـ Firebase');
+                    console.log('❌ غير متصل بـ Firebase');
                 }
             });
         }
@@ -336,23 +336,23 @@
             const el = document.getElementById('connectionStatus');
             if (status === 'online') {
                 el.className = 'connection-status online';
-                el.textContent = ' متصل';
+                el.textContent = '🟢 متصل';
             } else {
                 el.className = 'connection-status offline';
-                el.textContent = '🔴 غير متصل';
+                el.textContent = ' غير متصل';
             }
         }
         
         // ===== عند تحميل الصفحة =====
         window.onload = function() {
-            console.log(' تم تحميل الصفحة - v5.1');
+            console.log('📱 تم تحميل الصفحة - v5.2');
             checkConnection();
             
             const urlParams = new URLSearchParams(window.location.search);
             const room = urlParams.get('room');
             
             if (room) {
-                console.log('🔗 رابط لاعب - roomId:', room);
+                console.log(' رابط لاعب - roomId:', room);
                 roomId = room;
                 
                 // استخدام playerId ثابت
@@ -367,6 +367,9 @@
                 document.getElementById('rolePanel').classList.add('hidden');
                 document.getElementById('playerPanel').classList.remove('hidden');
                 
+                // ✅ إنشاء roomRef للاعب
+                roomRef = database.ref('rooms/' + roomId);
+                
                 // التحقق من الموافقة المحفوظة
                 const approvedStatus = localStorage.getItem('bingo_approved_' + playerId);
                 if (approvedStatus === 'true') {
@@ -374,14 +377,14 @@
                     console.log('✅ اللاعب مقبول مسبقاً');
                     showPlayerGamePanel();
                 } else {
-                    startPlayerPolling();
+                    startPlayerListener();
                 }
             } else {
                 document.getElementById('loginPanel').classList.remove('hidden');
             }
         };
         
-        // ===== نظام المفاتيح - ✅ تم التعديل ليتوافق مع الهيكل Keys/keys =====
+        // ===== نظام المفاتيح =====
         async function validateLicense() {
             const keyInput = document.getElementById('licenseKey').value.trim();
             const messageDiv = document.getElementById('loginMessage');
@@ -408,13 +411,13 @@
                 
                 const expiryDate = new Date(license.expires);
                 if (new Date() > expiryDate) {
-                    messageDiv.innerHTML = '<div class="error-box">⏰ انتهت الصلاحية</div>';
+                    messageDiv.innerHTML = '<div class="error-box"> انتهت الصلاحية</div>';
                     return;
                 }
                 
                 const deviceId = getDeviceId();
                 if (license.deviceId && license.deviceId !== deviceId) {
-                    messageDiv.innerHTML = '<div class="error-box">📱 المفتاح مسجل على جهاز آخر</div>';
+                    messageDiv.innerHTML = '<div class="error-box"> المفتاح مسجل على جهاز آخر</div>';
                     return;
                 }
                 
@@ -447,6 +450,11 @@
             
             if (role === 'host') {
                 roomId = 'room_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6);
+                console.log('🎮 تم إنشاء roomId:', roomId);
+                
+                // ✅ إنشاء roomRef للمتحكم
+                roomRef = database.ref('rooms/' + roomId);
+                
                 initHostGame();
                 document.getElementById('rolePanel').classList.add('hidden');
                 document.getElementById('hostPanel').classList.remove('hidden');
@@ -457,6 +465,7 @@
                 startHostListener();
             } else {
                 playerId = 'player_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6);
+                console.log('🎮 playerId:', playerId);
                 document.getElementById('rolePanel').classList.add('hidden');
                 document.getElementById('playerPanel').classList.remove('hidden');
             }
@@ -464,7 +473,10 @@
         
         // ===== وظائف المتحكم =====
         async function initHostGame() {
-            roomRef = database.ref('rooms/' + roomId);
+            if (!roomRef) {
+                console.error('❌ roomRef غير معرّف!');
+                return;
+            }
             
             const gameState = {
                 drawnNumbers: [],
@@ -479,51 +491,81 @@
                 createdAt: Date.now()
             };
             
-            await roomRef.set(gameState);
-            console.log('🎮 تم إنشاء اللعبة');
-            updateHostUI(gameState);
+            try {
+                await roomRef.set(gameState);
+                console.log('🎮 تم إنشاء اللعبة بنجاح');
+                updateHostUI(gameState);
+            } catch (error) {
+                console.error(' فشل في إنشاء اللعبة:', error);
+            }
         }
         
         async function drawNumber() {
-            if (!roomRef) return;
-            
-            const snapshot = await roomRef.once('value');
-            const state = snapshot.val();
-            
-            if (!state || state.remainingNumbers.length === 0) {
-                showMessage('انتهت الأرقام', 'تم سحب جميع الأرقام', 'error');
+            if (!roomRef) {
+                console.error('❌ roomRef غير معرّف!');
+                showMessage('خطأ', 'لم يتم تهيئة اللعبة', 'error');
                 return;
             }
             
-            const number = state.remainingNumbers.pop();
-            state.drawnNumbers.push(number);
-            state.lastDrawnNumber = number;
-            
-            await roomRef.update({
-                drawnNumbers: state.drawnNumbers,
-                lastDrawnNumber: state.lastDrawnNumber,
-                remainingNumbers: state.remainingNumbers
-            });
-            
-            console.log('🎲 تم سحب الرقم:', number);
-            updateHostUI(state);
+            try {
+                const snapshot = await roomRef.once('value');
+                const state = snapshot.val();
+                
+                if (!state) {
+                    showMessage('خطأ', 'الغرفة غير موجودة', 'error');
+                    return;
+                }
+                
+                if (!state.remainingNumbers || state.remainingNumbers.length === 0) {
+                    showMessage('انتهت الأرقام', 'تم سحب جميع الأرقام', 'error');
+                    return;
+                }
+                
+                const number = state.remainingNumbers.pop();
+                state.drawnNumbers.push(number);
+                state.lastDrawnNumber = number;
+                
+                await roomRef.update({
+                    drawnNumbers: state.drawnNumbers,
+                    lastDrawnNumber: state.lastDrawnNumber,
+                    remainingNumbers: state.remainingNumbers
+                });
+                
+                console.log('🎲 تم سحب الرقم:', number);
+                console.log('📊 إجمالي الأرقام:', state.drawnNumbers);
+                
+            } catch (error) {
+                console.error('❌ فشل في سحب الرقم:', error);
+                showMessage('خطأ', 'فشل في سحب الرقم: ' + error.message, 'error');
+            }
         }
         
         async function newGame() {
             if (!confirm('هل تريد بدء جولة جديدة؟')) return;
             if (!roomRef) return;
             
-            await roomRef.remove();
-            initHostGame();
-            document.getElementById('winnerDetails').classList.remove('active');
-            showMessage('جولة جديدة', 'تم بدء جولة جديدة', 'success');
+            try {
+                await roomRef.remove();
+                await initHostGame();
+                document.getElementById('winnerDetails').classList.remove('active');
+                showMessage('جولة جديدة', 'تم بدء جولة جديدة', 'success');
+            } catch (error) {
+                console.error('❌ فشل في بدء جولة جديدة:', error);
+            }
         }
         
         function startHostListener() {
-            if (!roomRef) return;
+            if (!roomRef) {
+                console.error('❌ roomRef غير معرّف في startHostListener');
+                return;
+            }
+            
+            console.log('⏰ بدء الاستماع للتغييرات كمتحكم');
             
             roomRef.on('value', (snapshot) => {
                 const state = snapshot.val();
+                console.log(' تحديث من Firebase:', state);
+                
                 if (state) {
                     updateHostUI(state);
                     renderPendingRequests(state.pendingRequests || []);
@@ -535,61 +577,71 @@
                         showBingoAlert(lastClaim);
                     }
                 }
+            }, (error) => {
+                console.error('❌ خطأ في الاستماع:', error);
             });
         }
         
         async function approvePlayer(reqPlayerId) {
             if (!roomRef) return;
             
-            const snapshot = await roomRef.once('value');
-            const state = snapshot.val();
-            
-            if (!state) return;
-            
-            const request = (state.pendingRequests || []).find(r => r.playerId === reqPlayerId);
-            if (!request) return;
-            
-            // إزالة من الطلبات المعلقة
-            state.pendingRequests = (state.pendingRequests || []).filter(r => r.playerId !== reqPlayerId);
-            
-            // إضافة إلى اللاعبين
-            state.players = state.players || [];
-            state.players.push({...request, approvedAt: Date.now()});
-            
-            // حفظ الموافقة في playerStatus
-            await database.ref('playerStatus/' + reqPlayerId).set({
-                status: 'approved',
-                roomId: roomId,
-                playerName: request.name,
-                timestamp: Date.now()
-            });
-            
-            await roomRef.update({
-                pendingRequests: state.pendingRequests,
-                players: state.players
-            });
-            
-            console.log('✅ تم قبول اللاعب:', reqPlayerId);
+            try {
+                const snapshot = await roomRef.once('value');
+                const state = snapshot.val();
+                
+                if (!state) return;
+                
+                const request = (state.pendingRequests || []).find(r => r.playerId === reqPlayerId);
+                if (!request) return;
+                
+                // إزالة من الطلبات المعلقة
+                state.pendingRequests = (state.pendingRequests || []).filter(r => r.playerId !== reqPlayerId);
+                
+                // إضافة إلى اللاعبين
+                state.players = state.players || [];
+                state.players.push({...request, approvedAt: Date.now()});
+                
+                // حفظ الموافقة في playerStatus
+                await database.ref('playerStatus/' + reqPlayerId).set({
+                    status: 'approved',
+                    roomId: roomId,
+                    playerName: request.name,
+                    timestamp: Date.now()
+                });
+                
+                await roomRef.update({
+                    pendingRequests: state.pendingRequests,
+                    players: state.players
+                });
+                
+                console.log('✅ تم قبول اللاعب:', reqPlayerId);
+            } catch (error) {
+                console.error(' فشل في قبول اللاعب:', error);
+            }
         }
         
         async function rejectPlayer(reqPlayerId) {
             if (!roomRef) return;
             
-            const snapshot = await roomRef.once('value');
-            const state = snapshot.val();
-            
-            if (!state) return;
-            
-            state.pendingRequests = (state.pendingRequests || []).filter(r => r.playerId !== reqPlayerId);
-            
-            await database.ref('playerStatus/' + reqPlayerId).set({
-                status: 'rejected',
-                roomId: roomId,
-                timestamp: Date.now()
-            });
-            
-            await roomRef.update({ pendingRequests: state.pendingRequests });
-            console.log('❌ تم رفض اللاعب:', reqPlayerId);
+            try {
+                const snapshot = await roomRef.once('value');
+                const state = snapshot.val();
+                
+                if (!state) return;
+                
+                state.pendingRequests = (state.pendingRequests || []).filter(r => r.playerId !== reqPlayerId);
+                
+                await database.ref('playerStatus/' + reqPlayerId).set({
+                    status: 'rejected',
+                    roomId: roomId,
+                    timestamp: Date.now()
+                });
+                
+                await roomRef.update({ pendingRequests: state.pendingRequests });
+                console.log('❌ تم رفض اللاعب:', reqPlayerId);
+            } catch (error) {
+                console.error('❌ فشل في رفض اللاعب:', error);
+            }
         }
         
         function updateHostUI(state) {
@@ -616,7 +668,7 @@
             
             container.innerHTML = requests.map(req => `
                 <div class="pending-request">
-                    <h4> ${req.name}</h4>
+                    <h4>👤 ${req.name}</h4>
                     <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:5px;margin:10px 0;font-size:0.8rem;">
                         ${req.numbers.map(n => `<span style="background:white;padding:5px;text-align:center;border-radius:5px;">${n}</span>`).join('')}
                     </div>
@@ -662,7 +714,7 @@
         }
         
         function showBingoAlert(claim) {
-            document.getElementById('bingoWinnerName').textContent = ' ' + claim.playerName;
+            document.getElementById('bingoWinnerName').textContent = '🎮 ' + claim.playerName;
             document.getElementById('bingoAlert').classList.add('active');
         }
         
@@ -679,37 +731,50 @@
         }
         
         // ===== وظائف اللاعب =====
-        function startPlayerPolling() {
-            if (!roomId) return;
+        function startPlayerListener() {
+            if (!roomRef || !roomId) {
+                console.error('❌ roomRef أو roomId غير معرّف');
+                return;
+            }
             
-            roomRef = database.ref('rooms/' + roomId);
+            console.log('⏰ بدء الاستماع للتغييرات كلاعب');
             
             roomRef.on('value', (snapshot) => {
                 const state = snapshot.val();
+                console.log('📡 تحديث من Firebase:', state);
                 
                 if (state) {
                     gameData = state;
+                    
+                    // التحقق من الموافقة
                     checkPlayerApproval(state);
+                    
+                    // تحديث الواجهة
                     updatePlayerUI(state);
                 }
+            }, (error) => {
+                console.error('❌ خطأ في الاستماع:', error);
             });
         }
         
         function checkPlayerApproval(state) {
             if (playerApproved) return;
             
+            // التحقق من playerStatus
             database.ref('playerStatus/' + playerId).once('value').then(snapshot => {
                 const status = snapshot.val();
                 
                 if (status && status.status === 'approved') {
                     playerApproved = true;
                     localStorage.setItem('bingo_approved_' + playerId, 'true');
+                    console.log('✅ تم قبول اللاعب من playerStatus');
                     showPlayerGamePanel();
                 } else if (status && status.status === 'rejected') {
                     showMessage('مرفوض', 'تم رفض طلبك', 'error');
                 }
             });
             
+            // التحقق من قائمة اللاعبين
             if (state.players) {
                 const found = state.players.find(p => p.playerId === playerId || p.name === currentPlayerName);
                 if (found) {
@@ -717,6 +782,7 @@
                     localStorage.setItem('bingo_approved_' + playerId, 'true');
                     currentPlayerName = found.name;
                     currentPlayerNumbers = found.numbers;
+                    console.log('✅ تم قبول اللاعب من قائمة اللاعبين');
                     showPlayerGamePanel();
                 }
             }
@@ -786,14 +852,17 @@
                     roomRef = database.ref('rooms/' + roomId);
                 }
                 
+                console.log('📤 جاري إرسال الطلب...', requestData);
                 await roomRef.child('pendingRequests').push(requestData);
+                console.log('✅ تم إرسال الطلب بنجاح');
                 
                 document.getElementById('registrationStatus').innerHTML = '<div class="success-box">✅ تم إرسال الطلب. انتظر موافقة المتحكم...</div>';
                 
+                // البدء في التحقق من الموافقة
                 checkPlayerApprovalFromRegistration();
                 
             } catch (error) {
-                console.error('❌ خطأ:', error);
+                console.error('❌ خطأ في إرسال الطلب:', error);
                 showMessage('خطأ في الإرسال', 'فشل: ' + error.message, 'error');
             }
         }
@@ -923,4 +992,4 @@
         }
     </script>
 </body>
-</html>
+    </html>
