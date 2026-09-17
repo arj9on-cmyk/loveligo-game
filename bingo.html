@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>لعبة Bingo v5.3 - Firebase - LOVELIGO</title>
+    <title>لعبة Bingo v5.4 - Firebase - LOVELIGO</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, sans-serif; }
@@ -96,17 +96,17 @@
     </style>
 </head>
 <body>
-    <div id="connectionStatus" class="connection-status offline"> غير متصل</div>
+    <div id="connectionStatus" class="connection-status offline">🔴 غير متصل</div>
     
     <div class="container">
         <div class="header">
-            <div class="version-badge">🎮 الإصدار v5.3 - Firebase (بدون حدود)</div>
+            <div class="version-badge">🎮 الإصدار v5.4 - Firebase (بدون حدود)</div>
             <h1>لعبة Bingo</h1>
             <p>LOVELIGO - النسخة المتصلة</p>
         </div>
         
         <div id="loginPanel" class="panel">
-            <h2> تسجيل الدخول</h2>
+            <h2>🔑 تسجيل الدخول</h2>
             <div class="info-box">أدخل مفتاح الترخيص للاستمرار</div>
             <div class="input-group">
                 <label>مفتاح الترخيص:</label>
@@ -269,7 +269,7 @@
         <div class="records-modal-content">
             <div class="records-modal-header">
                 <h3>📁 سجل اللاعبين</h3>
-                <button class="close-records" onclick="closeRecordsModal()">✕</button>
+                <button class="close-records" onclick="closeRecordsModal()"></button>
             </div>
             <div class="records-modal-body" id="recordsModalBody"></div>
         </div>
@@ -303,7 +303,7 @@
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
         
-        console.log('🎮 Bingo Game v5.3 - Firebase');
+        console.log('🎮 Bingo Game v5.4 - Firebase');
         
         // ===== المتغيرات العامة =====
         let currentRole = null;
@@ -316,6 +316,7 @@
         let roomRef = null;
         let playerApproved = false;
         let connectionStatus = 'offline';
+        let gameInitialized = false;
         
         // ===== التحقق من الاتصال =====
         function checkConnection() {
@@ -345,7 +346,7 @@
         
         // ===== عند تحميل الصفحة =====
         window.onload = function() {
-            console.log(' تم تحميل الصفحة - v5.3');
+            console.log(' تم تحميل الصفحة - v5.4');
             checkConnection();
             
             const urlParams = new URLSearchParams(window.location.search);
@@ -400,7 +401,7 @@
                 const snapshot = await database.ref('Keys/keys/' + keyInput).once('value');
                 const license = snapshot.val();
                 
-                console.log('🔑 التحقق من المفتاح:', keyInput);
+                console.log(' التحقق من المفتاح:', keyInput);
                 console.log('📊 نتيجة البحث:', license);
                 
                 if (!license || !license.active) {
@@ -410,7 +411,7 @@
                 
                 const expiryDate = new Date(license.expires);
                 if (new Date() > expiryDate) {
-                    messageDiv.innerHTML = '<div class="error-box">⏰ انتهت الصلاحية</div>';
+                    messageDiv.innerHTML = '<div class="error-box"> انتهت الصلاحية</div>';
                     return;
                 }
                 
@@ -473,42 +474,56 @@
         // ===== وظائف المتحكم =====
         async function initHostGame() {
             if (!roomRef) {
-                console.error(' roomRef غير معرّف!');
+                console.error('❌ roomRef غير معرّف!');
                 showMessage('خطأ', 'لم يتم تهيئة الغرفة', 'error');
                 return;
             }
             
             console.log('🎮 جاري إنشاء اللعبة...');
             
-            // ✅ إنشاء مصفوفة الأرقام بشكل صحيح
-            const numbers = [];
-            for (let i = 1; i <= 90; i++) {
-                numbers.push(i);
-            }
-            // خلط الأرقام
-            for (let i = numbers.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [numbers[i], numbers[j]] = [numbers[j], numbers[i]];
-            }
-            
-            const gameState = {
-                drawnNumbers: [],
-                remainingNumbers: numbers,
-                players: [],
-                pendingRequests: [],
-                lastDrawnNumber: null,
-                roomId: roomId,
-                winNumbersRequired: 20,
-                maxNumber: 90,
-                bingoClaims: [],
-                createdAt: Date.now()
-            };
-            
             try {
+                // ✅ إنشاء مصفوفة الأرقام بشكل صحيح
+                const numbers = [];
+                for (let i = 1; i <= 90; i++) {
+                    numbers.push(i);
+                }
+                // خلط الأرقام
+                for (let i = numbers.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [numbers[i], numbers[j]] = [numbers[j], numbers[i]];
+                }
+                
+                const gameState = {
+                    drawnNumbers: [],
+                    remainingNumbers: numbers,
+                    players: [],
+                    pendingRequests: [],
+                    lastDrawnNumber: null,
+                    roomId: roomId,
+                    winNumbersRequired: 20,
+                    maxNumber: 90,
+                    bingoClaims: [],
+                    createdAt: Date.now()
+                };
+                
+                console.log('📊 جاري حفظ اللعبة مع', numbers.length, 'رقم');
+                
+                // ✅ حفظ البيانات والتأكد من نجاح الحفظ
                 await roomRef.set(gameState);
-                console.log('🎮 تم إنشاء اللعبة بنجاح');
-                console.log('📊 الأرقام المتبقية:', numbers.length);
-                updateHostUI(gameState);
+                
+                // ✅ التحقق من أن البيانات حُفظت
+                const verifySnapshot = await roomRef.once('value');
+                const verifiedData = verifySnapshot.val();
+                
+                if (verifiedData && verifiedData.remainingNumbers && verifiedData.remainingNumbers.length === 90) {
+                    console.log('✅ تم إنشاء اللعبة بنجاح! الأرقام:', verifiedData.remainingNumbers.length);
+                    gameInitialized = true;
+                    updateHostUI(verifiedData);
+                } else {
+                    console.error('❌ فشل في التحقق من البيانات:', verifiedData);
+                    showMessage('خطأ', 'فشل في حفظ البيانات. حاول مرة أخرى', 'error');
+                }
+                
             } catch (error) {
                 console.error('❌ فشل في إنشاء اللعبة:', error);
                 showMessage('خطأ', 'فشل في إنشاء اللعبة: ' + error.message, 'error');
@@ -523,35 +538,36 @@
             }
             
             try {
-                console.log(' جاري سحب رقم...');
-                const snapshot = await roomRef.once('value');
-                const state = snapshot.val();
+                console.log('🎲 جاري سحب رقم...');
                 
-                console.log(' حالة اللعبة:', state);
-                
-                if (!state) {
-                    showMessage('خطأ', 'الغرفة غير موجودة. اضغط "جولة جديدة"', 'error');
-                    return;
-                }
-                
-                if (!state.remainingNumbers || state.remainingNumbers.length === 0) {
-                    showMessage('انتهت الأرقام', 'تم سحب جميع الأرقام', 'error');
-                    return;
-                }
-                
-                const number = state.remainingNumbers.pop();
-                state.drawnNumbers.push(number);
-                state.lastDrawnNumber = number;
-                
-                await roomRef.update({
-                    drawnNumbers: state.drawnNumbers,
-                    lastDrawnNumber: state.lastDrawnNumber,
-                    remainingNumbers: state.remainingNumbers
+                // ✅ استخدام Transaction لتجنب المشاكل
+                const result = await roomRef.transaction(currentState => {
+                    if (!currentState) {
+                        console.error('❌ الغرفة غير موجودة!');
+                        return currentState;
+                    }
+                    
+                    if (!currentState.remainingNumbers || currentState.remainingNumbers.length === 0) {
+                        console.log('️ لا توجد أرقام متبقية');
+                        return currentState;
+                    }
+                    
+                    const number = currentState.remainingNumbers.pop();
+                    currentState.drawnNumbers.push(number);
+                    currentState.lastDrawnNumber = number;
+                    
+                    console.log('🎲 تم سحب الرقم:', number);
+                    console.log(' المتبقي:', currentState.remainingNumbers.length);
+                    
+                    return currentState;
                 });
                 
-                console.log('🎲 تم سحب الرقم:', number);
-                console.log('📊 إجمالي الأرقام المسحوبة:', state.drawnNumbers.length);
-                console.log('📊 الأرقام المتبقية:', state.remainingNumbers.length);
+                if (result.committed) {
+                    console.log('✅ تم سحب الرقم بنجاح');
+                } else {
+                    console.error('❌ فشل في حفظ الرقم');
+                    showMessage('خطأ', 'فشل في سحب الرقم', 'error');
+                }
                 
             } catch (error) {
                 console.error('❌ فشل في سحب الرقم:', error);
@@ -565,11 +581,12 @@
             
             try {
                 await roomRef.remove();
+                gameInitialized = false;
                 await initHostGame();
                 document.getElementById('winnerDetails').classList.remove('active');
                 showMessage('جولة جديدة', 'تم بدء جولة جديدة', 'success');
             } catch (error) {
-                console.error(' فشل في بدء جولة جديدة:', error);
+                console.error('❌ فشل في بدء جولة جديدة:', error);
             }
         }
         
@@ -586,6 +603,10 @@
                 console.log('🔄 تحديث من Firebase:', state);
                 
                 if (state) {
+                    if (!gameInitialized && state.remainingNumbers) {
+                        gameInitialized = true;
+                        console.log('✅ اللعبة جاهزة الآن');
+                    }
                     updateHostUI(state);
                     renderPendingRequests(state.pendingRequests || []);
                     updatePlayersCount(state.players ? state.players.length : 0);
@@ -635,7 +656,7 @@
                 
                 console.log('✅ تم قبول اللاعب:', reqPlayerId);
             } catch (error) {
-                console.error('❌ فشل في قبول اللاعب:', error);
+                console.error(' فشل في قبول اللاعب:', error);
             }
         }
         
@@ -687,7 +708,7 @@
             
             container.innerHTML = requests.map(req => `
                 <div class="pending-request">
-                    <h4> ${req.name}</h4>
+                    <h4>👤 ${req.name}</h4>
                     <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:5px;margin:10px 0;font-size:0.8rem;">
                         ${req.numbers.map(n => `<span style="background:white;padding:5px;text-align:center;border-radius:5px;">${n}</span>`).join('')}
                     </div>
