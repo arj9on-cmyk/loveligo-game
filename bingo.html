@@ -3,286 +3,461 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>لعبة Bingo v3.0 - LOVELIGO</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <title>لعبة Bingo - LOVELIGO</title>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, sans-serif; }
-        body { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; padding: 10px; }
-        .container { max-width: 600px; margin: 0 auto; }
-        .version-badge { 
-            background: linear-gradient(135deg, #f39c12, #e74c3c); 
-            color: white; 
-            padding: 10px 20px; 
-            border-radius: 20px; 
-            display: inline-block; 
-            font-weight: bold;
-            margin: 10px 0;
-            box-shadow: 0 3px 10px rgba(0,0,0,0.3);
-            font-size: 1.1rem;
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, sans-serif;
         }
-        .header { background: white; padding: 20px; border-radius: 20px; text-align: center; margin-bottom: 15px; box-shadow: 0 5px 20px rgba(0,0,0,0.2); }
-        .header h1 { color: #6c5ce7; font-size: 2rem; }
-        .panel { background: white; padding: 20px; border-radius: 20px; margin-bottom: 15px; box-shadow: 0 5px 20px rgba(0,0,0,0.2); }
-        .panel h2 { color: #6c5ce7; margin-bottom: 15px; border-bottom: 3px solid #6c5ce7; padding-bottom: 10px; }
-        .input-group { margin-bottom: 15px; }
-        .input-group label { display: block; margin-bottom: 8px; font-weight: bold; color: #2d3436; }
-        .input-group input, .input-group textarea { width: 100%; padding: 12px; border: 2px solid #dfe6e9; border-radius: 10px; font-size: 1rem; }
-        .input-group input:focus, .input-group textarea:focus { outline: none; border-color: #6c5ce7; }
-        .btn { padding: 15px 25px; border: none; border-radius: 25px; font-size: 1rem; font-weight: bold; cursor: pointer; margin: 5px; transition: all 0.3s; width: 100%; display: flex; align-items: center; justify-content: center; gap: 10px; }
-        .btn-primary { background: #6c5ce7; color: white; }
-        .btn-success { background: #00b894; color: white; }
-        .btn-danger { background: #d63031; color: white; }
-        .btn-warning { background: #fdcb6e; color: #2d3436; }
-        .btn-info { background: #74b9ff; color: white; }
-        .btn-secondary { background: #636e72; color: white; }
-        .btn:hover:not(:disabled) { transform: translateY(-3px); box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
-        .btn:disabled { opacity: 0.5; cursor: not-allowed; }
-        .current-number { background: linear-gradient(135deg, #667eea, #764ba2); color: white; padding: 30px; border-radius: 20px; text-align: center; margin-bottom: 15px; min-height: 200px; }
-        .number-display { font-size: 5rem; font-weight: bold; margin: 10px 0; }
-        .letter-display { font-size: 2.5rem; font-weight: bold; }
-        .share-box { background: #f0f3f9; border: 3px dashed #6c5ce7; border-radius: 15px; padding: 15px; margin: 15px 0; }
-        .share-box input { width: 100%; padding: 12px; border: 2px solid #dfe6e9; border-radius: 10px; font-family: monospace; margin: 10px 0; text-align: center; font-size: 0.85rem; }
-        .player-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin: 15px 0; }
-        .grid-cell { aspect-ratio: 1; display: flex; align-items: center; justify-content: center; background: #dfe6e9; border: 3px solid #b2bec3; border-radius: 10px; font-weight: bold; font-size: 0.9rem; cursor: pointer; transition: all 0.3s; }
-        .grid-cell.marked { background: #00b894; color: white; border-color: #00b894; animation: pulse 0.5s; }
-        @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.1); } }
-        .numbers-log { display: flex; flex-wrap: wrap; gap: 8px; padding: 10px; background: #f8f9fa; border-radius: 10px; min-height: 60px; }
-        .number-badge { width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; background: #6c5ce7; color: white; border-radius: 50%; font-weight: bold; font-size: 0.9rem; animation: fadeIn 0.3s; }
-        @keyframes fadeIn { from { opacity: 0; transform: scale(0); } to { opacity: 1; transform: scale(1); } }
-        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 1000; align-items: center; justify-content: center; }
-        .modal.active { display: flex; }
-        .modal-content { background: white; padding: 30px; border-radius: 20px; text-align: center; max-width: 90%; animation: slideIn 0.3s; }
-        @keyframes slideIn { from { transform: translateY(-50px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-        .hidden { display: none !important; }
-        .info-box { background: #e8f4f8; padding: 15px; border-radius: 10px; margin: 10px 0; border-right: 4px solid #74b9ff; }
-        .error-box { background: #ffe6e6; padding: 15px; border-radius: 10px; margin: 10px 0; border-right: 4px solid #d63031; color: #d63031; }
-        .success-box { background: #e6fff0; padding: 15px; border-radius: 10px; margin: 10px 0; border-right: 4px solid #00b894; color: #00b894; }
-        .loading { text-align: center; padding: 30px; }
-        .spinner { border: 5px solid #f3f3f3; border-top: 5px solid #6c5ce7; border-radius: 50%; width: 50px; height: 50px; animation: spin 1s linear infinite; margin: 0 auto 15px; }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        .pending-request { background: #fff9e6; padding: 15px; border-radius: 15px; margin-bottom: 10px; border: 2px solid #fdcb6e; }
-        .request-actions { display: flex; gap: 10px; margin-top: 10px; }
-        .request-actions button { flex: 1; }
-        .contact-section { background: linear-gradient(135deg, #667eea, #764ba2); color: white; padding: 25px; border-radius: 20px; margin: 20px 0; text-align: center; }
-        .contact-section h3 { margin-bottom: 15px; font-size: 1.3rem; }
-        .contact-icons { display: flex; justify-content: center; gap: 20px; margin-top: 15px; }
-        .contact-icon { display: inline-flex; align-items: center; justify-content: center; width: 60px; height: 60px; border-radius: 50%; color: white; font-size: 1.8rem; text-decoration: none; transition: all 0.3s; box-shadow: 0 5px 15px rgba(0,0,0,0.2); }
-        .contact-icon:hover { transform: translateY(-5px) scale(1.1); }
-        .telegram-icon { background: #0088cc; }
-        .instagram-icon { background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888); }
-        .bingo-alert { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 2000; display: none; align-items: center; justify-content: center; }
-        .bingo-alert.active { display: flex; }
-        .bingo-alert-content { background: linear-gradient(135deg, #f39c12, #e74c3c); padding: 40px 30px; border-radius: 25px; text-align: center; max-width: 90%; width: 400px; color: white; animation: bounceIn 0.5s; }
-        @keyframes bounceIn { 0% { transform: scale(0.3); opacity: 0; } 50% { transform: scale(1.05); } 70% { transform: scale(0.9); } 100% { transform: scale(1); opacity: 1; } }
-        .bingo-alert-content h2 { font-size: 2.5rem; margin-bottom: 15px; }
-        .bingo-alert-content .winner-name { font-size: 1.8rem; font-weight: bold; margin: 15px 0; padding: 10px; background: rgba(255,255,255,0.2); border-radius: 10px; }
-        .bingo-alert-buttons { display: flex; gap: 10px; margin-top: 20px; }
-        .bingo-alert-buttons button { flex: 1; padding: 15px; border: none; border-radius: 15px; font-size: 1rem; font-weight: bold; cursor: pointer; }
-        .bingo-alert-buttons .btn-view { background: white; color: #e74c3c; }
-        .bingo-alert-buttons .btn-skip { background: rgba(255,255,255,0.3); color: white; border: 2px solid white; }
-        .records-btn { background: linear-gradient(135deg, #6c5ce7, #a29bfe); color: white; padding: 15px 25px; border: none; border-radius: 15px; font-size: 1.1rem; font-weight: bold; cursor: pointer; width: 100%; display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 15px; }
-        .records-count { background: white; color: #6c5ce7; padding: 3px 10px; border-radius: 15px; font-size: 0.9rem; }
-        .records-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 1500; align-items: center; justify-content: center; }
-        .records-modal.active { display: flex; }
-        .records-modal-content { background: white; border-radius: 20px; max-width: 90%; width: 500px; max-height: 80vh; overflow-y: auto; }
-        .records-modal-header { background: linear-gradient(135deg, #6c5ce7, #a29bfe); color: white; padding: 20px; border-radius: 20px 20px 0 0; display: flex; justify-content: space-between; align-items: center; }
-        .close-records { background: rgba(255,255,255,0.2); border: none; color: white; width: 35px; height: 35px; border-radius: 50%; font-size: 1.2rem; cursor: pointer; }
-        .records-modal-body { padding: 20px; max-height: 60vh; overflow-y: auto; }
-        .record-player { background: #f8f9fa; padding: 15px; border-radius: 15px; margin-bottom: 15px; border-right: 5px solid #6c5ce7; }
-        .record-player h4 { color: #6c5ce7; margin-bottom: 10px; }
-        .record-player .numbers-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 5px; }
-        .record-player .numbers-grid span { background: white; padding: 5px; text-align: center; border-radius: 5px; font-size: 0.85rem; }
-        .winner-details { display: none; background: white; padding: 20px; border-radius: 20px; margin-top: 15px; border: 3px solid #f39c12; }
-        .winner-details.active { display: block; }
-        .winner-details h3 { color: #e74c3c; margin-bottom: 15px; text-align: center; }
-        .winner-numbers-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin: 15px 0; }
-        .winner-numbers-grid span { background: #f39c12; color: white; padding: 10px; text-align: center; border-radius: 10px; font-weight: bold; }
-        .winner-numbers-grid span.marked { background: #00b894; }
-        .winner-numbers-grid span.unmarked { background: #d63031; opacity: 0.7; }
-        @media (max-width: 480px) { .number-display { font-size: 3.5rem; } }
+        
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 10px;
+            color: #2d3436;
+        }
+        
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            background: rgba(255,255,255,0.95);
+            padding: 15px;
+            border-radius: 15px;
+            margin-bottom: 15px;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        
+        .header h1 {
+            color: #6c5ce7;
+            font-size: 2rem;
+        }
+        
+        .role-selector {
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+        
+        .role-btn {
+            display: block;
+            width: 100%;
+            padding: 15px;
+            margin: 10px 0;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .host-btn {
+            background: #6c5ce7;
+            color: white;
+        }
+        
+        .player-btn {
+            background: #00b894;
+            color: white;
+        }
+        
+        .role-btn:hover {
+            transform: translateY(-2px);
+        }
+        
+        .panel {
+            background: white;
+            padding: 15px;
+            border-radius: 15px;
+            margin-bottom: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        
+        .panel h2 {
+            color: #6c5ce7;
+            margin-bottom: 15px;
+            border-bottom: 2px solid #6c5ce7;
+            padding-bottom: 10px;
+        }
+        
+        .btn {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 25px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            margin: 5px;
+            transition: all 0.3s;
+        }
+        
+        .btn-primary {
+            background: #6c5ce7;
+            color: white;
+        }
+        
+        .btn-success {
+            background: #00b894;
+            color: white;
+        }
+        
+        .btn-danger {
+            background: #d63031;
+            color: white;
+        }
+        
+        .btn-warning {
+            background: #fdcb6e;
+            color: #2d3436;
+        }
+        
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .current-number {
+            text-align: center;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 15px;
+        }
+        
+        .number-display {
+            font-size: 4rem;
+            font-weight: bold;
+        }
+        
+        .letter-display {
+            font-size: 2rem;
+            margin-top: 10px;
+        }
+        
+        .numbers-log {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+            max-height: 150px;
+            overflow-y: auto;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+        
+        .number-badge {
+            width: 35px;
+            height: 35px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #6c5ce7;
+            color: white;
+            border-radius: 50%;
+            font-weight: bold;
+            font-size: 0.9rem;
+        }
+        
+        .player-card {
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            border-right: 4px solid #6c5ce7;
+        }
+        
+        .player-card h4 {
+            color: #6c5ce7;
+            margin-bottom: 5px;
+        }
+        
+        .player-numbers {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 3px;
+            font-size: 0.8rem;
+        }
+        
+        .player-numbers span {
+            background: white;
+            padding: 3px;
+            text-align: center;
+            border-radius: 3px;
+        }
+        
+        .number-input {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #dfe6e9;
+            border-radius: 10px;
+            font-size: 1rem;
+            margin-bottom: 10px;
+        }
+        
+        .number-input:focus {
+            outline: none;
+            border-color: #6c5ce7;
+        }
+        
+        .player-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 5px;
+            margin: 15px 0;
+        }
+        
+        .grid-cell {
+            aspect-ratio: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #dfe6e9;
+            border: 2px solid #b2bec3;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 0.9rem;
+        }
+        
+        .grid-cell.marked {
+            background: #00b894;
+            color: white;
+            border-color: #00b894;
+        }
+        
+        .grid-cell:hover {
+            transform: scale(1.05);
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .modal.active {
+            display: flex;
+        }
+        
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            text-align: center;
+            max-width: 85%;
+            animation: slideIn 0.3s;
+        }
+        
+        @keyframes slideIn {
+            from { transform: translateY(-50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        
+        .pending-requests {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        
+        .request-item {
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            border-right: 4px solid #fdcb6e;
+        }
+        
+        .request-actions {
+            display: flex;
+            gap: 5px;
+            margin-top: 10px;
+        }
+        
+        .request-actions button {
+            flex: 1;
+            padding: 8px;
+            font-size: 0.9rem;
+        }
+        
+        .status-badge {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            margin-top: 5px;
+        }
+        
+        .status-pending {
+            background: #fdcb6e;
+            color: #2d3436;
+        }
+        
+        .status-approved {
+            background: #00b894;
+            color: white;
+        }
+        
+        .status-rejected {
+            background: #d63031;
+            color: white;
+        }
+        
+        .hidden {
+            display: none !important;
+        }
+        
+        .info-text {
+            background: #e8f4f8;
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            font-size: 0.9rem;
+            color: #2d3436;
+        }
+        
+        .error-text {
+            color: #d63031;
+            font-weight: bold;
+        }
+        
+        .success-text {
+            color: #00b894;
+            font-weight: bold;
+        }
     </style>
 </head>
 <body>
     <div class="container">
+        <!-- الرأس -->
         <div class="header">
-            <div class="version-badge">🎮 الإصدار v3.0 - إصلاح مشكلة الكاش</div>
-            <h1>لعبة Bingo</h1>
-            <p>LOVELIGO - النسخة المتصلة</p>
-        </div>
-        
-        <!-- صفحة تسجيل الدخول -->
-        <div id="loginPanel" class="panel">
-            <h2>🔑 تسجيل الدخول</h2>
-            <div class="info-box">أدخل مفتاح الترخيص للاستمرار</div>
-            <div class="input-group">
-                <label>مفتاح الترخيص:</label>
-                <input type="text" id="licenseKey" placeholder="مثال: ali1">
-            </div>
-            <button class="btn btn-primary" onclick="validateLicense()">
-                <i class="fas fa-sign-in-alt"></i> دخول
-            </button>
-            <div id="loginMessage"></div>
-            
-            <div class="contact-section">
-                <h3>🔑 لطلب مفتاح أو الاشتراك</h3>
-                <p>تواصل معي على:</p>
-                <div class="contact-icons">
-                    <a href="https://t.me/TF_69" target="_blank" class="contact-icon telegram-icon"><i class="fab fa-telegram-plane"></i></a>
-                    <a href="https://www.instagram.com/tf69x" target="_blank" class="contact-icon instagram-icon"><i class="fab fa-instagram"></i></a>
-                </div>
-            </div>
+            <h1>🎮 لعبة Bingo</h1>
+            <p>LOVELIGO</p>
         </div>
         
         <!-- اختيار الدور -->
-        <div id="rolePanel" class="panel hidden">
-            <h2> اختر دورك</h2>
-            <button class="btn btn-primary" onclick="selectRole('host')" style="margin-bottom: 10px;">
-                <i class="fas fa-gamepad"></i> أنا المتحكم (Host)
+        <div id="roleSelector" class="role-selector">
+            <h2>اختر دورك</h2>
+            <button class="role-btn host-btn" onclick="selectRole('host')">
+                🎛️ أنا المتحكم (Host)
             </button>
-            <button class="btn btn-success" onclick="selectRole('player')">
-                <i class="fas fa-users"></i> أنا لاعب (Player)
+            <button class="role-btn player-btn" onclick="selectRole('player')">
+                 أنا لاعب (Player)
             </button>
         </div>
         
         <!-- واجهة المتحكم -->
         <div id="hostPanel" class="hidden">
-            <div class="panel">
-                <h2>📤 رابط المشاركة</h2>
-                <div class="share-box">
-                    <p>انسخ هذا الرابط وأرسله للاعبين:</p>
-                    <input type="text" id="shareLink" readonly>
-                    <button class="btn btn-info" onclick="copyLink()">
-                        <i class="fas fa-copy"></i> نسخ الرابط
-                    </button>
-                </div>
-            </div>
-            
+            <!-- الرقم الحالي -->
             <div class="current-number">
                 <div>الرقم المسحوب</div>
                 <div id="hostCurrentNumber" class="number-display">--</div>
                 <div id="hostCurrentLetter" class="letter-display">-</div>
             </div>
             
+            <!-- أزرار التحكم -->
             <div class="panel">
                 <h2>🎛️ التحكم</h2>
-                <button class="btn btn-primary" onclick="drawNumber()">
-                    <i class="fas fa-random"></i> سحب رقم
-                </button>
-                <button class="btn btn-success" onclick="newGame()" style="margin-top: 10px;">
-                    <i class="fas fa-redo"></i> جولة جديدة
-                </button>
-                <button class="btn btn-danger" onclick="logout()" style="margin-top: 10px;">
-                    <i class="fas fa-sign-out-alt"></i> تسجيل الخروج
-                </button>
+                <button class="btn btn-primary" onclick="drawNumber()" id="drawBtn">📥 سحب رقم</button>
+                <button class="btn btn-success" onclick="newGame()">🔄 جولة جديدة</button>
+                <button class="btn btn-warning" onclick="backToRoles()">🔙 تغيير الدور</button>
             </div>
             
+            <!-- طلبات الانضمام -->
             <div class="panel">
                 <h2>📋 طلبات الانضمام</h2>
-                <div id="pendingRequests">
-                    <div class="loading">
-                        <div class="spinner"></div>
-                        <p>جاري تحميل الطلبات...</p>
-                    </div>
+                <div id="pendingRequests" class="pending-requests">
+                    <p>لا توجد طلبات حالياً</p>
                 </div>
             </div>
             
-            <button class="records-btn" onclick="openRecordsModal()">
-                <i class="fas fa-folder-open"></i> 
-                سجل اللاعبين المشاركين
-                <span class="records-count" id="playersCount">0</span>
-            </button>
+            <!-- قائمة المشتركين -->
+            <div class="panel">
+                <h2>👥 قائمة المشتركين</h2>
+                <div id="playersList">
+                    <p>لا يوجد لاعبين بعد</p>
+                </div>
+            </div>
             
+            <!-- سجل الأرقام -->
             <div class="panel">
                 <h2>📊 سجل الأرقام المسحوبة</h2>
                 <div id="hostNumbersLog" class="numbers-log">
                     <p>لم يتم سحب أي رقم بعد</p>
                 </div>
             </div>
-            
-            <div id="winnerDetails" class="winner-details">
-                <h3>🏆 تفاصيل اللاعب الفائز</h3>
-                <p id="winnerPlayerName" style="text-align: center; font-size: 1.3rem; margin-bottom: 10px;"></p>
-                <div id="winnerNumbersGrid" class="winner-numbers-grid"></div>
-                <button class="btn btn-secondary" onclick="closeWinnerDetails()" style="margin-top: 15px;">إغلاق</button>
-            </div>
         </div>
         
         <!-- واجهة اللاعب -->
         <div id="playerPanel" class="hidden">
+            <!-- نموذج التسجيل -->
             <div id="registrationForm" class="panel">
-                <h2>📝 الانضمام للعبة</h2>
-                <div class="input-group">
-                    <label>الاسم:</label>
-                    <input type="text" id="playerName" placeholder="اكتب اسمك">
+                <h2>📝 تسجيل الدخول</h2>
+                <input type="text" id="playerName" class="number-input" placeholder="اكتب اسمك هنا">
+                <div class="info-text">
+                    أدخل 25 رقماً فريداً من 1 إلى 75 (بدون تكرار)
                 </div>
-                <div class="input-group">
-                    <label>أدخل 20 رقماً فريداً (1-90):</label>
-                    <textarea id="playerNumbers" rows="3" placeholder="مثال: 1, 5, 12, 23, 34, 45, 56, 67, 75, 3, 8, 15, 22, 30, 38, 44, 51, 59, 66, 72"></textarea>
-                </div>
-                <button class="btn btn-success" onclick="submitRegistration()">
-                    <i class="fas fa-paper-plane"></i> إرسال طلب الانضمام
+                <textarea id="playerNumbers" class="number-input" rows="4" 
+                    placeholder="مثال: 1, 5, 12, 23, 34, 45, 56, 67, 75, 3, 8, 15, 22, 30, 38, 44, 51, 59, 66, 72, 2, 10, 18, 27, 35"></textarea>
+                <button class="btn btn-success" onclick="submitRegistration()" style="width: 100%;">
+                    📤 إرسال طلب الانضمام
                 </button>
                 <div id="registrationStatus"></div>
             </div>
             
+            <!-- واجهة اللعب -->
             <div id="playerGamePanel" class="hidden">
+                <!-- الرقم المسحوب -->
                 <div class="current-number">
                     <div>آخر رقم مسحوب</div>
                     <div id="playerCurrentNumber" class="number-display">--</div>
                     <div id="playerCurrentLetter" class="letter-display">-</div>
                 </div>
                 
+                <!-- حالة اللاعب -->
                 <div class="panel">
-                    <h2>📊 سجل الأرقام المسحوبة</h2>
-                    <div class="info-box">راجع الأرقام المسحوبة لتحديد أرقامك</div>
-                    <div id="playerNumbersLog" class="numbers-log">
-                        <p>لم يتم سحب أي رقم بعد</p>
+                    <h2>👤 <span id="playerDisplayName"></span></h2>
+                    <div id="playerStatus"></div>
+                </div>
+                
+                <!-- أرقام اللاعب -->
+                <div class="panel">
+                    <h2>🎯 أرقامك (اضغط لوضع علامة)</h2>
+                    <div class="info-text">
+                        اضغط على الرقم لوضع علامة عليه إذا تم سحبه
                     </div>
-                </div>
-                
-                <div class="panel">
-                    <h2>🎯 أرقامك (اضغط للتحديد)</h2>
-                    <div class="info-box">اضغط على الرقم لوضع علامة إذا تم سحبه</div>
                     <div id="playerGrid" class="player-grid"></div>
-                    <p style="text-align: center; margin-top: 10px; color: #636e72;">
-                        محدد: <span id="markedCount">0</span> / <span id="requiredCount">20</span>
-                    </p>
                 </div>
                 
+                <!-- زر BINGO -->
                 <div class="panel" style="text-align: center;">
-                    <button class="btn btn-warning" onclick="claimBingo()" style="font-size: 1.5rem; padding: 20px 40px;">
-                        <i class="fas fa-trophy"></i> BINGO!
+                    <button class="btn btn-warning" onclick="claimBingo()" 
+                        style="font-size: 1.5rem; padding: 15px 40px;">
+                        🏆 BINGO!
                     </button>
                 </div>
                 
-                <button class="btn btn-danger" onclick="logout()">
-                    <i class="fas fa-sign-out-alt"></i> تسجيل الخروج
+                <!-- زر تغيير الدور -->
+                <button class="btn btn-danger" onclick="backToRoles()" style="width: 100%;">
+                     تغيير الدور
                 </button>
             </div>
-        </div>
-    </div>
-    
-    <!-- إشعار BINGO -->
-    <div id="bingoAlert" class="bingo-alert">
-        <div class="bingo-alert-content">
-            <h2>🏆 BINGO! 🏆</h2>
-            <p>لديك فائز!</p>
-            <div class="winner-name" id="bingoWinnerName">-</div>
-            <div class="bingo-alert-buttons">
-                <button class="btn-view" onclick="viewWinnerDetails()">👁️ عرض التفاصيل</button>
-                <button class="btn-skip" onclick="skipBingoAlert()">⏭️ تخطي</button>
-            </div>
-        </div>
-    </div>
-    
-    <!-- نافذة السجل -->
-    <div id="recordsModal" class="records-modal">
-        <div class="records-modal-content">
-            <div class="records-modal-header">
-                <h3> سجل اللاعبين</h3>
-                <button class="close-records" onclick="closeRecordsModal()">✕</button>
-            </div>
-            <div class="records-modal-body" id="recordsModalBody"></div>
         </div>
     </div>
     
@@ -296,626 +471,410 @@
     </div>
 
     <script>
-        // ===== الإصدار v3.0 =====
-        console.log('🎮 Bingo Game v3.0 - إصلاح مشكلة الكاش');
+        // ===== إعدادات اللعبة =====
+        const GAME_KEY = 'bingo_game_state';
+        const CHANNEL_NAME = 'bingo_channel';
         
-        // ===== الإعدادات =====
-        const BIN_ID = '6aa91167ffd5d16053091105';
-        const API_KEY = '$2a$10$RITxbUC8tIk02/FZkOGeYenJCF0HLCbx9UTYcJnTX02kpyCjpCXXS';
-        const BASE_URL = `https://api.jsonbin.io/v3/b/${BIN_ID}`;
-        const POLL_INTERVAL = 1500; // أسرع - 1.5 ثانية
-        const MAX_NUMBER = 90;
-        const WIN_COUNT = 20;
-        
-        // ===== المتغيرات =====
         let currentRole = null;
-        let roomId = null;
-        let playerId = null;
+        let currentPlayerId = null;
         let currentPlayerName = '';
         let currentPlayerNumbers = [];
         let markedNumbers = new Set();
-        let gameData = null;
-        let pollingInterval = null;
-        let isProcessing = false;
-        let pendingBingoClaim = null;
-        let localGameState = null;
-        let processedRequests = new Set();
-        let lastReadTime = 0; // تتبع آخر قراءة
+        let channel = null;
         
-        // ===== عند تحميل الصفحة =====
-        window.onload = function() {
-            console.log('📱 تم تحميل الصفحة - v3.0');
-            const urlParams = new URLSearchParams(window.location.search);
-            const room = urlParams.get('room');
-            
-            if (room) {
-                console.log(' رابط لاعب - roomId:', room);
-                roomId = room;
-                document.getElementById('loginPanel').classList.add('hidden');
-                document.getElementById('rolePanel').classList.add('hidden');
-                document.getElementById('playerPanel').classList.remove('hidden');
-                playerId = 'player_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6);
-                console.log('🎮 playerId:', playerId);
-                startPlayerPolling();
+        // ===== تهيئة الاتصال =====
+        function initChannel() {
+            if ('BroadcastChannel' in window) {
+                channel = new BroadcastChannel(CHANNEL_NAME);
+                channel.onmessage = handleChannelMessage;
             } else {
-                console.log('🔑 رابط أساسي - إظهار تسجيل الدخول');
-                document.getElementById('loginPanel').classList.remove('hidden');
-            }
-        };
-        
-        // ===== دوال JSONBin - مع إصلاح الكاش =====
-        async function readBin() {
-            try {
-                //  الحل: إضافة timestamp لمنع الكاش
-                const url = `${BASE_URL}?t=${Date.now()}`;
-                const response = await fetch(url, {
-                    headers: { 
-                        'X-Master-Key': API_KEY,
-                        'Cache-Control': 'no-cache, no-store, must-revalidate',
-                        'Pragma': 'no-cache'
-                    },
-                    cache: 'no-store'
-                });
-                if (!response.ok) throw new Error('فشل في القراءة: ' + response.status);
-                const data = await response.json();
-                lastReadTime = Date.now();
-                console.log('📖 تم القراءة من JSONBin - الوقت:', new Date().toLocaleTimeString());
-                return data.record;
-            } catch (error) {
-                console.error('❌ خطأ في القراءة:', error);
-                throw error;
+                // Fallback: استخدام localStorage events
+                window.addEventListener('storage', handleStorageEvent);
             }
         }
         
-        async function writeBin(data) {
-            if (isProcessing) {
-                console.log('⏳ عملية كتابة جارية، انتظر...');
-                return false;
-            }
-            isProcessing = true;
-            try {
-                const response = await fetch(BASE_URL, {
-                    method: 'PUT',
-                    headers: { 
-                        'Content-Type': 'application/json', 
-                        'X-Master-Key': API_KEY 
-                    },
-                    body: JSON.stringify(data)
-                });
-                if (!response.ok) throw new Error('فشل في الكتابة: ' + response.status);
-                console.log('️ تم الكتابة في JSONBin - الوقت:', new Date().toLocaleTimeString());
-                return true;
-            } catch (error) {
-                console.error('❌ خطأ في الكتابة:', error);
-                throw error;
-            } finally {
-                setTimeout(() => { isProcessing = false; }, 800);
+        function sendMessage(type, data) {
+            const message = {
+                type: type,
+                data: data,
+                timestamp: Date.now()
+            };
+            
+            if (channel) {
+                channel.postMessage(message);
+            } else {
+                localStorage.setItem('bingo_message_' + Date.now(), JSON.stringify(message));
             }
         }
         
-        // ===== نظام المفاتيح =====
-        async function validateLicense() {
-            const keyInput = document.getElementById('licenseKey').value.trim();
-            const messageDiv = document.getElementById('loginMessage');
-            
-            if (!keyInput) {
-                messageDiv.innerHTML = '<div class="error-box">الرجاء إدخال المفتاح</div>';
-                return;
-            }
-            
-            messageDiv.innerHTML = '<div class="loading"><div class="spinner"></div><p>جاري التحقق...</p></div>';
-            
-            try {
-                const data = await readBin();
-                const keys = data.keys || [];
-                const license = keys.find(k => k.key === keyInput && k.active === true);
-                
-                if (!license) {
-                    messageDiv.innerHTML = '<div class="error-box">❌ مفتاح غير صحيح</div>';
-                    return;
-                }
-                
-                const expiryDate = new Date(license.expires);
-                if (new Date() > expiryDate) {
-                    messageDiv.innerHTML = '<div class="error-box">⏰ انتهت الصلاحية</div>';
-                    return;
-                }
-                
-                const deviceId = getDeviceId();
-                if (license.deviceId && license.deviceId !== deviceId) {
-                    messageDiv.innerHTML = '<div class="error-box">📱 المفتاح مسجل على جهاز آخر</div>';
-                    return;
-                }
-                
-                if (!license.deviceId) {
-                    license.deviceId = deviceId;
-                    await writeBin(data);
-                }
-                
-                console.log('✅ تم تسجيل الدخول بنجاح');
-                document.getElementById('loginPanel').classList.add('hidden');
-                document.getElementById('rolePanel').classList.remove('hidden');
-                
-            } catch (error) {
-                messageDiv.innerHTML = '<div class="error-box">❌ خطأ في الاتصال: ' + error.message + '</div>';
+        function handleChannelMessage(event) {
+            const message = event.data;
+            processMessage(message);
+        }
+        
+        function handleStorageEvent(event) {
+            if (event.key.startsWith('bingo_message_')) {
+                try {
+                    const message = JSON.parse(event.newValue);
+                    processMessage(message);
+                } catch (e) {}
             }
         }
         
-        function getDeviceId() {
-            let deviceId = localStorage.getItem('bingo_device_id');
-            if (!deviceId) {
-                deviceId = 'device_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
-                localStorage.setItem('bingo_device_id', deviceId);
+        function processMessage(message) {
+            if (!message || !message.type) return;
+            
+            switch (message.type) {
+                case 'REGISTRATION_REQUEST':
+                    if (currentRole === 'host') {
+                        addPendingRequest(message.data);
+                    }
+                    break;
+                    
+                case 'REGISTRATION_APPROVED':
+                    if (currentRole === 'player' && message.data.playerId === currentPlayerId) {
+                        showPlayerGamePanel();
+                        showMessage('تمت الموافقة', 'تم قبول انضمامك! يمكنك البدء باللعب', 'success');
+                    }
+                    break;
+                    
+                case 'REGISTRATION_REJECTED':
+                    if (currentRole === 'player' && message.data.playerId === currentPlayerId) {
+                        showMessage('تم الرفض', 'تم رفض طلب الانضمام', 'error');
+                        document.getElementById('registrationForm').classList.remove('hidden');
+                        document.getElementById('playerGamePanel').classList.add('hidden');
+                    }
+                    break;
+                    
+                case 'NUMBER_DRAWN':
+                    if (currentRole === 'player') {
+                        updatePlayerCurrentNumber(message.data);
+                    }
+                    if (currentRole === 'host') {
+                        updateHostCurrentNumber(message.data);
+                    }
+                    break;
+                    
+                case 'GAME_RESET':
+                    if (currentRole === 'player') {
+                        resetPlayerGame();
+                    }
+                    if (currentRole === 'host') {
+                        resetHostGame();
+                    }
+                    break;
+                    
+                case 'BINGO_CLAIM':
+                    if (currentRole === 'host') {
+                        handleBingoClaim(message.data);
+                    }
+                    break;
+                    
+                case 'BINGO_RESULT':
+                    if (currentRole === 'player' && message.data.playerId === currentPlayerId) {
+                        if (message.data.valid) {
+                            showMessage('🎉 مبروك!', 'لقد فزت بـ BINGO!', 'success');
+                        } else {
+                            showMessage('خطأ', message.data.message, 'error');
+                        }
+                    }
+                    break;
             }
-            return deviceId;
         }
         
         // ===== اختيار الدور =====
         function selectRole(role) {
             currentRole = role;
-            console.log('🎯 تم اختيار الدور:', role);
+            currentPlayerId = generateId();
+            
+            document.getElementById('roleSelector').classList.add('hidden');
             
             if (role === 'host') {
-                roomId = 'room_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6);
-                console.log(' تم إنشاء roomId:', roomId);
-                initHostGame();
-                document.getElementById('rolePanel').classList.add('hidden');
                 document.getElementById('hostPanel').classList.remove('hidden');
-                
-                const baseUrl = window.location.href.split('?')[0];
-                const shareUrl = `${baseUrl}?room=${roomId}`;
-                document.getElementById('shareLink').value = shareUrl;
-                console.log('🔗 رابط المشاركة:', shareUrl);
-                
-                startHostPolling();
+                initHostGame();
             } else {
-                playerId = 'player_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6);
-                console.log(' playerId:', playerId);
-                document.getElementById('rolePanel').classList.add('hidden');
                 document.getElementById('playerPanel').classList.remove('hidden');
             }
+            
+            initChannel();
+        }
+        
+        function backToRoles() {
+            currentRole = null;
+            currentPlayerId = null;
+            document.getElementById('hostPanel').classList.add('hidden');
+            document.getElementById('playerPanel').classList.add('hidden');
+            document.getElementById('roleSelector').classList.remove('hidden');
         }
         
         // ===== وظائف المتحكم =====
-        async function initHostGame() {
-            localGameState = {
+        let gameState = {
+            status: 'WAITING',
+            drawnNumbers: [],
+            remainingNumbers: [],
+            players: [],
+            pendingRequests: [],
+            lastDrawnNumber: null
+        };
+        
+        function initHostGame() {
+            gameState = {
+                status: 'PLAYING',
                 drawnNumbers: [],
-                remainingNumbers: shuffleArray(Array.from({length: MAX_NUMBER}, (_, i) => i + 1)),
+                remainingNumbers: shuffleArray(Array.from({length: 75}, (_, i) => i + 1)),
                 players: [],
                 pendingRequests: [],
-                lastDrawnNumber: null,
-                roomId: roomId,
-                winNumbersRequired: WIN_COUNT,
-                maxNumber: MAX_NUMBER,
-                bingoClaims: []
+                lastDrawnNumber: null
             };
-            console.log('🎮 تم تهيئة اللعبة');
-            await saveGameState();
             updateHostUI();
         }
         
-        async function saveGameState() {
-            if (isProcessing) {
-                console.log('⏳ حفظ جاري، انتظر...');
-                return;
-            }
-            console.log('💾 جاري حفظ الحالة...');
-            console.log('📊 الأرقام المسحوبة:', localGameState.drawnNumbers);
-            console.log(' آخر رقم:', localGameState.lastDrawnNumber);
-            
-            isProcessing = true;
-            try {
-                const data = await readBin();
-                if (!data.rooms) data.rooms = {};
-                data.rooms[roomId] = { 
-                    gameState: JSON.parse(JSON.stringify(localGameState)), // نسخة عميقة
-                    lastUpdate: Date.now() 
-                };
-                await writeBin(data);
-                console.log('✅ تم حفظ الحالة بنجاح');
-            } catch (error) {
-                console.error('❌ فشل في الحفظ:', error);
-            } finally {
-                isProcessing = false;
-            }
-        }
-        
-        async function drawNumber() {
-            if (!localGameState) {
-                console.error('❌ localGameState غير معرف');
-                return;
-            }
-            if (localGameState.remainingNumbers.length === 0) {
+        function drawNumber() {
+            if (gameState.remainingNumbers.length === 0) {
                 showMessage('انتهت الأرقام', 'تم سحب جميع الأرقام', 'error');
                 return;
             }
             
-            const number = localGameState.remainingNumbers.pop();
-            localGameState.drawnNumbers.push(number);
-            localGameState.lastDrawnNumber = number;
+            const number = gameState.remainingNumbers.pop();
+            gameState.drawnNumbers.push(number);
+            gameState.lastDrawnNumber = number;
             
-            console.log('🎲 تم سحب الرقم:', number);
-            console.log('📊 إجمالي الأرقام المسحوبة:', localGameState.drawnNumbers);
-            console.log('🔢 آخر رقم:', localGameState.lastDrawnNumber);
+            const letter = getLetterForNumber(number);
             
-            await saveGameState();
             updateHostUI();
-            
-            // عرض تنبيه
-            showMessage('تم السحب', `تم سحب الرقم ${number}`, 'success');
+            sendMessage('NUMBER_DRAWN', {number, letter});
         }
         
-        async function newGame() {
-            if (!confirm('هل تريد بدء جولة جديدة؟')) return;
-            console.log(' بدء جولة جديدة');
-            await clearGameData();
-            initHostGame();
-            document.getElementById('winnerDetails').classList.remove('active');
-            processedRequests.clear();
+        function newGame() {
+            if (!confirm('هل تريد بدء جولة جديدة؟ سيتم مسح كل شيء')) {
+                return;
+            }
+            
+            gameState = {
+                status: 'PLAYING',
+                drawnNumbers: [],
+                remainingNumbers: shuffleArray(Array.from({length: 75}, (_, i) => i + 1)),
+                players: [],
+                pendingRequests: [],
+                lastDrawnNumber: null
+            };
+            
+            updateHostUI();
+            sendMessage('GAME_RESET', {});
             showMessage('جولة جديدة', 'تم بدء جولة جديدة', 'success');
         }
         
-        async function clearGameData() {
-            try {
-                const data = await readBin();
-                if (data.rooms && data.rooms[roomId]) {
-                    delete data.rooms[roomId];
-                    console.log('🗑️ تم مسح بيانات الغرفة');
-                }
-                if (data.playerStatus) {
-                    Object.keys(data.playerStatus).forEach(key => {
-                        if (data.playerStatus[key].roomId === roomId) delete data.playerStatus[key];
-                    });
-                }
-                await writeBin(data);
-            } catch (error) {
-                console.error('❌ فشل في المسح:', error);
-            }
-        }
-        
-        function startHostPolling() {
-            console.log('⏰ بدء المراقبة كل', POLL_INTERVAL, 'مللي ثانية');
-            fetchPendingRequests();
-            pollingInterval = setInterval(fetchPendingRequests, POLL_INTERVAL);
-        }
-        
-        async function fetchPendingRequests() {
-            try {
-                const data = await readBin();
-                const roomData = data.rooms && data.rooms[roomId];
-                
-                if (roomData && roomData.gameState) {
-                    const serverState = roomData.gameState;
-                    console.log('📡 بيانات من السيرفر:', serverState);
-                    
-                    const oldBingoClaims = localGameState && localGameState.bingoClaims ? localGameState.bingoClaims.length : 0;
-                    const newBingoClaims = serverState.bingoClaims || [];
-                    if (newBingoClaims.length > oldBingoClaims) {
-                        console.log('🏆 تم اكتشاف BINGO جديد');
-                        showBingoAlert(newBingoClaims[newBingoClaims.length - 1]);
-                    }
-                    
-                    if (localGameState) {
-                        if (serverState.pendingRequests) {
-                            localGameState.pendingRequests = serverState.pendingRequests.filter(req => {
-                                const requestId = req.playerId + '_' + req.timestamp;
-                                return !processedRequests.has(requestId);
-                            });
-                        }
-                        localGameState.bingoClaims = newBingoClaims;
-                        if (serverState.drawnNumbers) {
-                            localGameState.drawnNumbers = serverState.drawnNumbers;
-                        }
-                        if (serverState.lastDrawnNumber !== null && serverState.lastDrawnNumber !== undefined) {
-                            localGameState.lastDrawnNumber = serverState.lastDrawnNumber;
-                        }
-                    }
-                    
-                    renderPendingRequests();
-                    updateHostUI();
-                }
-            } catch (error) {
-                console.error('❌ خطأ في جلب الطلبات:', error);
-            }
-        }
-        
-        function showBingoAlert(claim) {
-            pendingBingoClaim = claim;
-            document.getElementById('bingoWinnerName').textContent = '🎮 ' + claim.playerName;
-            document.getElementById('bingoAlert').classList.add('active');
-        }
-        
-        function skipBingoAlert() {
-            document.getElementById('bingoAlert').classList.remove('active');
-            pendingBingoClaim = null;
-        }
-        
-        function viewWinnerDetails() {
-            document.getElementById('bingoAlert').classList.remove('active');
-            if (!pendingBingoClaim) return;
+        function addPendingRequest(data) {
+            // التحقق من عدم التكرار
+            const exists = gameState.pendingRequests.find(r => r.playerId === data.playerId);
+            if (exists) return;
             
-            const winner = pendingBingoClaim;
-            const player = localGameState.players.find(p => p.playerId === winner.playerId);
-            if (!player) { showMessage('خطأ', 'لم يتم العثور على اللاعب', 'error'); return; }
-            
-            document.getElementById('winnerPlayerName').textContent = ' ' + player.name;
-            const grid = document.getElementById('winnerNumbersGrid');
-            grid.innerHTML = '';
-            player.numbers.forEach(num => {
-                const span = document.createElement('span');
-                span.textContent = num;
-                span.className = winner.markedNumbers.includes(num) ? 'marked' : 'unmarked';
-                grid.appendChild(span);
-            });
-            
-            document.getElementById('winnerDetails').classList.add('active');
-            pendingBingoClaim = null;
+            gameState.pendingRequests.push(data);
+            renderPendingRequests();
         }
         
-        function closeWinnerDetails() {
-            document.getElementById('winnerDetails').classList.remove('active');
-        }
-        
-        async function approvePlayer(reqPlayerId) {
-            if (isProcessing || !localGameState) return;
-            const request = localGameState.pendingRequests.find(r => r.playerId === reqPlayerId);
+        function approvePlayer(playerId) {
+            const request = gameState.pendingRequests.find(r => r.playerId === playerId);
             if (!request) return;
             
-            processedRequests.add(request.playerId + '_' + request.timestamp);
-            localGameState.pendingRequests = localGameState.pendingRequests.filter(r => r.playerId !== reqPlayerId);
-            localGameState.players.push({...request, approvedAt: new Date().toISOString()});
+            gameState.pendingRequests = gameState.pendingRequests.filter(r => r.playerId !== playerId);
+            gameState.players.push(request);
             
             renderPendingRequests();
-            updateHostUI();
-            await saveGameState();
+            renderPlayersList();
             
-            try {
-                const data = await readBin();
-                if (!data.playerStatus) data.playerStatus = {};
-                data.playerStatus[reqPlayerId] = { status: 'approved', roomId: roomId, timestamp: Date.now() };
-                await writeBin(data);
-                console.log('✅ تم قبول اللاعب:', reqPlayerId);
-            } catch (error) { console.error(error); }
+            sendMessage('REGISTRATION_APPROVED', {playerId});
         }
         
-        async function rejectPlayer(reqPlayerId) {
-            if (isProcessing || !localGameState) return;
-            const request = localGameState.pendingRequests.find(r => r.playerId === reqPlayerId);
-            if (!request) return;
-            
-            processedRequests.add(request.playerId + '_' + request.timestamp);
-            localGameState.pendingRequests = localGameState.pendingRequests.filter(r => r.playerId !== reqPlayerId);
-            
+        function rejectPlayer(playerId) {
+            gameState.pendingRequests = gameState.pendingRequests.filter(r => r.playerId !== playerId);
             renderPendingRequests();
-            await saveGameState();
             
-            try {
-                const data = await readBin();
-                if (!data.playerStatus) data.playerStatus = {};
-                data.playerStatus[reqPlayerId] = { status: 'rejected', roomId: roomId, timestamp: Date.now() };
-                await writeBin(data);
-                console.log('❌ تم رفض اللاعب:', reqPlayerId);
-            } catch (error) { console.error(error); }
+            sendMessage('REGISTRATION_REJECTED', {playerId});
+        }
+        
+        function handleBingoClaim(data) {
+            const player = gameState.players.find(p => p.playerId === data.playerId);
+            if (!player) {
+                sendMessage('BINGO_RESULT', {playerId: data.playerId, valid: false, message: 'اللاعب غير موجود'});
+                return;
+            }
+            
+            // التحقق من صحة BINGO
+            const allMarked = data.markedNumbers.every(num => gameState.drawnNumbers.includes(num));
+            const allNumbersInCard = data.markedNumbers.every(num => player.numbers.includes(num));
+            
+            if (allMarked && allNumbersInCard && data.markedNumbers.length === 25) {
+                sendMessage('BINGO_RESULT', {playerId: data.playerId, valid: true});
+                showMessage('🎉 فوز!', `مبروك! فاز اللاعب ${player.name} بـ BINGO!`, 'success');
+            } else {
+                sendMessage('BINGO_RESULT', {playerId: data.playerId, valid: false, message: 'لم تكمل جميع الأرقام أو الأرقام غير صحيحة'});
+            }
         }
         
         function renderPendingRequests() {
             const container = document.getElementById('pendingRequests');
-            if (!localGameState || !localGameState.pendingRequests || localGameState.pendingRequests.length === 0) {
-                container.innerHTML = '<div class="info-box">لا توجد طلبات حالياً</div>';
+            
+            if (gameState.pendingRequests.length === 0) {
+                container.innerHTML = '<p>لا توجد طلبات حالياً</p>';
                 return;
             }
-            container.innerHTML = localGameState.pendingRequests.map(req => `
-                <div class="pending-request">
+            
+            container.innerHTML = gameState.pendingRequests.map(req => `
+                <div class="request-item">
                     <h4>👤 ${req.name}</h4>
-                    <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:5px;margin:10px 0;font-size:0.8rem;">
-                        ${req.numbers.map(n => `<span style="background:white;padding:5px;text-align:center;border-radius:5px;">${n}</span>`).join('')}
+                    <div class="player-numbers">
+                        ${req.numbers.map(n => `<span>${n}</span>`).join('')}
                     </div>
                     <div class="request-actions">
                         <button class="btn btn-success" onclick="approvePlayer('${req.playerId}')">✅ قبول</button>
-                        <button class="btn btn-danger" onclick="rejectPlayer('${req.playerId}')">❌ رفض</button>
+                        <button class="btn btn-danger" onclick="rejectPlayer('${req.playerId}')"> رفض</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        function renderPlayersList() {
+            const container = document.getElementById('playersList');
+            
+            if (gameState.players.length === 0) {
+                container.innerHTML = '<p>لا يوجد لاعبين بعد</p>';
+                return;
+            }
+            
+            container.innerHTML = gameState.players.map(player => `
+                <div class="player-card">
+                    <h4>🎮 اللاعب ${player.name}</h4>
+                    <div class="player-numbers">
+                        ${player.numbers.map(n => `<span>${n}</span>`).join('')}
                     </div>
                 </div>
             `).join('');
         }
         
         function updateHostUI() {
-            if (!localGameState) return;
+            // الرقم الحالي
+            if (gameState.lastDrawnNumber) {
+                document.getElementById('hostCurrentNumber').textContent = gameState.lastDrawnNumber;
+                document.getElementById('hostCurrentLetter').textContent = getLetterForNumber(gameState.lastDrawnNumber);
+            } else {
+                document.getElementById('hostCurrentNumber').textContent = '--';
+                document.getElementById('hostCurrentLetter').textContent = '-';
+            }
             
-            document.getElementById('hostCurrentNumber').textContent = localGameState.lastDrawnNumber || '--';
-            document.getElementById('hostCurrentLetter').textContent = localGameState.lastDrawnNumber ? getLetterForNumber(localGameState.lastDrawnNumber) : '-';
-            
+            // سجل الأرقام
             const logContainer = document.getElementById('hostNumbersLog');
-            if (localGameState.drawnNumbers.length === 0) {
+            if (gameState.drawnNumbers.length === 0) {
                 logContainer.innerHTML = '<p>لم يتم سحب أي رقم بعد</p>';
             } else {
-                logContainer.innerHTML = localGameState.drawnNumbers.map(n => `<div class="number-badge">${n}</div>`).join('');
+                logContainer.innerHTML = gameState.drawnNumbers.map(n => 
+                    `<div class="number-badge">${n}</div>`
+                ).join('');
             }
+        }
+        
+        function updateHostCurrentNumber(data) {
+            document.getElementById('hostCurrentNumber').textContent = data.number;
+            document.getElementById('hostCurrentLetter').textContent = data.letter;
             
-            document.getElementById('playersCount').textContent = localGameState.players ? localGameState.players.length : 0;
+            const logContainer = document.getElementById('hostNumbersLog');
+            const badge = document.createElement('div');
+            badge.className = 'number-badge';
+            badge.textContent = data.number;
+            logContainer.appendChild(badge);
         }
         
-        function openRecordsModal() {
-            const body = document.getElementById('recordsModalBody');
-            if (!localGameState || !localGameState.players || localGameState.players.length === 0) {
-                body.innerHTML = '<p style="text-align:center;padding:30px;">لا يوجد لاعبين بعد</p>';
-            } else {
-                body.innerHTML = localGameState.players.map(player => `
-                    <div class="record-player">
-                        <h4>🎮 ${player.name}</h4>
-                        <div class="numbers-grid">${player.numbers.map(n => `<span>${n}</span>`).join('')}</div>
-                    </div>
-                `).join('');
-            }
-            document.getElementById('recordsModal').classList.add('active');
-        }
-        
-        function closeRecordsModal() {
-            document.getElementById('recordsModal').classList.remove('active');
+        function resetHostGame() {
+            gameState.drawnNumbers = [];
+            gameState.lastDrawnNumber = null;
+            updateHostUI();
         }
         
         // ===== وظائف اللاعب =====
-        function startPlayerPolling() {
-            console.log('⏰ بدء مراقبة البيانات كل', POLL_INTERVAL, 'مللي ثانية');
-            fetchGameData();
-            pollingInterval = setInterval(fetchGameData, POLL_INTERVAL);
-        }
-        
-        async function fetchGameData() {
-            try {
-                console.log('📡 جاري جلب البيانات من roomId:', roomId);
-                const data = await readBin();
-                const roomData = data.rooms && data.rooms[roomId];
-                
-                if (roomData && roomData.gameState) {
-                    gameData = roomData.gameState;
-                    console.log('✅ تم جلب البيانات بنجاح');
-                    console.log('📊 drawnNumbers:', gameData.drawnNumbers);
-                    console.log('🔢 lastDrawnNumber:', gameData.lastDrawnNumber);
-                    console.log('📏 عدد الأرقام:', gameData.drawnNumbers ? gameData.drawnNumbers.length : 0);
-                    updatePlayerUI();
-                } else {
-                    console.log('⚠️ لم يتم العثور على الغرفة:', roomId);
-                    console.log('الغرف المتاحة:', data.rooms ? Object.keys(data.rooms) : 'لا توجد غرف');
-                }
-            } catch (error) {
-                console.error('❌ فشل في جلب البيانات:', error);
-            }
-        }
-        
-        function updatePlayerUI() {
-            if (!gameData) {
-                console.log('⚠️ gameData فارغة');
-                return;
-            }
-            
-            console.log('🎨 تحديث واجهة اللاعب');
-            console.log('lastDrawnNumber:', gameData.lastDrawnNumber);
-            console.log('drawnNumbers:', gameData.drawnNumbers);
-            console.log('drawnNumbers.length:', gameData.drawnNumbers ? gameData.drawnNumbers.length : 0);
-            
-            const numEl = document.getElementById('playerCurrentNumber');
-            const letterEl = document.getElementById('playerCurrentLetter');
-            
-            if (gameData.lastDrawnNumber !== null && gameData.lastDrawnNumber !== undefined && gameData.lastDrawnNumber !== '') {
-                numEl.textContent = gameData.lastDrawnNumber;
-                letterEl.textContent = getLetterForNumber(gameData.lastDrawnNumber);
-                console.log('✅ تم تحديث الرقم الحالي:', gameData.lastDrawnNumber);
-            } else {
-                numEl.textContent = '--';
-                letterEl.textContent = '-';
-                console.log('⚠️ لا يوجد رقم مسحوب');
-            }
-            
-            const logContainer = document.getElementById('playerNumbersLog');
-            if (gameData.drawnNumbers && gameData.drawnNumbers.length > 0) {
-                logContainer.innerHTML = gameData.drawnNumbers.map(n => `<div class="number-badge">${n}</div>`).join('');
-                console.log('✅ تم تحديث السجل:', gameData.drawnNumbers.length, 'أرقام');
-            } else {
-                logContainer.innerHTML = '<p>لم يتم سحب أي رقم بعد</p>';
-                console.log('⚠️ لا توجد أرقام في السجل');
-            }
-            
-            document.getElementById('requiredCount').textContent = WIN_COUNT;
-            document.getElementById('markedCount').textContent = markedNumbers.size;
-        }
-        
-        async function submitRegistration() {
+        function submitRegistration() {
             const name = document.getElementById('playerName').value.trim();
             const numbersText = document.getElementById('playerNumbers').value.trim();
             
-            if (!name) { showMessage('خطأ', 'يرجى إدخال الاسم', 'error'); return; }
-            
-            const numbers = numbersText.split(/[\s,،]+/).map(n => parseInt(n)).filter(n => !isNaN(n));
-            
-            if (numbers.length !== WIN_COUNT) {
-                showMessage('خطأ', `يجب إدخال ${WIN_COUNT} رقماً بالضبط (أدخلت ${numbers.length})`, 'error');
+            if (!name) {
+                showMessage('خطأ', 'يرجى إدخال الاسم', 'error');
                 return;
             }
             
-            const invalidNumbers = numbers.filter(n => n < 1 || n > MAX_NUMBER);
-            if (invalidNumbers.length > 0) { showMessage('خطأ', 'الأرقام يجب أن تكون بين 1 و 90', 'error'); return; }
+            // تحليل الأرقام
+            const numbers = numbersText.split(/[\s,،]+/).map(n => parseInt(n)).filter(n => !isNaN(n));
             
+            // التحقق من 25 رقم
+            if (numbers.length !== 25) {
+                showMessage('خطأ', `يجب إدخال 25 رقماً بالضبط (أدخلت ${numbers.length})`, 'error');
+                return;
+            }
+            
+            // التحقق من النطاق
+            const invalidNumbers = numbers.filter(n => n < 1 || n > 75);
+            if (invalidNumbers.length > 0) {
+                showMessage('خطأ', `الأرقام يجب أن تكون بين 1 و 75. أرقام خاطئة: ${invalidNumbers.join(', ')}`, 'error');
+                return;
+            }
+            
+            // التحقق من عدم التكرار
             const uniqueNumbers = [...new Set(numbers)];
-            if (uniqueNumbers.length !== WIN_COUNT) { showMessage('خطأ', 'يوجد أرقام مكررة', 'error'); return; }
+            if (uniqueNumbers.length !== 25) {
+                showMessage('خطأ', 'يوجد أرقام مكررة! يجب أن تكون جميع الأرقام فريدة', 'error');
+                return;
+            }
             
             currentPlayerName = name;
             currentPlayerNumbers = uniqueNumbers.sort((a, b) => a - b);
             
-            const requestData = { playerId: playerId, name: name, numbers: currentPlayerNumbers, roomId: roomId, timestamp: Date.now() };
+            const requestData = {
+                playerId: currentPlayerId,
+                name: name,
+                numbers: currentPlayerNumbers,
+                timestamp: Date.now()
+            };
             
-            try {
-                const data = await readBin();
-                if (!data.rooms) data.rooms = {};
-                if (!data.rooms[roomId]) {
-                    data.rooms[roomId] = { gameState: null, lastUpdate: Date.now() };
-                }
-                if (!data.rooms[roomId].gameState) {
-                    data.rooms[roomId].gameState = {
-                        drawnNumbers: [], remainingNumbers: [], players: [], pendingRequests: [],
-                        lastDrawnNumber: null, roomId: roomId, winNumbersRequired: WIN_COUNT,
-                        maxNumber: MAX_NUMBER, bingoClaims: []
-                    };
-                }
-                if (!data.rooms[roomId].gameState.pendingRequests) data.rooms[roomId].gameState.pendingRequests = [];
-                data.rooms[roomId].gameState.pendingRequests.push(requestData);
-                data.rooms[roomId].lastUpdate = Date.now();
-                await writeBin(data);
-                console.log('✅ تم إرسال طلب الانضمام');
-                
-                document.getElementById('registrationStatus').innerHTML = '<div class="success-box">✅ تم إرسال الطلب. انتظر موافقة المتحكم...</div>';
-                checkPlayerStatus();
-            } catch (error) {
-                console.error('❌ Error:', error);
-                showMessage('خطأ', 'فشل في إرسال الطلب', 'error');
-            }
-        }
-        
-        async function checkPlayerStatus() {
-            const interval = setInterval(async () => {
-                try {
-                    const data = await readBin();
-                    const status = data.playerStatus && data.playerStatus[playerId];
-                    if (status && status.status === 'approved') {
-                        clearInterval(interval);
-                        console.log('✅ تم قبول اللاعب');
-                        showPlayerGamePanel();
-                    } else if (status && status.status === 'rejected') {
-                        clearInterval(interval);
-                        console.log('❌ تم رفض اللاعب');
-                        showMessage('مرفوض', 'تم رفض طلبك', 'error');
-                    }
-                } catch (error) { console.error(error); }
-            }, 2000);
+            sendMessage('REGISTRATION_REQUEST', requestData);
+            
+            document.getElementById('registrationStatus').innerHTML = 
+                '<p class="success-text">✅ تم إرسال طلب الانضمام. انتظر موافقة المتحكم...</p>';
+            
+            setTimeout(() => {
+                document.getElementById('registrationForm').classList.add('hidden');
+            }, 1000);
         }
         
         function showPlayerGamePanel() {
             document.getElementById('registrationForm').classList.add('hidden');
             document.getElementById('playerGamePanel').classList.remove('hidden');
+            document.getElementById('playerDisplayName').textContent = currentPlayerName;
+            
             renderPlayerGrid();
-            fetchGameData();
         }
         
         function renderPlayerGrid() {
             const grid = document.getElementById('playerGrid');
             grid.innerHTML = '';
+            
             currentPlayerNumbers.forEach(num => {
                 const cell = document.createElement('div');
                 cell.className = 'grid-cell';
                 cell.textContent = num;
+                cell.dataset.number = num;
                 cell.onclick = () => toggleNumber(num, cell);
                 grid.appendChild(cell);
             });
         }
         
         function toggleNumber(number, cell) {
-            if (!gameData || !gameData.drawnNumbers || gameData.drawnNumbers.length === 0) {
-                showMessage('خطأ', 'لم يتم سحب أي رقم بعد', 'error');
-                return;
-            }
-            if (!gameData.drawnNumbers.includes(number)) {
+            // التحقق من أن الرقم تم سحبه
+            // نحتاج لمعرفة الأرقام المسحوبة - سنستخدم localStorage كقراءة
+            const drawnNumbers = getDrawnNumbersFromStorage();
+            
+            if (!drawnNumbers.includes(number)) {
                 showMessage('❌ خطأ', 'الرقم مو طالع! لم يتم سحب هذا الرقم بعد', 'error');
                 return;
             }
+            
             if (markedNumbers.has(number)) {
                 markedNumbers.delete(number);
                 cell.classList.remove('marked');
@@ -923,41 +882,58 @@
                 markedNumbers.add(number);
                 cell.classList.add('marked');
             }
-            document.getElementById('markedCount').textContent = markedNumbers.size;
         }
         
-        async function claimBingo() {
-            if (markedNumbers.size < WIN_COUNT) {
-                showMessage('خطأ', `يجب تحديد ${WIN_COUNT} رقم (حددت ${markedNumbers.size})`, 'error');
+        function getDrawnNumbersFromStorage() {
+            // قراءة الأرقام المسحوبة من localStorage (يتم تحديثها من المتحكم)
+            try {
+                const state = JSON.parse(localStorage.getItem(GAME_KEY) || '{}');
+                return state.drawnNumbers || [];
+            } catch (e) {
+                return [];
+            }
+        }
+        
+        function claimBingo() {
+            if (markedNumbers.size !== 25) {
+                showMessage('خطأ', `يجب وضع علامة على جميع الأرقام 25 (وضعت ${markedNumbers.size})`, 'error');
                 return;
             }
-            if (!gameData || !gameData.drawnNumbers) { showMessage('خطأ', 'لا توجد بيانات', 'error'); return; }
             
-            const allDrawn = currentPlayerNumbers.every(num => gameData.drawnNumbers.includes(num));
-            if (!allDrawn) { showMessage('خطأ', 'لم تكمل الأرقام بعد!', 'error'); return; }
+            sendMessage('BINGO_CLAIM', {
+                playerId: currentPlayerId,
+                playerName: currentPlayerName,
+                markedNumbers: [...markedNumbers]
+            });
             
+            showMessage('تم الإرسال', 'تم إرسال طلب BINGO للمتحكم للتحقق', 'success');
+        }
+        
+        function updatePlayerCurrentNumber(data) {
+            document.getElementById('playerCurrentNumber').textContent = data.number;
+            document.getElementById('playerCurrentLetter').textContent = data.letter;
+            
+            // حفظ في localStorage للرجوع إليه
             try {
-                const data = await readBin();
-                if (!data.rooms[roomId].gameState.bingoClaims) data.rooms[roomId].gameState.bingoClaims = [];
-                data.rooms[roomId].gameState.bingoClaims.push({
-                    playerId: playerId, playerName: currentPlayerName, markedNumbers: [...markedNumbers], timestamp: Date.now()
-                });
-                await writeBin(data);
-                console.log('🏆 تم إرسال طلب BINGO');
-                showMessage('تم الإرسال', 'تم إرسال طلب BINGO', 'success');
-            } catch (error) { showMessage('خطأ', 'فشل في الإرسال', 'error'); }
+                const state = JSON.parse(localStorage.getItem(GAME_KEY) || '{}');
+                if (!state.drawnNumbers) state.drawnNumbers = [];
+                if (!state.drawnNumbers.includes(data.number)) {
+                    state.drawnNumbers.push(data.number);
+                }
+                localStorage.setItem(GAME_KEY, JSON.stringify(state));
+            } catch (e) {}
+        }
+        
+        function resetPlayerGame() {
+            markedNumbers.clear();
+            document.getElementById('playerCurrentNumber').textContent = '--';
+            document.getElementById('playerCurrentLetter').textContent = '-';
+            renderPlayerGrid();
         }
         
         // ===== دوال مساعدة =====
-        function copyLink() {
-            const linkInput = document.getElementById('shareLink');
-            linkInput.select();
-            if (navigator.clipboard) {
-                navigator.clipboard.writeText(linkInput.value).then(() => showMessage('تم النسخ', 'تم نسخ الرابط', 'success'));
-            } else {
-                document.execCommand('copy');
-                showMessage('تم النسخ', 'تم نسخ الرابط', 'success');
-            }
+        function generateId() {
+            return 'player_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
         }
         
         function shuffleArray(arr) {
@@ -975,7 +951,6 @@
             if (num >= 31 && num <= 45) return 'N';
             if (num >= 46 && num <= 60) return 'G';
             if (num >= 61 && num <= 75) return 'O';
-            if (num >= 76 && num <= 90) return 'X';
             return '?';
         }
         
@@ -990,10 +965,13 @@
             document.getElementById('messageModal').classList.remove('active');
         }
         
-        function logout() {
-            if (pollingInterval) clearInterval(pollingInterval);
-            location.reload();
-        }
+        // ===== تهيئة =====
+        window.addEventListener('DOMContentLoaded', () => {
+            // تهيئة localStorage
+            if (!localStorage.getItem(GAME_KEY)) {
+                localStorage.setItem(GAME_KEY, JSON.stringify({drawnNumbers: []}));
+            }
+        });
     </script>
 </body>
 </html>
