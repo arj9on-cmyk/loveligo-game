@@ -128,7 +128,7 @@
         .card-face {
             position: absolute; width: 100%; height: 100%; border-radius: 16px;
             backface-visibility: hidden; display: flex; align-items: center; justify-content: center;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1); font-size: 2.5rem;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1); font-size: 2.5rem; font-weight: 900;
         }
         .card-front {
             background: linear-gradient(135deg, var(--primary), var(--secondary));
@@ -136,7 +136,7 @@
         }
         .card-back {
             background: white; border: 3px solid var(--primary);
-            transform: rotateY(180deg);
+            transform: rotateY(180deg); color: var(--primary);
         }
 
         .share-box {
@@ -299,7 +299,7 @@
         let flippedCards = [];
         let canFlip = true;
         let gameRef = null;
-        let emojisList = ['🐶', '🐱', '🐭', '🐹', '🐰', '🦊', '🐻', '🐼', '🐨', '🐯', '🦁', '🐮', '🐷', '🐸', '🐵', '🐔', '🐧', '🐦', '🐤', '🦆', '🦅', '🦉', '🦇', '🐺', '🐗', '🐴', '🦄', '🐝', '🐛', '🦋'];
+        let emojisList = ['🐶', '🐱', '🐭', '🐹', '', '🦊', '🐻', '🐼', '🐨', '', '🦁', '', '🐷', '🐸', '🐵', '🐔', '🐧', '🐦', '🐤', '🦆', '', '🦉', '', '🐺', '', '🐴', '', '🐝', '', '🦋'];
 
         // ===== عند تحميل الصفحة =====
         window.onload = function() {
@@ -405,7 +405,7 @@
             }
 
             const gameState = {
-                cards: cards.map((emoji, index) => ({ id: index, emoji: emoji, isFlipped: false, isMatched: false })),
+                cards: cards.map((emoji, index) => ({ id: index, emoji: emoji, isFlipped: false, isMatched: false, number: index + 1 })),
                 teams: teams,
                 currentTurnIndex: 0,
                 attempts: 0,
@@ -476,7 +476,7 @@
                 const cardEl = document.createElement('div');
                 cardEl.className = `card ${card.isFlipped ? 'flipped' : ''} ${card.isMatched ? 'matched' : ''}`;
                 cardEl.innerHTML = `
-                    <div class="card-face card-front"><i class="fas fa-question"></i></div>
+                    <div class="card-face card-front">${card.number}</div>
                     <div class="card-face card-back">${card.emoji}</div>
                 `;
                 
@@ -523,6 +523,7 @@
                     canFlip = true; // الفريق نفسه يلعب مرة أخرى
                 } else {
                     // لا يوجد تطابق، قلب البطاقات مرة أخرى وتغيير الدور
+                    // ✅ تم تسريع الوقت من 1000ms إلى 500ms
                     setTimeout(async () => {
                         await gameRef.child(`cards/${card1.id}/isFlipped`).set(false);
                         await gameRef.child(`cards/${card2.id}/isFlipped`).set(false);
@@ -530,7 +531,7 @@
                         const nextTurn = (currentTurnIndex + 1) % teams.length;
                         await gameRef.child('currentTurnIndex').set(nextTurn);
                         canFlip = true;
-                    }, 1000);
+                    }, 500); // ✅ أسرع بـ 50% لزيادة التحدي!
                 }
             }
         }
