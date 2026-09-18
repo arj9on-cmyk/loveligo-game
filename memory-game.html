@@ -135,6 +135,11 @@
             border-color: var(--success);
             color: white;
         }
+        
+        /* ✅ للمشاهد فقط - البطاقات غير قابلة للنقر */
+        .card.viewer-mode {
+            cursor: default;
+        }
 
         .card-face {
             position: absolute;
@@ -150,14 +155,12 @@
             font-size: 3rem;
             font-weight: 900;
         }
-        /* الوجه الأمامي - الأزرق مع الرقم */
         .card-front {
             background: var(--card-blue);
             color: white;
             font-size: 2rem;
             z-index: 2;
         }
-        /* الوجه الخلفي - الأبيض مع الإيموجي (مخفي في البداية) */
         .card-back {
             background: white;
             border: 3px solid var(--card-blue);
@@ -224,7 +227,7 @@
     <div class="container">
         <!-- 1. شاشة تسجيل الدخول -->
         <div id="loginPanel" class="panel">
-            <h1> لعبة الذاكرة</h1>
+            <h1>🧠 لعبة الذاكرة</h1>
             <p>LOVELIGO - النسخة الاحترافية المتصلة</p>
             
             <div class="input-group">
@@ -298,7 +301,8 @@
 
             <div class="game-header">
                 <div class="turn-indicator" id="turnIndicator">دور: الفريق 1</div>
-                <button class="btn btn-danger" style="width: auto; padding: 10px 20px; font-size: 0.9rem;" onclick="resetGame()">
+                <!-- ✅ زر جولة جديدة يظهر فقط للمتحكم -->
+                <button id="resetBtn" class="btn btn-danger hidden" style="width: auto; padding: 10px 20px; font-size: 0.9rem;" onclick="resetGame()">
                     <i class="fas fa-redo"></i> جولة جديدة
                 </button>
             </div>
@@ -343,12 +347,11 @@
         let canFlip = true;
         let gameRef = null;
         
-        // ✅ مصفوفة نظيفة - 20 إيموجي بدون فراغات
         const emojisList = [
-            '🐶', '🐱', '🐭', '🐹', '🐰',
-            '🦊', '🐻', '🐼', '🐨', '🐯',
-            '🦁', '🐮', '', '🐸', '🐵',
-            '🐔', '🐧', '🐦', '🐤', ''
+            '🐶', '🐱', '🐭', '🐹', '🐬',
+            '🦊', '🦍', '🐼', '🐸', '🐯',
+            '🦁', '🐮', '🐝', '🦦', '🐵',
+            '🐫', '🐧', '🐦', '🐍', '🦆'
         ];
 
         window.onload = function() {
@@ -386,7 +389,7 @@
                 
                 const expiryDate = new Date(license.expires);
                 if (new Date() > expiryDate) {
-                    msgDiv.innerHTML = '<div style="color:#d63031; font-weight:bold;">⏰ انتهت الصلاحية</div>';
+                    msgDiv.innerHTML = '<div style="color:#d63031; font-weight:bold;"> انتهت الصلاحية</div>';
                     return;
                 }
 
@@ -469,6 +472,9 @@
             document.getElementById('gamePanel').classList.remove('hidden');
             document.getElementById('hostShareSection').classList.remove('hidden');
             
+            // ✅ إظهار زر جولة جديدة للمتحكم فقط
+            document.getElementById('resetBtn').classList.remove('hidden');
+            
             const baseUrl = window.location.href.split('?')[0];
             document.getElementById('shareLink').value = `${baseUrl}?game=${gameId}`;
             
@@ -477,6 +483,9 @@
 
         function joinGame() {
             gameRef = database.ref('memoryGames/' + gameId);
+            // ✅ للمشاهد: زر جولة جديدة مخفي تلقائياً (لأنه لم يُضف class hidden في HTML)
+            // لكن نتأكد من إخفائه
+            document.getElementById('resetBtn').classList.add('hidden');
             listenToGame();
         }
 
@@ -520,22 +529,29 @@
 
             cards.forEach((card, index) => {
                 const cardEl = document.createElement('div');
-                cardEl.className = `card ${card.isFlipped ? 'flipped' : ''} ${card.isMatched ? 'matched' : ''}`;
+                // ✅ إضافة class viewer-mode للمشاهد
+                const viewerClass = currentRole === 'player' ? 'viewer-mode' : '';
+                cardEl.className = `card ${card.isFlipped ? 'flipped' : ''} ${card.isMatched ? 'matched' : ''} ${viewerClass}`;
                 cardEl.innerHTML = `
                     <div class="card-face card-front">${card.number}</div>
                     <div class="card-face card-back">${card.emoji}</div>
                 `;
                 
-                cardEl.addEventListener('click', () => handleCardClick(index, card));
+                // ✅ السماح بالنقر فقط للمتحكم
+                if (currentRole === 'host') {
+                    cardEl.addEventListener('click', () => handleCardClick(index, card));
+                }
+                
                 board.appendChild(cardEl);
             });
         }
 
-        // ✅ منطق قلب البطاقة مع إصلاحات
+        // ✅ التحكم فقط يمكنه قلب البطاقات
         async function handleCardClick(index, card) {
+            // ✅ حماية إضافية: التحقق من الدور
+            if (currentRole !== 'host') return;
             if (card.isFlipped || card.isMatched || !canFlip) return;
 
-            // قلب البطاقة الأولى
             await gameRef.child(`cards/${index}/isFlipped`).set(true);
             
             const snapshot = await gameRef.once('value');
@@ -551,7 +567,6 @@
                 const [card1, card2] = newlyFlipped;
                 
                 if (card1.emoji === card2.emoji) {
-                    // تطابق!
                     await gameRef.child(`cards/${card1.id}/isMatched`).set(true);
                     await gameRef.child(`cards/${card2.id}/isMatched`).set(true);
                     
@@ -565,9 +580,7 @@
                     
                     canFlip = true;
                 } else {
-                    // ✅ لا تطابق - قلب البطاقتين معاً في نفس اللحظة
                     setTimeout(async () => {
-                        // قلب البطاقتين في نفس الوقت باستخدام Promise.all
                         await Promise.all([
                             gameRef.child(`cards/${card1.id}/isFlipped`).set(false),
                             gameRef.child(`cards/${card2.id}/isFlipped`).set(false)
@@ -576,7 +589,7 @@
                         const nextTurn = (currentTurnIndex + 1) % teams.length;
                         await gameRef.child('currentTurnIndex').set(nextTurn);
                         canFlip = true;
-                    }, 400); // 400ms لإظهار البطاقتين قبل القلب
+                    }, 400);
                 }
             }
         }
@@ -588,7 +601,9 @@
             alert('تم نسخ الرابط بنجاح!');
         }
 
+        // ✅ التحكم فقط يمكنه إعادة اللعبة
         async function resetGame() {
+            if (currentRole !== 'host') return;
             if (confirm('هل أنت متأكد من بدء جولة جديدة؟')) {
                 await gameRef.remove();
                 location.reload();
