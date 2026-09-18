@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لعبة الذاكرة الاحترافية - LOVELIGO</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #6c5ce7;
+            --secondary: #a29bfe;
+            --accent: #fd79a8;
+            --success: #00b894;
+            --bg-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --glass: rgba(255, 255, 255, 0.95);
+            --shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Cairo', sans-serif; }
+        
+        body {
+            background: var(--bg-gradient);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            color: #2d3436;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 800px;
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+        .panel {
+            background: var(--glass);
+            backdrop-filter: blur(10px);
+            border-radius: 24px;
+            padding: 40px;
+            box-shadow: var(--shadow);
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.5);
+        }
+
+        .hidden { display: none !important; }
+
+        h1 { color: var(--primary); font-size: 2.5rem; font-weight: 900; margin-bottom: 10px; }
+        h2 { color: var(--primary); font-size: 1.8rem; margin-bottom: 20px; border-bottom: 3px solid var(--secondary); padding-bottom: 10px; display: inline-block; }
+        p { color: #636e72; font-size: 1.1rem; margin-bottom: 20px; }
+
+        .input-group { margin-bottom: 20px; text-align: right; }
+        .input-group label { display: block; font-weight: 700; margin-bottom: 8px; color: #2d3436; }
+        .input-group input, .input-group select {
+            width: 100%; padding: 14px; border: 2px solid #dfe6e9; border-radius: 12px;
+            font-size: 1rem; transition: all 0.3s; background: #f8f9fa;
+        }
+        .input-group input:focus, .input-group select:focus {
+            outline: none; border-color: var(--primary); background: white; box-shadow: 0 0 0 4px rgba(108, 92, 231, 0.1);
+        }
+
+        .btn {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white; border: none; padding: 16px 32px; border-radius: 50px;
+            font-size: 1.1rem; font-weight: 700; cursor: pointer; width: 100%;
+            transition: all 0.3s; box-shadow: 0 4px 15px rgba(108, 92, 231, 0.3);
+            display: flex; align-items: center; justify-content: center; gap: 10px;
+        }
+        .btn:hover { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(108, 92, 231, 0.4); }
+        .btn-secondary { background: linear-gradient(135deg, #00b894, #55efc4); box-shadow: 0 4px 15px rgba(0, 184, 148, 0.3); }
+        .btn-danger { background: linear-gradient(135deg, #d63031, #ff7675); box-shadow: 0 4px 15px rgba(214, 48, 49, 0.3); }
+
+        /* Contact Section */
+        .contact-section {
+            margin-top: 30px; padding-top: 20px; border-top: 2px dashed #dfe6e9;
+        }
+        .contact-icons { display: flex; justify-content: center; gap: 20px; margin-top: 15px; }
+        .contact-icon {
+            width: 55px; height: 55px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            font-size: 1.5rem; color: white; text-decoration: none; transition: all 0.3s;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+        }
+        .contact-icon:hover { transform: translateY(-5px) scale(1.1); }
+        .telegram { background: #0088cc; }
+        .instagram { background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888); }
+
+        /* Game Board */
+        .game-header {
+            display: flex; justify-content: space-between; align-items: center;
+            background: #f8f9fa; padding: 15px; border-radius: 15px; margin-bottom: 20px;
+        }
+        .turn-indicator {
+            font-size: 1.3rem; font-weight: 700; color: var(--primary);
+            background: white; padding: 10px 20px; border-radius: 50px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+        .scores-board {
+            display: flex; gap: 15px; justify-content: center; flex-wrap: wrap; margin-bottom: 20px;
+        }
+        .team-score {
+            background: white; padding: 10px 20px; border-radius: 12px; border: 2px solid #dfe6e9;
+            font-weight: 700; transition: all 0.3s;
+        }
+        .team-score.active { border-color: var(--primary); background: rgba(108, 92, 231, 0.1); transform: scale(1.05); }
+
+        .game-board {
+            display: grid; gap: 12px; margin: 20px auto; max-width: 600px;
+            perspective: 1000px;
+        }
+        /* Dynamic grid columns based on difficulty */
+        .grid-8 { grid-template-columns: repeat(4, 1fr); }
+        .grid-12 { grid-template-columns: repeat(4, 1fr); }
+        .grid-16 { grid-template-columns: repeat(4, 1fr); }
+        .grid-20 { grid-template-columns: repeat(5, 1fr); }
+
+        .card {
+            aspect-ratio: 1; cursor: pointer; position: relative;
+            transform-style: preserve-3d; transition: transform 0.6s cubic-bezier(0.4, 0.0, 0.2, 1);
+        }
+        .card.flipped { transform: rotateY(180deg); }
+        .card.matched { cursor: default; }
+        .card.matched .card-back { background: var(--success); border-color: var(--success); color: white; }
+
+        .card-face {
+            position: absolute; width: 100%; height: 100%; border-radius: 16px;
+            backface-visibility: hidden; display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1); font-size: 2.5rem;
+        }
+        .card-front {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white; font-size: 2rem;
+        }
+        .card-back {
+            background: white; border: 3px solid var(--primary);
+            transform: rotateY(180deg);
+        }
+
+        .share-box {
+            background: #f0f3f9; border: 2px dashed var(--primary); border-radius: 15px;
+            padding: 15px; margin: 20px 0;
+        }
+        .share-box input {
+            width: 100%; padding: 12px; border: 1px solid #dfe6e9; border-radius: 8px;
+            text-align: center; font-family: monospace; margin-top: 10px;
+        }
+
+        .modal {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.8); z-index: 1000; display: none;
+            align-items: center; justify-content: center;
+        }
+        .modal.active { display: flex; }
+        .modal-content {
+            background: white; padding: 40px; border-radius: 24px; text-align: center;
+            animation: bounceIn 0.5s; max-width: 90%; width: 400px;
+        }
+        @keyframes bounceIn {
+            0% { transform: scale(0.3); opacity: 0; }
+            50% { transform: scale(1.05); }
+            70% { transform: scale(0.9); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        @media (max-width: 600px) {
+            .game-board { gap: 8px; }
+            .card-face { font-size: 1.8rem; border-radius: 10px; }
+            .panel { padding: 20px; }
+            h1 { font-size: 1.8rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <!-- 1. شاشة تسجيل الدخول -->
+        <div id="loginPanel" class="panel">
+            <h1>🧠 لعبة الذاكرة</h1>
+            <p>LOVELIGO - النسخة الاحترافية المتصلة</p>
+            
+            <div class="input-group">
+                <label>🔑 مفتاح الترخيص:</label>
+                <input type="text" id="licenseKey" placeholder="أدخل المفتاح هنا (مثال: ali1)">
+            </div>
+            <button class="btn" onclick="validateLicense()">
+                <i class="fas fa-sign-in-alt"></i> دخول
+            </button>
+            <div id="loginMessage" style="margin-top: 15px;"></div>
+
+            <div class="contact-section">
+                <p style="margin-bottom: 5px; font-weight: 700; color: var(--primary);">لطلب مفتاح أو اشتراك، تواصل معي:</p>
+                <div class="contact-icons">
+                    <a href="https://t.me/TF_69" target="_blank" class="contact-icon telegram" title="Telegram">
+                        <i class="fab fa-telegram-plane"></i>
+                    </a>
+                    <a href="https://www.instagram.com/tf69x?stkn=cnRpMjZsbjdkczFy" target="_blank" class="contact-icon instagram" title="Instagram">
+                        <i class="fab fa-instagram"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- 2. اختيار الدور -->
+        <div id="rolePanel" class="panel hidden">
+            <h2>🎯 اختر دورك</h2>
+            <button class="btn" onclick="selectRole('host')" style="margin-bottom: 15px;">
+                <i class="fas fa-gamepad"></i> أنا المتحكم (Host)
+            </button>
+            <button class="btn btn-secondary" onclick="selectRole('player')">
+                <i class="fas fa-users"></i> أنا لاعب / مشاهد (Player)
+            </button>
+        </div>
+
+        <!-- 3. إعدادات المتحكم -->
+        <div id="hostSetupPanel" class="panel hidden">
+            <h2>⚙️ إعدادات اللعبة</h2>
+            <div class="input-group">
+                <label>عدد الفرق:</label>
+                <select id="teamCount" onchange="generateTeamInputs()">
+                    <option value="2">فريقان (2)</option>
+                    <option value="3">3 فرق</option>
+                    <option value="4">4 فرق</option>
+                </select>
+            </div>
+            <div id="teamNamesContainer"></div>
+            <div class="input-group">
+                <label>مستوى الصعوبة (عدد الأزواج):</label>
+                <select id="pairCount">
+                    <option value="8">سهل (8 أزواج - 16 بطاقة)</option>
+                    <option value="12" selected>متوسط (12 زوجاً - 24 بطاقة)</option>
+                    <option value="16">صعب (16 زوجاً - 32 بطاقة)</option>
+                    <option value="20">خبير (20 زوجاً - 40 بطاقة)</option>
+                </select>
+            </div>
+            <button class="btn" onclick="startGame()">
+                <i class="fas fa-play"></i> بدء اللعبة وإنشاء الرابط
+            </button>
+        </div>
+
+        <!-- 4. شاشة اللعب (للمتحكم واللاعب) -->
+        <div id="gamePanel" class="panel hidden">
+            <div id="hostShareSection" class="share-box hidden">
+                <p style="margin:0; font-weight:700;">📤 رابط اللعبة (أرسله للفرق):</p>
+                <input type="text" id="shareLink" readonly>
+                <button class="btn btn-secondary" style="margin-top:10px; padding: 10px;" onclick="copyLink()">
+                    <i class="fas fa-copy"></i> نسخ الرابط
+                </button>
+            </div>
+
+            <div class="game-header">
+                <div class="turn-indicator" id="turnIndicator">دور: الفريق 1</div>
+                <button class="btn btn-danger" style="width: auto; padding: 10px 20px; font-size: 0.9rem;" onclick="resetGame()">
+                    <i class="fas fa-redo"></i> جولة جديدة
+                </button>
+            </div>
+
+            <div class="scores-board" id="scoresBoard"></div>
+
+            <div class="game-board" id="gameBoard"></div>
+        </div>
+    </div>
+
+    <!-- نافذة الفوز -->
+    <div id="winModal" class="modal">
+        <div class="modal-content">
+            <h1 style="color: var(--success); font-size: 3rem;">🏆</h1>
+            <h2 id="winnerText" style="border: none;">مبروك!</h2>
+            <p id="winnerDetails"></p>
+            <button class="btn" onclick="closeModal()">إغلاق</button>
+        </div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
+
+    <script>
+        // ===== إعدادات Firebase (نفس الإعدادات السابقة) =====
+        const firebaseConfig = {
+            apiKey: "AIzaSyBuP7MzrIawGMO6FaO-LXMO6ZneatvdZ4k",
+            authDomain: "bingo-html.firebaseapp.com",
+            databaseURL: "https://bingo-html-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "bingo-html",
+            storageBucket: "bingo-html.firebasestorage.app",
+            messagingSenderId: "26806990688",
+            appId: "1:26806990688:web:2ce343ddde4b8addeed005"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+
+        // ===== المتغيرات العامة =====
+        let gameId = null;
+        let currentRole = null;
+        let teams = [];
+        let currentTurnIndex = 0;
+        let flippedCards = [];
+        let canFlip = true;
+        let gameRef = null;
+        let emojisList = ['🐶', '🐱', '🐭', '🐹', '🐰', '🦊', '🐻', '🐼', '🐨', '🐯', '🦁', '🐮', '🐷', '🐸', '🐵', '🐔', '🐧', '🐦', '🐤', '🦆', '🦅', '🦉', '🦇', '🐺', '🐗', '🐴', '🦄', '🐝', '🐛', '🦋'];
+
+        // ===== عند تحميل الصفحة =====
+        window.onload = function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const game = urlParams.get('game');
+            
+            if (game) {
+                gameId = game;
+                currentRole = 'player';
+                document.getElementById('loginPanel').classList.add('hidden');
+                document.getElementById('rolePanel').classList.add('hidden');
+                document.getElementById('gamePanel').classList.remove('hidden');
+                joinGame();
+            } else {
+                document.getElementById('loginPanel').classList.remove('hidden');
+            }
+            generateTeamInputs();
+        };
+
+        // ===== نظام تسجيل الدخول =====
+        async function validateLicense() {
+            const keyInput = document.getElementById('licenseKey').value.trim();
+            const msgDiv = document.getElementById('loginMessage');
+            if (!keyInput) { msgDiv.innerHTML = '<div style="color:#d63031">الرجاء إدخال المفتاح</div>'; return; }
+            
+            msgDiv.innerHTML = '<div class="spinner" style="border: 3px solid #f3f3f3; border-top: 3px solid var(--primary); border-radius: 50%; width: 30px; height: 30px; animation: spin 1s linear infinite; margin: 10px auto;"></div>';
+            
+            try {
+                const snapshot = await database.ref('Keys/keys/' + keyInput).once('value');
+                const license = snapshot.val();
+                
+                if (!license || !license.active) {
+                    msgDiv.innerHTML = '<div style="color:#d63031; font-weight:bold;">❌ مفتاح غير صحيح أو غير نشط</div>';
+                    return;
+                }
+                
+                const expiryDate = new Date(license.expires);
+                if (new Date() > expiryDate) {
+                    msgDiv.innerHTML = '<div style="color:#d63031; font-weight:bold;">⏰ انتهت صلاحية المفتاح</div>';
+                    return;
+                }
+
+                // تسجيل الجهاز
+                let deviceId = localStorage.getItem('memory_device_id');
+                if (!deviceId) {
+                    deviceId = 'dev_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5);
+                    localStorage.setItem('memory_device_id', deviceId);
+                }
+                if (!license.deviceId) {
+                    await database.ref('Keys/keys/' + keyInput).update({ deviceId: deviceId });
+                }
+
+                document.getElementById('loginPanel').classList.add('hidden');
+                document.getElementById('rolePanel').classList.remove('hidden');
+            } catch (error) {
+                msgDiv.innerHTML = '<div style="color:#d63031; font-weight:bold;">❌ خطأ في الاتصال</div>';
+            }
+        }
+
+        // ===== اختيار الدور =====
+        function selectRole(role) {
+            currentRole = role;
+            document.getElementById('rolePanel').classList.add('hidden');
+            
+            if (role === 'host') {
+                document.getElementById('hostSetupPanel').classList.remove('hidden');
+            } else {
+                // للاعب، نطلب منه إدخال رابط أو ننتظر منه الدخول عبر الرابط مباشرة
+                alert('يرجى الدخول عبر رابط اللعبة الذي يرسله لك المتحكم!');
+                location.reload();
+            }
+        }
+
+        function generateTeamInputs() {
+            const count = parseInt(document.getElementById('teamCount').value);
+            const container = document.getElementById('teamNamesContainer');
+            container.innerHTML = '';
+            for (let i = 1; i <= count; i++) {
+                container.innerHTML += `
+                    <div class="input-group">
+                        <label>اسم الفريق ${i}:</label>
+                        <input type="text" class="team-name-input" value="الفريق ${i}" placeholder="اسم الفريق">
+                    </div>
+                `;
+            }
+        }
+
+        // ===== بدء اللعبة (للمتحكم) =====
+        async function startGame() {
+            const pairCount = parseInt(document.getElementById('pairCount').value);
+            const teamInputs = document.querySelectorAll('.team-name-input');
+            teams = Array.from(teamInputs).map(input => ({ name: input.value, score: 0 }));
+            
+            gameId = 'mem_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5);
+            gameRef = database.ref('memoryGames/' + gameId);
+
+            // إنشاء البطاقات
+            const selectedEmojis = emojisList.slice(0, pairCount);
+            const cards = [...selectedEmojis, ...selectedEmojis];
+            for (let i = cards.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [cards[i], cards[j]] = [cards[j], cards[i]];
+            }
+
+            const gameState = {
+                cards: cards.map((emoji, index) => ({ id: index, emoji: emoji, isFlipped: false, isMatched: false })),
+                teams: teams,
+                currentTurnIndex: 0,
+                attempts: 0,
+                status: 'playing',
+                createdAt: Date.now()
+            };
+
+            await gameRef.set(gameState);
+            
+            document.getElementById('hostSetupPanel').classList.add('hidden');
+            document.getElementById('gamePanel').classList.remove('hidden');
+            document.getElementById('hostShareSection').classList.remove('hidden');
+            
+            const baseUrl = window.location.href.split('?')[0];
+            document.getElementById('shareLink').value = `${baseUrl}?game=${gameId}`;
+            
+            listenToGame();
+        }
+
+        // ===== الانضمام للعبة (للاعب) =====
+        function joinGame() {
+            gameRef = database.ref('memoryGames/' + gameId);
+            listenToGame();
+        }
+
+        // ===== الاستماع للتغييرات (Real-time) =====
+        function listenToGame() {
+            gameRef.on('value', (snapshot) => {
+                const state = snapshot.val();
+                if (!state) return;
+
+                teams = state.teams;
+                currentTurnIndex = state.currentTurnIndex;
+                
+                renderScores();
+                renderBoard(state.cards);
+                
+                const turnText = state.status === 'finished' ? 'انتهت اللعبة!' : `الدور على: ${teams[currentTurnIndex].name}`;
+                document.getElementById('turnIndicator').textContent = turnText;
+
+                if (state.status === 'finished') {
+                    const winner = teams.reduce((prev, current) => (prev.score > current.score) ? prev : current);
+                    document.getElementById('winnerText').textContent = `فاز ${winner.name}! 🎉`;
+                    document.getElementById('winnerDetails').textContent = `بمجموع ${winner.score} نقاط`;
+                    document.getElementById('winModal').classList.add('active');
+                }
+            });
+        }
+
+        // ===== عرض لوحة النقاط =====
+        function renderScores() {
+            const board = document.getElementById('scoresBoard');
+            board.innerHTML = teams.map((team, index) => `
+                <div class="team-score ${index === currentTurnIndex ? 'active' : ''}">
+                    ${team.name}: ${team.score}
+                </div>
+            `).join('');
+        }
+
+        // ===== عرض لوحة اللعب =====
+        function renderBoard(cards) {
+            const board = document.getElementById('gameBoard');
+            const pairCount = cards.length / 2;
+            board.className = 'game-board grid-' + pairCount;
+            board.innerHTML = '';
+
+            cards.forEach((card, index) => {
+                const cardEl = document.createElement('div');
+                cardEl.className = `card ${card.isFlipped ? 'flipped' : ''} ${card.isMatched ? 'matched' : ''}`;
+                cardEl.innerHTML = `
+                    <div class="card-face card-front"><i class="fas fa-question"></i></div>
+                    <div class="card-face card-back">${card.emoji}</div>
+                `;
+                
+                cardEl.addEventListener('click', () => handleCardClick(index, card));
+                board.appendChild(cardEl);
+            });
+        }
+
+        // ===== منطق قلب البطاقة =====
+        async function handleCardClick(index, card) {
+            if (card.isFlipped || card.isMatched || !canFlip) return;
+
+            // قلب البطاقة محلياً فوراً لتجربة مستخدم سلسة
+            await gameRef.child(`cards/${index}/isFlipped`).set(true);
+            
+            // قراءة الحالة المحدثة
+            const snapshot = await gameRef.once('value');
+            const state = snapshot.val();
+            const currentCards = state.cards;
+            
+            const newlyFlipped = currentCards.filter(c => c.isFlipped && !c.isMatched);
+            
+            if (newlyFlipped.length === 2) {
+                canFlip = false;
+                await gameRef.child('attempts').set(state.attempts + 1);
+                
+                const [card1, card2] = newlyFlipped;
+                
+                if (card1.emoji === card2.emoji) {
+                    // تطابق!
+                    await gameRef.child(`cards/${card1.id}/isMatched`).set(true);
+                    await gameRef.child(`cards/${card2.id}/isMatched`).set(true);
+                    
+                    // زيادة نقاط الفريق الحالي
+                    const currentScore = teams[currentTurnIndex].score + 1;
+                    await gameRef.child(`teams/${currentTurnIndex}/score`).set(currentScore);
+                    
+                    // التحقق من الفوز
+                    const matchedCount = currentCards.filter(c => c.isMatched).length + 2; // +2 لأننا أضفنا للتو
+                    if (matchedCount === currentCards.length) {
+                        await gameRef.child('status').set('finished');
+                    }
+                    
+                    canFlip = true; // الفريق نفسه يلعب مرة أخرى
+                } else {
+                    // لا يوجد تطابق، قلب البطاقات مرة أخرى وتغيير الدور
+                    setTimeout(async () => {
+                        await gameRef.child(`cards/${card1.id}/isFlipped`).set(false);
+                        await gameRef.child(`cards/${card2.id}/isFlipped`).set(false);
+                        
+                        const nextTurn = (currentTurnIndex + 1) % teams.length;
+                        await gameRef.child('currentTurnIndex').set(nextTurn);
+                        canFlip = true;
+                    }, 1000);
+                }
+            }
+        }
+
+        // ===== أدوات مساعدة =====
+        function copyLink() {
+            const linkInput = document.getElementById('shareLink');
+            linkInput.select();
+            document.execCommand('copy');
+            alert('تم نسخ الرابط بنجاح!');
+        }
+
+        async function resetGame() {
+            if (confirm('هل أنت متأكد من بدء جولة جديدة؟ سيتم مسح النتائج الحالية.')) {
+                await gameRef.remove();
+                location.reload();
+            }
+        }
+
+        function closeModal() {
+            document.getElementById('winModal').classList.remove('active');
+        }
+    </script>
+</body>
+</html>
