@@ -75,7 +75,6 @@
         .btn-secondary { background: linear-gradient(135deg, #00b894, #55efc4); box-shadow: 0 4px 15px rgba(0, 184, 148, 0.3); }
         .btn-danger { background: linear-gradient(135deg, #d63031, #ff7675); box-shadow: 0 4px 15px rgba(214, 48, 49, 0.3); }
 
-        /* Contact Section */
         .contact-section {
             margin-top: 30px; padding-top: 20px; border-top: 2px dashed #dfe6e9;
         }
@@ -112,25 +111,24 @@
             display: grid; gap: 12px; margin: 20px auto; max-width: 600px;
             perspective: 1000px;
         }
-        /* Dynamic grid columns based on difficulty */
         .grid-8 { grid-template-columns: repeat(4, 1fr); }
         .grid-12 { grid-template-columns: repeat(4, 1fr); }
         .grid-16 { grid-template-columns: repeat(4, 1fr); }
         .grid-20 { grid-template-columns: repeat(5, 1fr); }
 
+        /* ✅ إصلاح الدوران ثلاثي الأبعاد */
         .card {
             aspect-ratio: 1;
             cursor: pointer;
             position: relative;
             transform-style: preserve-3d;
-            transition: transform 0.5s ease-in-out;
+            transition: transform 0.6s cubic-bezier(0.4, 0.0, 0.2, 1);
         }
         .card.flipped {
             transform: rotateY(180deg);
         }
         .card.matched {
             cursor: default;
-            opacity: 0.8;
         }
         .card.matched .card-back {
             background: var(--success);
@@ -152,11 +150,14 @@
             font-size: 3rem;
             font-weight: 900;
         }
+        /* الوجه الأمامي - الأزرق مع الرقم */
         .card-front {
             background: var(--card-blue);
             color: white;
             font-size: 2rem;
+            z-index: 2;
         }
+        /* الوجه الخلفي - الأبيض مع الإيموجي (مخفي في البداية) */
         .card-back {
             background: white;
             border: 3px solid var(--card-blue);
@@ -285,7 +286,7 @@
             </button>
         </div>
 
-        <!-- 4. شاشة اللعب (للمتحكم واللاعب) -->
+        <!-- 4. شاشة اللعب -->
         <div id="gamePanel" class="panel hidden">
             <div id="hostShareSection" class="share-box hidden">
                 <p style="margin:0; font-weight:700;">📤 رابط اللعبة (أرسله للفرق):</p>
@@ -323,7 +324,6 @@
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
 
     <script>
-        // ===== إعدادات Firebase =====
         const firebaseConfig = {
             apiKey: "AIzaSyBuP7MzrIawGMO6FaO-LXMO6ZneatvdZ4k",
             authDomain: "bingo-html.firebaseapp.com",
@@ -336,24 +336,21 @@
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
 
-        // ===== المتغيرات العامة =====
         let gameId = null;
         let currentRole = null;
         let teams = [];
         let currentTurnIndex = 0;
-        let flippedCards = [];
         let canFlip = true;
         let gameRef = null;
         
-        // ✅ مصفوفة نظيفة تماماً - 20 إيموجي بدون أي فراغات
+        // ✅ مصفوفة نظيفة - 20 إيموجي بدون فراغات
         const emojisList = [
-            '🐶', '🐱', '🐭', '🐹', '',
-            '🦊', '', '🐼', '🐨', '🐯',
-            '🦁', '🐮', '🐷', '🐸', '🐵',
-            '🐔', '🐧', '', '🐤', '🦆'
+            '🐶', '🐱', '🐭', '🐹', '🐰',
+            '🦊', '🐻', '🐼', '🐨', '🐯',
+            '🦁', '🐮', '', '🐸', '🐵',
+            '🐔', '🐧', '🐦', '🐤', ''
         ];
 
-        // ===== عند تحميل الصفحة =====
         window.onload = function() {
             const urlParams = new URLSearchParams(window.location.search);
             const game = urlParams.get('game');
@@ -371,7 +368,6 @@
             generateTeamInputs();
         };
 
-        // ===== نظام تسجيل الدخول =====
         async function validateLicense() {
             const keyInput = document.getElementById('licenseKey').value.trim();
             const msgDiv = document.getElementById('loginMessage');
@@ -384,13 +380,13 @@
                 const license = snapshot.val();
                 
                 if (!license || !license.active) {
-                    msgDiv.innerHTML = '<div style="color:#d63031; font-weight:bold;">❌ مفتاح غير صحيح أو غير نشط</div>';
+                    msgDiv.innerHTML = '<div style="color:#d63031; font-weight:bold;">❌ مفتاح غير صحيح</div>';
                     return;
                 }
                 
                 const expiryDate = new Date(license.expires);
                 if (new Date() > expiryDate) {
-                    msgDiv.innerHTML = '<div style="color:#d63031; font-weight:bold;">⏰ انتهت صلاحية المفتاح</div>';
+                    msgDiv.innerHTML = '<div style="color:#d63031; font-weight:bold;">⏰ انتهت الصلاحية</div>';
                     return;
                 }
 
@@ -410,7 +406,6 @@
             }
         }
 
-        // ===== اختيار الدور =====
         function selectRole(role) {
             currentRole = role;
             document.getElementById('rolePanel').classList.add('hidden');
@@ -418,7 +413,7 @@
             if (role === 'host') {
                 document.getElementById('hostSetupPanel').classList.remove('hidden');
             } else {
-                alert('يرجى الدخول عبر رابط اللعبة الذي يرسله لك المتحكم!');
+                alert('يرجى الدخول عبر رابط اللعبة!');
                 location.reload();
             }
         }
@@ -437,7 +432,6 @@
             }
         }
 
-        // ===== بدء اللعبة (للمتحكم) =====
         async function startGame() {
             const pairCount = parseInt(document.getElementById('pairCount').value);
             const teamInputs = document.querySelectorAll('.team-name-input');
@@ -446,11 +440,9 @@
             gameId = 'mem_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5);
             gameRef = database.ref('memoryGames/' + gameId);
 
-            // إنشاء البطاقات من المصفوفة النظيفة
             const selectedEmojis = emojisList.slice(0, pairCount);
             const cards = [...selectedEmojis, ...selectedEmojis];
             
-            // خلط البطاقات
             for (let i = cards.length - 1; i > 0; i--) {
                 const j = Math.floor(Math.random() * (i + 1));
                 [cards[i], cards[j]] = [cards[j], cards[i]];
@@ -483,13 +475,11 @@
             listenToGame();
         }
 
-        // ===== الانضمام للعبة (للاعب) =====
         function joinGame() {
             gameRef = database.ref('memoryGames/' + gameId);
             listenToGame();
         }
 
-        // ===== الاستماع للتغييرات (Real-time) =====
         function listenToGame() {
             gameRef.on('value', (snapshot) => {
                 const state = snapshot.val();
@@ -513,7 +503,6 @@
             });
         }
 
-        // ===== عرض لوحة النقاط =====
         function renderScores() {
             const board = document.getElementById('scoresBoard');
             board.innerHTML = teams.map((team, index) => `
@@ -523,7 +512,6 @@
             `).join('');
         }
 
-        // ===== عرض لوحة اللعب =====
         function renderBoard(cards) {
             const board = document.getElementById('gameBoard');
             const pairCount = cards.length / 2;
@@ -543,10 +531,11 @@
             });
         }
 
-        // ===== منطق قلب البطاقة =====
+        // ✅ منطق قلب البطاقة مع إصلاحات
         async function handleCardClick(index, card) {
             if (card.isFlipped || card.isMatched || !canFlip) return;
 
+            // قلب البطاقة الأولى
             await gameRef.child(`cards/${index}/isFlipped`).set(true);
             
             const snapshot = await gameRef.once('value');
@@ -576,20 +565,22 @@
                     
                     canFlip = true;
                 } else {
-                    // لا تطابق - قلب سريع (300ms)
+                    // ✅ لا تطابق - قلب البطاقتين معاً في نفس اللحظة
                     setTimeout(async () => {
-                        await gameRef.child(`cards/${card1.id}/isFlipped`).set(false);
-                        await gameRef.child(`cards/${card2.id}/isFlipped`).set(false);
+                        // قلب البطاقتين في نفس الوقت باستخدام Promise.all
+                        await Promise.all([
+                            gameRef.child(`cards/${card1.id}/isFlipped`).set(false),
+                            gameRef.child(`cards/${card2.id}/isFlipped`).set(false)
+                        ]);
                         
                         const nextTurn = (currentTurnIndex + 1) % teams.length;
                         await gameRef.child('currentTurnIndex').set(nextTurn);
                         canFlip = true;
-                    }, 300);
+                    }, 400); // 400ms لإظهار البطاقتين قبل القلب
                 }
             }
         }
 
-        // ===== أدوات مساعدة =====
         function copyLink() {
             const linkInput = document.getElementById('shareLink');
             linkInput.select();
@@ -598,7 +589,7 @@
         }
 
         async function resetGame() {
-            if (confirm('هل أنت متأكد من بدء جولة جديدة؟ سيتم مسح النتائج الحالية.')) {
+            if (confirm('هل أنت متأكد من بدء جولة جديدة؟')) {
                 await gameRef.remove();
                 location.reload();
             }
