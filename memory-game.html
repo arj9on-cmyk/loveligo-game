@@ -12,6 +12,7 @@
             --secondary: #a29bfe;
             --accent: #fd79a8;
             --success: #00b894;
+            --card-blue: #74b9ff;
             --bg-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             --glass: rgba(255, 255, 255, 0.95);
             --shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
@@ -118,45 +119,89 @@
         .grid-20 { grid-template-columns: repeat(5, 1fr); }
 
         .card {
-            aspect-ratio: 1; cursor: pointer; position: relative;
-            transform-style: preserve-3d; transition: transform 0.6s cubic-bezier(0.4, 0.0, 0.2, 1);
+            aspect-ratio: 1;
+            cursor: pointer;
+            position: relative;
+            transform-style: preserve-3d;
+            transition: transform 0.5s ease-in-out;
         }
-        .card.flipped { transform: rotateY(180deg); }
-        .card.matched { cursor: default; }
-        .card.matched .card-back { background: var(--success); border-color: var(--success); color: white; }
+        .card.flipped {
+            transform: rotateY(180deg);
+        }
+        .card.matched {
+            cursor: default;
+            opacity: 0.8;
+        }
+        .card.matched .card-back {
+            background: var(--success);
+            border-color: var(--success);
+            color: white;
+        }
 
         .card-face {
-            position: absolute; width: 100%; height: 100%; border-radius: 16px;
-            backface-visibility: hidden; display: flex; align-items: center; justify-content: center;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1); font-size: 2.5rem; font-weight: 900;
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border-radius: 16px;
+            backface-visibility: hidden;
+            -webkit-backface-visibility: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            font-size: 3rem;
+            font-weight: 900;
         }
         .card-front {
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
-            color: white; font-size: 2rem;
+            background: var(--card-blue);
+            color: white;
+            font-size: 2rem;
         }
         .card-back {
-            background: white; border: 3px solid var(--primary);
-            transform: rotateY(180deg); color: var(--primary);
+            background: white;
+            border: 3px solid var(--card-blue);
+            transform: rotateY(180deg);
+            color: var(--primary);
         }
 
         .share-box {
-            background: #f0f3f9; border: 2px dashed var(--primary); border-radius: 15px;
-            padding: 15px; margin: 20px 0;
+            background: #f0f3f9;
+            border: 2px dashed var(--primary);
+            border-radius: 15px;
+            padding: 15px;
+            margin: 20px 0;
         }
         .share-box input {
-            width: 100%; padding: 12px; border: 1px solid #dfe6e9; border-radius: 8px;
-            text-align: center; font-family: monospace; margin-top: 10px;
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #dfe6e9;
+            border-radius: 8px;
+            text-align: center;
+            font-family: monospace;
+            margin-top: 10px;
         }
 
         .modal {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.8); z-index: 1000; display: none;
-            align-items: center; justify-content: center;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            z-index: 1000;
+            display: none;
+            align-items: center;
+            justify-content: center;
         }
         .modal.active { display: flex; }
         .modal-content {
-            background: white; padding: 40px; border-radius: 24px; text-align: center;
-            animation: bounceIn 0.5s; max-width: 90%; width: 400px;
+            background: white;
+            padding: 40px;
+            border-radius: 24px;
+            text-align: center;
+            animation: bounceIn 0.5s;
+            max-width: 90%;
+            width: 400px;
         }
         @keyframes bounceIn {
             0% { transform: scale(0.3); opacity: 0; }
@@ -167,7 +212,7 @@
 
         @media (max-width: 600px) {
             .game-board { gap: 8px; }
-            .card-face { font-size: 1.8rem; border-radius: 10px; }
+            .card-face { font-size: 2rem; border-radius: 10px; }
             .panel { padding: 20px; }
             h1 { font-size: 1.8rem; }
         }
@@ -178,7 +223,7 @@
     <div class="container">
         <!-- 1. شاشة تسجيل الدخول -->
         <div id="loginPanel" class="panel">
-            <h1>🧠 لعبة الذاكرة</h1>
+            <h1> لعبة الذاكرة</h1>
             <p>LOVELIGO - النسخة الاحترافية المتصلة</p>
             
             <div class="input-group">
@@ -243,7 +288,7 @@
         <!-- 4. شاشة اللعب (للمتحكم واللاعب) -->
         <div id="gamePanel" class="panel hidden">
             <div id="hostShareSection" class="share-box hidden">
-                <p style="margin:0; font-weight:700;"> رابط اللعبة (أرسله للفرق):</p>
+                <p style="margin:0; font-weight:700;">📤 رابط اللعبة (أرسله للفرق):</p>
                 <input type="text" id="shareLink" readonly>
                 <button class="btn btn-secondary" style="margin-top:10px; padding: 10px;" onclick="copyLink()">
                     <i class="fas fa-copy"></i> نسخ الرابط
@@ -266,7 +311,7 @@
     <!-- نافذة الفوز -->
     <div id="winModal" class="modal">
         <div class="modal-content">
-            <h1 style="color: var(--success); font-size: 3rem;"></h1>
+            <h1 style="color: var(--success); font-size: 3rem;">🏆</h1>
             <h2 id="winnerText" style="border: none;">مبروك!</h2>
             <p id="winnerDetails"></p>
             <button class="btn" onclick="closeModal()">إغلاق</button>
@@ -278,7 +323,7 @@
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
 
     <script>
-        // ===== إعدادات Firebase (نفس الإعدادات السابقة) =====
+        // ===== إعدادات Firebase =====
         const firebaseConfig = {
             apiKey: "AIzaSyBuP7MzrIawGMO6FaO-LXMO6ZneatvdZ4k",
             authDomain: "bingo-html.firebaseapp.com",
@@ -300,12 +345,12 @@
         let canFlip = true;
         let gameRef = null;
         
-        // ✅ تم إصلاح المصفوفة - إزالة جميع العناصر الفارغة
-        let emojisList = [
-            '🦜', '🐱', '🐘', '🐹', '🐰', '🦊', '🐻', '🐼', 
-            '🐨', '🐯', '🦁', '🐮', '🐬', '🐸', '🐵', '🐫', 
-            '🐧', '🍉', '🐣', '🐍', '🦅', '🦀', '🦇', '🦒', 
-            '🦦', '🦆', '🦄', '🐝', '🐛', '🦋'
+        // ✅ مصفوفة نظيفة تماماً - 20 إيموجي بدون أي فراغات
+        const emojisList = [
+            '🐶', '🐱', '🐭', '🐹', '',
+            '🦊', '', '🐼', '🐨', '🐯',
+            '🦁', '🐮', '🐷', '🐸', '🐵',
+            '🐔', '🐧', '', '🐤', '🦆'
         ];
 
         // ===== عند تحميل الصفحة =====
@@ -332,7 +377,7 @@
             const msgDiv = document.getElementById('loginMessage');
             if (!keyInput) { msgDiv.innerHTML = '<div style="color:#d63031">الرجاء إدخال المفتاح</div>'; return; }
             
-            msgDiv.innerHTML = '<div class="spinner" style="border: 3px solid #f3f3f3; border-top: 3px solid var(--primary); border-radius: 50%; width: 30px; height: 30px; animation: spin 1s linear infinite; margin: 10px auto;"></div>';
+            msgDiv.innerHTML = '<div style="border: 3px solid #f3f3f3; border-top: 3px solid var(--primary); border-radius: 50%; width: 30px; height: 30px; animation: spin 1s linear infinite; margin: 10px auto;"></div>';
             
             try {
                 const snapshot = await database.ref('Keys/keys/' + keyInput).once('value');
@@ -349,7 +394,6 @@
                     return;
                 }
 
-                // تسجيل الجهاز
                 let deviceId = localStorage.getItem('memory_device_id');
                 if (!deviceId) {
                     deviceId = 'dev_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5);
@@ -374,7 +418,6 @@
             if (role === 'host') {
                 document.getElementById('hostSetupPanel').classList.remove('hidden');
             } else {
-                // للاعب، نطلب منه إدخال رابط أو ننتظر منه الدخول عبر الرابط مباشرة
                 alert('يرجى الدخول عبر رابط اللعبة الذي يرسله لك المتحكم!');
                 location.reload();
             }
@@ -403,16 +446,24 @@
             gameId = 'mem_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5);
             gameRef = database.ref('memoryGames/' + gameId);
 
-            // إنشاء البطاقات
+            // إنشاء البطاقات من المصفوفة النظيفة
             const selectedEmojis = emojisList.slice(0, pairCount);
             const cards = [...selectedEmojis, ...selectedEmojis];
+            
+            // خلط البطاقات
             for (let i = cards.length - 1; i > 0; i--) {
                 const j = Math.floor(Math.random() * (i + 1));
                 [cards[i], cards[j]] = [cards[j], cards[i]];
             }
 
             const gameState = {
-                cards: cards.map((emoji, index) => ({ id: index, emoji: emoji, isFlipped: false, isMatched: false, number: index + 1 })),
+                cards: cards.map((emoji, index) => ({ 
+                    id: index, 
+                    emoji: emoji, 
+                    isFlipped: false, 
+                    isMatched: false, 
+                    number: index + 1 
+                })),
                 teams: teams,
                 currentTurnIndex: 0,
                 attempts: 0,
@@ -496,10 +547,8 @@
         async function handleCardClick(index, card) {
             if (card.isFlipped || card.isMatched || !canFlip) return;
 
-            // قلب البطاقة محلياً فوراً لتجربة مستخدم سلسة
             await gameRef.child(`cards/${index}/isFlipped`).set(true);
             
-            // قراءة الحالة المحدثة
             const snapshot = await gameRef.once('value');
             const state = snapshot.val();
             const currentCards = state.cards;
@@ -517,20 +566,17 @@
                     await gameRef.child(`cards/${card1.id}/isMatched`).set(true);
                     await gameRef.child(`cards/${card2.id}/isMatched`).set(true);
                     
-                    // زيادة نقاط الفريق الحالي
                     const currentScore = teams[currentTurnIndex].score + 1;
                     await gameRef.child(`teams/${currentTurnIndex}/score`).set(currentScore);
                     
-                    // التحقق من الفوز
-                    const matchedCount = currentCards.filter(c => c.isMatched).length + 2; // +2 لأننا أضفنا للتو
+                    const matchedCount = currentCards.filter(c => c.isMatched).length + 2;
                     if (matchedCount === currentCards.length) {
                         await gameRef.child('status').set('finished');
                     }
                     
-                    canFlip = true; // الفريق نفسه يلعب مرة أخرى
+                    canFlip = true;
                 } else {
-                    // لا يوجد تطابق، قلب البطاقات مرة أخرى وتغيير الدور
-                    // ✅ تم التسريع أكثر! من 500ms إلى 300ms (أسرع بـ 70%)
+                    // لا تطابق - قلب سريع (300ms)
                     setTimeout(async () => {
                         await gameRef.child(`cards/${card1.id}/isFlipped`).set(false);
                         await gameRef.child(`cards/${card2.id}/isFlipped`).set(false);
@@ -538,7 +584,7 @@
                         const nextTurn = (currentTurnIndex + 1) % teams.length;
                         await gameRef.child('currentTurnIndex').set(nextTurn);
                         canFlip = true;
-                    }, 300); // ✅ سريع جداً لزيادة التحدي!
+                    }, 300);
                 }
             }
         }
