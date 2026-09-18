@@ -1,0 +1,1011 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🇸🇦 لعبة اليوم الوطني - عزّ لنا طبع</title>
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
+  import { getDatabase, ref, set, onValue, update, push, get, remove } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-database.js";
+  window.fb = { initializeApp, getDatabase, ref, set, onValue, update, push, get, remove };
+</script>
+<script src="https://www.youtube.com/iframe_api"></script>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; font-family:'Segoe UI', Tahoma, sans-serif; }
+  body {
+    min-height:100vh;
+    background: url('https://i.pinimg.com/736x/8a/5c/4f/8a5c4f8e9c8b7a6d5e4f3a2b1c0d9e8f.jpg') center/cover fixed;
+    color:#fff; padding:20px; overflow-x:hidden;
+    position: relative;
+  }
+  body::before {
+    content:""; position:fixed; inset:0; 
+    background: rgba(0, 50, 20, 0.85);
+    pointer-events:none; z-index: 0;
+  }
+  .container { max-width:1000px; margin:auto; position:relative; z-index:1; }
+  .logo {
+    text-align:center; padding:20px; margin-bottom:20px;
+    background: rgba(255,255,255,0.1); border-radius:20px;
+    backdrop-filter: blur(10px); border:2px solid rgba(255,215,0,0.3);
+  }
+  .logo h1 { font-size:2.2em; color:#fff; text-shadow:0 0 20px rgba(255,215,0,0.5); }
+  .logo .slogan { font-size:1.6em; color:#ffd700; margin-top:10px; font-weight:bold; }
+  .logo .flag { font-size:3em; margin:10px 0; }
+  .btn {
+    padding:14px 30px; border:none; border-radius:12px; font-size:1.1em; font-weight:bold;
+    cursor:pointer; transition:all .3s; margin:5px; color:#fff;
+    background: linear-gradient(135deg, #00a651, #006c35);
+    box-shadow:0 4px 15px rgba(0,0,0,0.3);
+  }
+  .btn:hover { transform:translateY(-2px); box-shadow:0 6px 20px rgba(0,166,81,0.5); }
+  .btn-gold { background: linear-gradient(135deg, #ffd700, #daa520); color:#000; }
+  .btn-red { background: linear-gradient(135deg, #dc3545, #a71d2a); }
+  .btn-blue { background: linear-gradient(135deg, #007bff, #0056b3); }
+  .btn-small { padding:8px 16px; font-size:0.9em; }
+  .btn:disabled { opacity:.5; cursor:not-allowed; }
+  .card {
+    background: rgba(255,255,255,0.1); border-radius:18px; padding:25px;
+    backdrop-filter: blur(10px); border:1px solid rgba(255,255,255,0.2);
+    margin-bottom:20px; box-shadow:0 8px 32px rgba(0,0,0,0.3);
+  }
+  .card h2 { color:#ffd700; margin-bottom:15px; font-size:1.4em; border-bottom:2px solid #ffd700; padding-bottom:10px; }
+  input[type=text] {
+    width:100%; padding:14px; border-radius:10px; border:2px solid rgba(255,215,0,0.3);
+    background: rgba(255,255,255,0.15); color:#fff; font-size:1.1em; margin:10px 0;
+  }
+  input[type=text]::placeholder { color:rgba(255,255,255,0.6); }
+  .choice-btn {
+    display:block; width:100%; padding:18px; margin:10px 0;
+    background: linear-gradient(135deg, rgba(255,255,255,0.15), rgba(255,255,255,0.05));
+    border:2px solid rgba(255,255,255,0.3); border-radius:12px;
+    color:#fff; font-size:1.1em; cursor:pointer; transition:all .3s; text-align:right;
+  }
+  .choice-btn:hover:not(:disabled) {
+    background: linear-gradient(135deg, #00a651, #006c35);
+    transform:translateX(-5px); border-color:#ffd700;
+  }
+  .choice-btn.correct { background: linear-gradient(135deg, #28a745, #1e7e34) !important; border-color:#fff; }
+  .choice-btn.wrong { background: linear-gradient(135deg, #dc3545, #a71d2a) !important; border-color:#fff; }
+  
+  /* قائمة اللاعبين القابلة للطي */
+  .collapsible {
+    background: rgba(255,215,0,0.2);
+    border: 2px solid #ffd700;
+    border-radius: 12px;
+    padding: 15px;
+    cursor: pointer;
+    margin-bottom: 10px;
+    transition: all 0.3s;
+  }
+  .collapsible:hover {
+    background: rgba(255,215,0,0.3);
+  }
+  .collapsible-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-weight: bold;
+    color: #ffd700;
+  }
+  .collapsible-content {
+    display: none;
+    max-height: 400px;
+    overflow-y: auto;
+    margin-top: 10px;
+  }
+  .collapsible-content.active {
+    display: block;
+  }
+  .player-list { display:grid; grid-template-columns:repeat(auto-fill, minmax(180px, 1fr)); gap:10px; }
+  .player-item {
+    background: rgba(255,255,255,0.1); padding:12px; border-radius:10px;
+    display:flex; justify-content:space-between; align-items:center;
+    border:1px solid rgba(255,255,255,0.2);
+    position: relative;
+  }
+  .player-item .delete-btn {
+    position: absolute;
+    left: 5px;
+    top: 5px;
+    background: #dc3545;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+    cursor: pointer;
+    font-size: 0.8em;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .score-badge { background:#ffd700; color:#000; padding:4px 12px; border-radius:20px; font-weight:bold; }
+  .question-box {
+    background: linear-gradient(135deg, rgba(255,215,0,0.2), rgba(255,215,0,0.05));
+    border:2px solid #ffd700; border-radius:15px; padding:25px; margin:20px 0;
+    font-size:1.3em; text-align:center; font-weight:bold; line-height: 1.6;
+  }
+  .status-bar {
+    display:flex; justify-content:space-around; flex-wrap:wrap; gap:10px;
+    background:rgba(0,0,0,0.5); padding:15px; border-radius:12px; margin-bottom:20px;
+  }
+  .status-item { text-align:center; }
+  .status-item .label { font-size:.85em; opacity:.8; }
+  .status-item .value { font-size:1.6em; font-weight:bold; color:#ffd700; }
+  .winner-card {
+    background: linear-gradient(135deg, #ffd700, #ff8c00);
+    color:#000; padding:15px; border-radius:12px; margin:8px 0;
+    text-align:center; font-size:1.1em; font-weight:bold;
+  }
+  .audio-controls {
+    position: fixed; bottom: 20px; left: 20px; z-index: 1000;
+    background: rgba(0,0,0,0.8); padding: 15px; border-radius: 15px;
+    display: flex; align-items: center; gap: 10px; border: 2px solid #ffd700;
+  }
+  .audio-controls button {
+    background: #ffd700; color: #000; border: none; width: 40px; height: 40px;
+    border-radius: 50%; font-size: 1.2em; cursor: pointer;
+  }
+  .audio-controls input[type=range] { width: 100px; accent-color: #ffd700; }
+  .hidden { display:none !important; }
+  .role-select { text-align:center; padding:40px; }
+  .role-btn {
+    display:inline-block; padding:25px 40px; margin:15px;
+    background: linear-gradient(135deg, #00a651, #006c35);
+    border-radius:20px; cursor:pointer; font-size:1.2em; font-weight:bold;
+    transition:all .3s; border:3px solid transparent;
+  }
+  .role-btn:hover { transform:scale(1.05); border-color:#ffd700; }
+  .notification {
+    position:fixed; top:20px; left:50%; transform:translateX(-50%);
+    background:#ffd700; color:#000; padding:15px 30px; border-radius:10px;
+    font-weight:bold; z-index:1000; animation:slideDown .5s;
+  }
+  @keyframes slideDown { from { top:-100px; } to { top:20px; } }
+  .control-panel {
+    background: rgba(0,0,0,0.4);
+    padding: 15px;
+    border-radius: 10px;
+    margin-bottom: 15px;
+    border: 1px solid rgba(255,215,0,0.3);
+  }
+  @media(max-width:600px) {
+    .logo h1 { font-size:1.6em; }
+    .question-box { font-size:1.1em; }
+    .audio-controls { bottom: 10px; left: 10px; padding: 10px; }
+  }
+</style>
+</head>
+<body>
+
+<div id="yt-player" style="position:absolute; width:1px; height:1px; opacity:0; pointer-events:none;"></div>
+
+<div class="container">
+  <!-- شاشة اختيار الدور (تظهر فقط بدون parameter) -->
+  <div id="roleScreen">
+    <div class="logo">
+      <div class="flag">🇸🇦</div>
+      <h1>اليوم الوطني السعودي</h1>
+      <div class="slogan">✨ عزّ لنا طبع ✨</div>
+    </div>
+    <div class="role-select">
+      <h2>اختر دورك للبدء</h2>
+      <p style="margin-bottom:20px; opacity:0.8;">(مطلوب تفاعل للبدء بتشغيل الموسيقى)</p>
+      <div class="role-btn" onclick="startAs('host')">🎛️ متحكم</div>
+      <div class="role-btn" onclick="startAs('player')">🎮 لاعب</div>
+      <div class="role-btn" onclick="startAs('spectator')">️ مشاهد</div>
+    </div>
+  </div>
+
+  <!-- شاشة المتحكم -->
+  <div id="hostScreen" class="hidden">
+    <div class="logo">
+      <div class="flag">🇦</div>
+      <h1>لوحة المتحكم</h1>
+      <div class="slogan">عزّ لنا طبع</div>
+    </div>
+    <div class="status-bar">
+      <div class="status-item"><div class="label">الجولة</div><div class="value" id="hostRound">-</div></div>
+      <div class="status-item"><div class="label">السؤال</div><div class="value" id="hostQNum">0/50</div></div>
+      <div class="status-item"><div class="label">اللاعبون</div><div class="value" id="hostPlayerCount">0</div></div>
+      <div class="status-item"><div class="label">الفائزون</div><div class="value" id="hostWinners">0</div></div>
+    </div>
+    
+    <div class="card">
+      <h2>📋 طلبات التسجيل</h2>
+      <div id="pendingList"></div>
+    </div>
+    
+    <!-- قائمة اللاعبين القابلة للطي -->
+    <div class="card">
+      <h2>🎯 اللاعبون المسجلون</h2>
+      <div class="collapsible" onclick="toggleCollapsible('playersList')">
+        <div class="collapsible-header">
+          <span>📂 اضغط لعرض اللاعبين المسجلين (<span id="playerCountDisplay">0</span>)</span>
+          <span id="playersArrow">▼</span>
+        </div>
+      </div>
+      <div id="playersList" class="collapsible-content">
+        <div id="registeredList" class="player-list"></div>
+      </div>
+      <div class="control-panel">
+        <button class="btn btn-red btn-small" onclick="deleteAllPlayers()">🗑️ حذف جميع اللاعبين</button>
+      </div>
+    </div>
+    
+    <div class="card">
+      <h2>🏆 سجل الفائزين</h2>
+      <div id="winnersLog"></div>
+      <div class="control-panel">
+        <button class="btn btn-red btn-small" onclick="clearWinners()">🗑️ حذف سجل الفائزين</button>
+      </div>
+    </div>
+    
+    <div class="card">
+      <h2>🎮 التحكم بالجولة</h2>
+      <div id="roundControl">
+        <button class="btn btn-gold" onclick="startRound(1)"> بدء الجولة الأولى</button>
+        <button class="btn btn-gold" onclick="startRound(2)">🟢 بدء الجولة الثانية</button>
+        <button class="btn btn-gold" onclick="startRound(3)">⚡ بدء الجولة الثالثة</button>
+        <button class="btn btn-blue" onclick="nextQuestion()">➡️ السؤال التالي</button>
+        <button class="btn btn-red" onclick="resetGame()">🔄 إعادة اللعبة</button>
+      </div>
+      <div id="currentQuestion" style="margin-top:20px;"></div>
+    </div>
+    
+    <div class="card">
+      <h2> رابط اللاعبين</h2>
+      <p style="margin-bottom:10px;">شارك هذا الرابط مع اللاعبين:</p>
+      <input type="text" id="playerLink" readonly style="direction: ltr; text-align: center; font-size: 0.9em;">
+      <button class="btn btn-blue btn-small" onclick="copyPlayerLink()">📋 نسخ الرابط</button>
+    </div>
+  </div>
+
+  <!-- شاشة اللاعب -->
+  <div id="playerScreen" class="hidden">
+    <div class="logo">
+      <div class="flag">🇸🇦</div>
+      <h1>منطقة اللاعب</h1>
+      <div class="slogan">عزّ لنا طبع</div>
+    </div>
+    <div id="registerBox" class="card">
+      <h2>📝 التسجيل للمشاركة</h2>
+      <input type="text" id="playerName" placeholder="اكتب اسمك هنا...">
+      <button class="btn btn-gold" onclick="sendJoinRequest()">📨 إرسال طلب التسجيل</button>
+      <div id="regStatus" style="margin-top:15px; font-size:1.1em;"></div>
+    </div>
+    <div id="gameBox" class="hidden">
+      <div class="status-bar">
+        <div class="status-item"><div class="label">اسمك</div><div class="value" id="myName" style="font-size:1.1em;">-</div></div>
+        <div class="status-item"><div class="label">الجولة</div><div class="value" id="myRound">-</div></div>
+        <div class="status-item"><div class="label">نقاطك</div><div class="value" id="myScore">0</div></div>
+      </div>
+      <div id="playerGameArea" class="card">
+        <div class="question-box" id="playerQuestion">في انتظار بدء الجولة...</div>
+        <div id="playerChoices"></div>
+        <button class="btn btn-gold hidden" id="winnerBtn" onclick="declareWinner()"> إعلان الفوز بالجولة</button>
+        <div id="playerMsg" style="margin-top:15px; font-size:1.1em; text-align:center;"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- شاشة المشاهد -->
+  <div id="spectatorScreen" class="hidden">
+    <div class="logo">
+      <div class="flag">🇸🇦</div>
+      <h1>شاشة المشاهدين</h1>
+      <div class="slogan">عزّ لنا طبع</div>
+    </div>
+    <div class="status-bar">
+      <div class="status-item"><div class="label">الجولة</div><div class="value" id="specRound">-</div></div>
+      <div class="status-item"><div class="label">السؤال</div><div class="value" id="specQNum">0/50</div></div>
+      <div class="status-item"><div class="label">اللاعبون</div><div class="value" id="specPlayerCount">0</div></div>
+    </div>
+    <div class="card">
+      <div class="question-box" id="specQuestion">في انتظار بدء اللعبة...</div>
+      <div id="specChoices"></div>
+    </div>
+    <div class="card">
+      <h2>🏆 سجل الفائزين</h2>
+      <div id="specWinners"></div>
+    </div>
+    <div class="card">
+      <h2>📊 لوحة النقاط</h2>
+      <!-- قائمة منسدلة للمشاهدين أيضاً -->
+      <div class="collapsible" onclick="toggleCollapsible('specPlayersList')">
+        <div class="collapsible-header">
+          <span>📂 عرض اللاعبين (<span id="specCountDisplay">0</span>)</span>
+          <span id="specPlayersArrow">▼</span>
+        </div>
+      </div>
+      <div id="specPlayersList" class="collapsible-content">
+        <div id="specScores" class="player-list"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="audioControlPanel" class="audio-controls hidden">
+  <button onclick="toggleAudio()" id="audioPlayBtn">▶️</button>
+  <input type="range" min="0" max="100" value="50" oninput="setAudioVolume(this.value)">
+  <span style="color:#ffd700; font-size:0.9em;"></span>
+</div>
+
+<script type="module">
+  const firebaseConfig = {
+    apiKey: "AIzaSyCHEowAgf2fUKg1gucjIlTfIHRI9VG4MNs",
+    authDomain: "ks-alk.firebaseapp.com",
+    databaseURL: "https://ks-alk-default-rtdb.europe-west1.firebasedatabase.app",
+    projectId: "ks-alk",
+    storageBucket: "ks-alk.firebasestorage.app",
+    messagingSenderId: "57029154329",
+    appId: "1:57029154329:web:37de976f48333b48c13c88"
+  };
+
+  const { initializeApp, getDatabase, ref, set, onValue, update, push, get, remove } = window.fb;
+  const app = initializeApp(firebaseConfig);
+  const db = getDatabase(app);
+
+  let myRole = null;
+  let myId = 'p_' + Math.random().toString(36).substr(2,9);
+  let myName = '';
+  let myScore = 0;
+  let answeredThisQ = false;
+  let ytPlayer = null;
+  let isAudioPlaying = false;
+  let currentMusicIndex = 0;
+
+  // قائمة الموسيقى بالتسلسل
+  const musicQueue = [
+    { id: 'hDuOGrWD2xc', name: 'النشيد الوطني' },
+    { id: 'EYJWafsw3RA', name: 'الموسيقى 1' },
+    { id: 'fcMCLPlaCx8', name: 'الموسيقى 2' },
+    { id: 'Fw7evTfZg7Q', name: 'الموسيقى 3' }
+  ];
+
+  const roundTitles = {
+    1: ' الجولة الأولى — اعرف وطنك (نقطة لكل إجابة)',
+    2: '🟢 الجولة الثانية — عزّ لنا طبع (نقطتان لكل إجابة)',
+    3: '⚡ الجولة الثالثة — التحدي الوطني (3 نقاط لكل إجابة)'
+  };
+
+  const maxWinners = { 1: 21, 2: 14, 3: 7 };
+  const pointsPerRound = { 1: 1, 2: 2, 3: 3 };
+
+  // دالة لخلط الخيارات
+  function shuffleChoices(question) {
+    const choices = question.c.map((text, index) => ({ text, isCorrect: index === question.a }));
+    // خلط الخيارات
+    for (let i = choices.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [choices[i], choices[j]] = [choices[j], choices[i]];
+    }
+    return {
+      q: question.q,
+      c: choices.map(c => c.text),
+      a: choices.findIndex(c => c.isCorrect)
+    };
+  }
+
+  const Q1 = [
+    {q:"في أي تاريخ تحتفل السعودية باليوم الوطني؟", c:["23 سبتمبر","1 أكتوبر","4 أغسطس"], a:0},
+    {q:"ماذا يخلّد اليوم الوطني السعودي؟", c:["تأسيس الجيش","توحيد المملكة","استقلال اقتصادي"], a:1},
+    {q:"في أي عام أُعلن توحيد المملكة؟", c:["1902م","1932م","1953م"], a:1},
+    {q:"من مؤسس المملكة العربية السعودية الحديثة؟", c:["الملك فيصل","الملك عبدالعزيز","الملك سعود"], a:1},
+    {q:"ما عاصمة المملكة العربية السعودية؟", c:["جدة","مكة","الرياض"], a:2},
+    {q:"ما العملة الرسمية للمملكة؟", c:["الدرهم","الريال السعودي","الدينار"], a:1},
+    {q:"ما لون العلم السعودي؟", c:["الأبيض","الأزرق","الأخضر"], a:2},
+    {q:"ماذا يوجد في منتصف العلم السعودي؟", c:["نسر","الشهادتان وسيف","نجمة"], a:1},
+    {q:"ما اللغة الرسمية للمملكة؟", c:["اللغة الإنجليزية","اللغة الفارسية","اللغة العربية"], a:2},
+    {q:"ما البحر الذي يقع غرب المملكة؟", c:["البحر المتوسط","الخليج العربي","البحر الأحمر"], a:2},
+    {q:"ما الخليج الذي يقع شرق المملكة؟", c:["بحر العرب","الخليج العربي","بحر عمان"], a:1},
+    {q:"ما المدينة التي استردها الملك عبدالعزيز عام 1902م؟", c:["مكة","جدة","الرياض"], a:2},
+    {q:"ما اسم المسجد الذي يوجد في مكة المكرمة؟", c:["المسجد النبوي","المسجد الأقصى","المسجد الحرام"], a:2},
+    {q:"ما اسم المسجد الذي يوجد في المدينة المنورة؟", c:["المسجد الحرام","مسجد قباء","المسجد النبوي"], a:2},
+    {q:"ما اسم أعلى برج في الرياض المعروف بفتحة في أعلاه؟", c:["برج الفيصلية","مركز المملكة","برج المملكة"], a:1},
+    {q:"ما اسم المنطقة التي تقع فيها مكة المكرمة؟", c:["منطقة الرياض","المنطقة الشرقية","منطقة مكة المكرمة"], a:2},
+    {q:"ما المدينة المعروفة بأنها عاصمة المنطقة الشرقية؟", c:["الأحساء","الجبيل","الدمام"], a:2},
+    {q:"ما المدينة السعودية المشهورة بمدائن صالح؟", c:["تبوك","حائل","العلا"], a:2},
+    {q:"ما اسم الموقع الأثري الشهير في العلا المسجل في اليونسكو؟", c:["الدرعية","مدائن شعيب","الحِجر"], a:2},
+    {q:"ما اسم المشروع الحضري الضخم في شمال غرب السعودية؟", c:["ذا لاين","نيوم","أمالا"], a:1},
+    {q:"ما اسم الرؤية الوطنية التي أُطلقت عام 2016م؟", c:["رؤية 2020","رؤية 2040","رؤية 2030"], a:2},
+    {q:"ما اسم البحر الذي تقع عليه مدينة جدة؟", c:["الخليج العربي","بحر العرب","البحر الأحمر"], a:2},
+    {q:"ما المدينة التي تُعرف تاريخيًا بأنها بوابة مكة من جهة البحر؟", c:["ينبع","الليث","جدة"], a:2},
+    {q:"في أي شهر هجري صدر الأمر بتوحيد الدولة عام 1351هـ؟", c:["رمضان","محرم","جمادى الأولى"], a:2},
+    {q:"ما الاسم الذي أُعلن رسميًا للدولة بعد التوحيد؟", c:["دولة الحجاز","المملكة العربية السعودية","سلطنة نجد"], a:1},
+    {q:"من هو مؤسس الدولة السعودية الثانية؟", c:["فيصل بن تركي","سعود الكبير","تركي بن عبدالله"], a:2},
+    {q:"ما أهم ما تمتلكه المملكة العربية السعودية؟", c:["النفط","الأرض","المواطن السعودي"], a:2},
+    {q:"في أي عام انتهت الدولة السعودية الأولى؟", c:["1200هـ","1250هـ","1233هـ"], a:2},
+    {q:"ما اسم أكبر سد مائي في المملكة؟", c:["سد وادي فاطمة","سد الملك فهد","سد وادي نجران"], a:2},
+    {q:"في أي عام تم اعتماد اسم المملكة العربية السعودية رسميًا؟", c:["1923م","1945م","1932م"], a:2},
+    {q:"ما أول المدن التي استعادها الملك عبدالعزيز بعد تحرير الرياض؟", c:["مكة والطائف","القصيم وحائل","الخرج والدلم"], a:2},
+    {q:"كم استغرقت مدة استعادة تركي بن عبدالله للمملكة؟", c:["5 سنوات","10 سنوات","8 سنوات"], a:2},
+    {q:"ما عاصمة المملكة العربية السعودية الأولى؟", c:["الرياض","الدمام","الدرعية"], a:2},
+    {q:"ما المدينتان المقدستان في المملكة؟", c:["الرياض وجدة","الطائف وأبها","مكة والمدينة"], a:2},
+    {q:"من الملك الذي وحّد المملكة العربية السعودية؟", c:["سعود بن عبدالعزيز","فيصل بن عبدالعزيز","عبدالعزيز بن عبدالرحمن"], a:2},
+    {q:"ما الصفة المميزة للعلم السعودي عن أعلام العالم؟", c:["أكبر علم في العالم","لا يُنكّس لوجود الشهادتين","أقدم علم"], a:1},
+    {q:"ما نظام الحكم في المملكة العربية السعودية؟", c:["جمهوري","اتحادي","ملكي"], a:2},
+    {q:"في أي عام تم اكتشاف النفط لأول مرة في المملكة؟", c:["1938م","1945م","1933م"], a:2},
+    {q:"من الملك الملقب بـ(معزي)؟", c:["سعود بن عبدالعزيز","فهد بن عبدالعزيز","عبدالعزيز آل سعود"], a:2},
+    {q:"ما اسم المطار الدولي الرئيسي في الرياض؟", c:["مطار الملك فهد","مطار الملك عبدالعزيز","مطار الملك خالد"], a:2},
+    {q:"ما اسم المطار الدولي الرئيسي في جدة؟", c:["مطار الملك خالد","مطار الأمير محمد","مطار الملك عبدالعزيز"], a:2},
+    {q:"ما اسم المطار الدولي في المنطقة الشرقية؟", c:["مطار الملك خالد","مطار أبها","مطار الملك فهد"], a:2},
+    {q:"ما أعلى قمة جبلية في المملكة؟", c:["جبل فيفاء","جبل اللوز","جبل السودة"], a:2},
+    {q:"ما المدينة المعروفة بـ(عروس الشمال)؟", c:["حائل","عرعر","تبوك"], a:2},
+    {q:"ما اسم الصحراء الكبرى في وسط المملكة؟", c:["النفود الكبير","صحراء الدهناء","الربع الخالي"], a:0},
+    {q:"ما اسم المنطقة الرملية جنوب شرق المملكة؟", c:["النفود","صحراء ثار","الربع الخالي"], a:2},
+    {q:"ما اسم المدينة المعروفة بـ(مدينة الورد)؟", c:["أبها","الباحة","الطائف"], a:2},
+    {q:"ما اسم المدينة المعروفة بـ(مدينة الضباب)؟", c:["الطائف","خميس مشيط","أبها"], a:2},
+    {q:"كم عدد مناطق المملكة الإدارية؟", c:["12 منطقة","14 منطقة","13 منطقة"], a:2},
+    {q:"ما اسم البحر الذي يفصل السعودية عن مصر؟", c:["البحر المتوسط","بحر العرب","البحر الأحمر"], a:2},
+  ];
+
+  const Q2 = [
+    {q:"شخص رأى ضيفًا جديدًا فبادر بالترحيب به وإكرامه، ما الصفة؟", c:["الخوف","الغضب","الكرم"], a:2},
+    {q:"شخص واجه صعوبة كبيرة ولم يستسلم، ما الصفة؟", c:["الجبن","الكسل","الشجاعة"], a:2},
+    {q:"شخص يساعد الآخرين دون انتظار مقابل، ما الصفة الأقرب؟", c:["البخل","الغيرة","الجود"], a:2},
+    {q:"شخص يحافظ على عادات وتراث أجداده، ما الصفة؟", c:["التقليد الأعمى","الانغلاق","الأصالة"], a:2},
+    {q:"شخص يضع هدفًا كبيرًا ويعمل للوصول إليه، ما الصفة؟", c:["اللامبالاة","التواني","الهمة"], a:2},
+    {q:"شخص يفكر في المستقبل ويخطط له، ما الصفة؟", c:["العبث","العشوائية","الرؤية"], a:2},
+    {q:"وصل ضيف إلى مجلسك لأول مرة، ما أول شيء تفعله؟", c:["تجاهله","طرده","الترحيب به وإكرامه"], a:2},
+    {q:"رأيت شخصًا يحتاج إلى المساعدة في مكان عام، ما التصرف المناسب؟", c:["تجاهله","الابتعاد","مساعدته"], a:2},
+    {q:"شخص يفتخر بتراث بلاده ويحافظ عليه، أي قيمة يمثل؟", c:["الضعف","التخلف","الأصالة"], a:2},
+    {q:"شخص بدأ مشروعًا جديدًا رغم صعوبة البداية، أي قيمة تظهر؟", c:["الخوف","اليأس","الهمة"], a:2},
+    {q:"شخص يواجه تحديًا ولا يخاف من المحاولة، أي قيمة؟", c:["الجبن","التردد","الشجاعة"], a:2},
+    {q:"شخص يخطط لما يريد تحقيقه بعد سنوات، أي قيمة؟", c:["اللامبالاة","الفوضى","الرؤية"], a:2},
+    {q:"شخص دعا مجموعة من الناس إلى منزله وقدم لهم أفضل ما لديه، أي قيمة؟", c:["البخل","الغرور","الكرم"], a:2},
+    {q:"شخص يعطي المحتاج أكثر مما يطلب منه، أي قيمة؟", c:["الشح","الأنانية","الجود"], a:2},
+    {q:"المحافظة على الموروث الشعبي والأزياء والعادات تمثل ماذا؟", c:["التخلف","الضعف","الأصالة"], a:2},
+    {q:"الاستمرار في العمل رغم الفشل والمحاولة مرة أخرى يمثل ماذا؟", c:["الاستسلام","اليأس","الهمة"], a:2},
+    {q:"التفكير في المستقبل بدل الاكتفاء بالحاضر يمثل ماذا؟", c:["الخمول","الجمود","الرؤية"], a:2},
+    {q:"الدفاع عن الحق وعدم الخوف من الصعوبات يمثل ماذا؟", c:["الجبن","الضعف","الشجاعة"], a:2},
+    {q:"تقديم الطعام والضيافة للزائر تعبير عن ماذا؟", c:["البخل","اللامبالاة","الكرم"], a:2},
+    {q:"مشاركة ما تملك مع الآخرين بسخاء تعبر عن ماذا؟", c:["الأنانية","البخل","الجود"], a:2},
+    {q:"شخص يتعلم من الماضي ويبني عليه للمستقبل، ما القيمة الأقرب؟", c:["النسيان","التقليد","الأصالة والرؤية"], a:2},
+    {q:"شخص يشجع فريقه ويواصل المحاولة حتى النهاية، ما القيمة الأقرب؟", c:["اليأس","اللامبالاة","الهمة"], a:2},
+    {q:"شخص يستقبل ضيفًا غريبًا بكل ترحاب واحترام، ما القيمة الأقرب؟", c:["الخوف","الغضب","الكرم"], a:2},
+    {q:"شخص يتخذ قرارًا صعبًا رغم الخوف عندما يكون القرار صحيحًا، ما القيمة؟", c:["الجبن","التردد","الشجاعة"], a:2},
+    {q:"شخص يضع تصورًا لما يريد تحقيقه وطنه في المستقبل، ما القيمة؟", c:["العبث","الفوضى","الرؤية"], a:2},
+    {q:"عائلة تحافظ على الأكلات الشعبية في المناسبات، تمثل أي قيمة؟", c:["التخلف","الضعف","الأصالة"], a:2},
+    {q:"شخص يتطوع لتنظيف بيئته المحلية، يمثل أي قيمة؟", c:["اللامبالاة","الأنانية","الهمة والكرم"], a:2},
+    {q:"شخص يرفض الغش رغم إمكانية الربح، يمثل أي قيمة؟", c:["الجبن","الضعف","الشجاعة والأصالة"], a:2},
+    {q:"شخص يخطط لبناء مستقبله الدراسي، يمثل أي قيمة؟", c:["اللامبالاة","الفوضى","الرؤية"], a:2},
+    {q:"شخص يفتح بيته لجيرانه في العيد، يمثل أي قيمة؟", c:["البخل","الغضب","الكرم"], a:2},
+    {q:"شخص يتعلم الحرف الشعبية من أجداده، يمثل أي قيمة؟", c:["التخلف","الضعف","الأصالة"], a:2},
+    {q:"شخص يعمل بجد لتحقيق حلمه، يمثل أي قيمة؟", c:["الكسل","اليأس","الهمة"], a:2},
+    {q:"شخص يدافع عن زميله المظلوم، يمثل أي قيمة؟", c:["الجبن","اللامبالاة","الشجاعة"], a:2},
+    {q:"شخص يتبرع بجزء من ماله للفقراء، يمثل أي قيمة؟", c:["البخل","الأنانية","الجود"], a:2},
+    {q:"شخص يفكر في حلول مبتكرة لمشكلة مجتمعه، يمثل أي قيمة؟", c:["الجمود","الفوضى","الرؤية"], a:2},
+    {q:"شخص يحترم كبار السن ويستمع لنصائحهم، يمثل أي قيمة؟", c:["التمرد","الغرور","الأصالة"], a:2},
+    {q:"شخص لا يستسلم رغم تكرار المحاولات الفاشلة، يمثل أي قيمة؟", c:["اليأس","الاستسلام","الهمة"], a:2},
+    {q:"شخص يواجه ظلمًا ويقف ضده، يمثل أي قيمة؟", c:["الجبن","الضعف","الشجاعة"], a:2},
+    {q:"شخص يشارك زملاءه طعامه، يمثل أي قيمة؟", c:["البخل","الأنانية","الكرم والجود"], a:2},
+    {q:"شخص يخطط لمشروع وطني طموح، يمثل أي قيمة؟", c:["العبث","الفوضى","الرؤية"], a:2},
+    {q:"شخص يحافظ على الزي الوطني في المناسبات، يمثل أي قيمة؟", c:["التخلف","الضعف","الأصالة"], a:2},
+    {q:"شخص يبدأ مشروعه الخاص رغم الصعوبات، يمثل أي قيمة؟", c:["الخوف","اليأس","الهمة"], a:2},
+    {q:"شخص يقول الحق ولو على نفسه، يمثل أي قيمة؟", c:["الجبن","الضعف","الشجاعة"], a:2},
+    {q:"شخص يعطي الصدقة في السر، يمثل أي قيمة؟", c:["البخل","الغرور","الجود"], a:2},
+    {q:"شخص يضع خطة لخدمة وطنه، يمثل أي قيمة؟", c:["اللامبالاة","الفوضى","الرؤية"], a:2},
+    {q:"شخص يعلّم أبناءه العادات الطيبة، يمثل أي قيمة؟", c:["الجهل","الضعف","الأصالة"], a:2},
+    {q:"شخص يتحدى الصعاب لتحقيق إنجاز، يمثل أي قيمة؟", c:["اليأس","الكسل","الهمة"], a:2},
+    {q:"شخص يقف مع الحق رغم التهديد، يمثل أي قيمة؟", c:["الجبن","الضعف","الشجاعة"], a:2},
+    {q:"شخص يكرم ضيفه بأفضل ما عنده، يمثل أي قيمة؟", c:["البخل","اللامبالاة","الكرم"], a:2},
+    {q:"شخص يضع رؤية طويلة المدى لوطنه، يمثل أي قيمة؟", c:["الفوضى","الجمود","الرؤية"], a:2},
+  ];
+
+  const Q3 = [
+    {q:"صح أم خطأ: اليوم الوطني السعودي يكون في 23 سبتمبر.", c:["خطأ","غير معروف","صح"], a:2},
+    {q:"صح أم خطأ: عاصمة السعودية هي جدة.", c:["صح","أحيانًا","خطأ"], a:2},
+    {q:"ما عاصمة السعودية؟", c:["جدة","مكة","الرياض"], a:2},
+    {q:"صح أم خطأ: لون العلم السعودي أخضر.", c:["خطأ","أبيض","صح"], a:2},
+    {q:"في أي عام تم إعلان توحيد المملكة؟", c:["1902م","1950م","1932م"], a:2},
+    {q:"من قاد عملية توحيد المملكة؟", c:["الملك فيصل","الملك فهد","الملك عبدالعزيز"], a:2},
+    {q:"أكمل: المملكة العربية ____؟", c:["المتحدة","العربية","السعودية"], a:2},
+    {q:"ما العملة السعودية؟", c:["الدرهم","الدينار","الريال"], a:2},
+    {q:"ما لون السيف الموجود على العلم السعودي؟", c:["الأسود","الذهبي","الأبيض"], a:2},
+    {q:"ما المدينة التي استردها الملك عبدالعزيز عام 1902م؟", c:["مكة","جدة","الرياض"], a:2},
+    {q:"ما اسم البحر غرب السعودية؟", c:["البحر الميت","المتوسط","البحر الأحمر"], a:2},
+    {q:"ما اسم الخليج شرق السعودية؟", c:["بحر العرب","بحر عمان","الخليج العربي"], a:2},
+    {q:"في أي مدينة يوجد المسجد الحرام؟", c:["المدينة المنورة","الرياض","مكة المكرمة"], a:2},
+    {q:"في أي مدينة يوجد المسجد النبوي؟", c:["مكة","جدة","المدينة المنورة"], a:2},
+    {q:"ما اسم الرؤية الوطنية السعودية؟", c:["رؤية 2020","رؤية 2040","رؤية 2030"], a:2},
+    {q:"أكمل: رؤية السعودية ____؟", c:["2025","2040","2030"], a:2},
+    {q:"ما المدينة المشهورة بآثار الحِجر؟", c:["تبوك","حائل","العلا"], a:2},
+    {q:"صح أم خطأ: جدة تقع على البحر الأحمر.", c:["خطأ","على الخليج","صح"], a:2},
+    {q:"صح أم خطأ: اليوم الوطني هو نفسه يوم التأسيس.", c:["صح","نفس اليوم","خطأ"], a:2},
+    {q:"ما تاريخ يوم التأسيس السعودي؟", c:["23 سبتمبر","1 يناير","22 فبراير"], a:2},
+    {q:"ما تاريخ اليوم الوطني السعودي؟", c:["22 فبراير","2 ديسمبر","23 سبتمبر"], a:2},
+    {q:"ما اسم الدولة قبل إعلان المملكة العربية السعودية؟", c:["دولة نجد","إمبراطورية الصحراء","مملكة الحجاز ونجد وملحقاتها"], a:2},
+    {q:"ما اسم العاصمة التي استردها الملك عبدالعزيز في بداية رحلة التوحيد؟", c:["مكة","الدرعية","الرياض"], a:2},
+    {q:"كم نقطة يحصل عليها المشارك في هذه الجولة؟", c:["نقطة واحدة","نقطتان","3 نقاط"], a:2},
+    {q:"من الملك الملقب بـ(معزي)؟", c:["سعود بن عبدالعزيز","فهد بن عبدالعزيز","عبدالعزيز آل سعود"], a:2},
+    {q:"ما لون العلم السعودي؟", c:["الأبيض","الأحمر","الأخضر"], a:2},
+    {q:"كم عدد مناطق المملكة الإدارية؟", c:["12","14","13"], a:2},
+    {q:"ما أكبر مدينة في المملكة من حيث المساحة؟", c:["جدة","مكة","الرياض"], a:2},
+    {q:"ما اسم الصحراء الكبرى في المملكة؟", c:["النفود","الدهناء","الربع الخالي"], a:2},
+    {q:"ما اسم المدينة المعروفة بـ(عروس الشمال)؟", c:["حائل","عرعر","تبوك"], a:2},
+    {q:"ما اسم المدينة المعروفة بـ(مدينة الورد)؟", c:["أبها","الباحة","الطائف"], a:2},
+    {q:"ما اسم أول عاصمة للدولة السعودية الأولى؟", c:["الرياض","مكة","الدرعية"], a:2},
+    {q:"ما اسم الجبل الشهير في مدينة أبها؟", c:["جبل فيفاء","جبل اللوز","جبل السودة"], a:2},
+    {q:"ما اسم البحر الذي يفصل السعودية عن مصر؟", c:["البحر المتوسط","بحر العرب","البحر الأحمر"], a:2},
+    {q:"ما اسم المطار الدولي الرئيسي في الرياض؟", c:["مطار الملك فهد","مطار الملك عبدالعزيز","مطار الملك خالد"], a:2},
+    {q:"ما اسم المطار الدولي الرئيسي في جدة؟", c:["مطار الملك خالد","مطار الأمير محمد","مطار الملك عبدالعزيز"], a:2},
+    {q:"ما اسم المطار الدولي في الدمام؟", c:["مطار الملك خالد","مطار أبها","مطار الملك فهد"], a:2},
+    {q:"ما اسم المدينة المشهورة بقلعتها التاريخية (المصمك)؟", c:["مكة","جدة","الرياض"], a:2},
+    {q:"ما اسم المدينة التي تقع فيها جامعة الملك فهد للبترول؟", c:["الرياض","جدة","الظهران"], a:2},
+    {q:"ما اسم المدينة المعروفة بـ(مدينة الشمس)؟", c:["حائل","الجوف","تبوك"], a:2},
+    {q:"ما اسم أكبر سد في المملكة؟", c:["سد وادي فاطمة","سد الملك فهد","سد وادي نجران"], a:2},
+    {q:"ما اسم المدينة التي تقع فيها آثار مدائن صالح؟", c:["تبوك","حائل","العلا"], a:2},
+    {q:"ما اسم المشروع السياحي الضخم على البحر الأحمر؟", c:["نيوم","ذا لاين","أمالا"], a:2},
+    {q:"ما اسم المدينة التي استضافت قمة العشرين 2020؟", c:["جدة","مكة","الرياض"], a:2},
+    {q:"ما اسم اليوم الذي يُحتفل فيه بتأسيس الدولة السعودية الأولى؟", c:["يوم الوطن","يوم البئر","يوم التأسيس"], a:2},
+    {q:"ما اسم الملك الذي أدخل التعليم النظامي للمملكة؟", c:["الملك سعود","الملك فيصل","الملك عبدالعزيز"], a:2},
+    {q:"ما اسم المدينة التي تقع فيها جامعة أم القرى؟", c:["المدينة المنورة","الرياض","مكة المكرمة"], a:2},
+    {q:"ما اسم المدينة التي تقع فيها الجامعة الإسلامية؟", c:["مكة","الرياض","المدينة المنورة"], a:2},
+    {q:"ما اسم أطول خط ساحلي في المملكة؟", c:["الخليج العربي","متساويان","البحر الأحمر"], a:2},
+    {q:"ما اسم المدينة التي تقع فيها جامعة الملك سعود؟", c:["جدة","الدمام","الرياض"], a:2},
+  ];
+
+  function getQ(round, idx) {
+    const bank = [null, Q1, Q2, Q3][round];
+    return bank && bank[idx] ? shuffleChoices(bank[idx]) : null;
+  }
+
+  // نظام تشغيل الموسيقى المتسلسل
+  window.onYouTubeIframeAPIReady = function() {
+    ytPlayer = new YT.Player('yt-player', {
+      height: '1', width: '1',
+      videoId: musicQueue[0].id,
+      playerVars: { 
+        'autoplay': 0, 
+        'controls': 0, 
+        'loop': 0,
+        'rel': 0
+      },
+      events: { 
+        'onReady': onPlayerReady,
+        'onStateChange': onPlayerStateChange
+      }
+    });
+  };
+
+  function onPlayerReady(event) {
+    ytPlayer.setVolume(50);
+  }
+
+  function onPlayerStateChange(event) {
+    // عند انتهاء الموسيقى، شغل التالية
+    if (event.data === YT.PlayerState.ENDED) {
+      playNextMusic();
+    }
+  }
+
+  function playNextMusic() {
+    currentMusicIndex = (currentMusicIndex + 1) % musicQueue.length;
+    if (ytPlayer && isAudioPlaying) {
+      ytPlayer.loadVideoById(musicQueue[currentMusicIndex].id);
+      ytPlayer.setVolume(50);
+    }
+  }
+
+  window.playStageMusic = function(stage) {
+    if (!ytPlayer || !ytPlayer.loadVideoById) return;
+    currentMusicIndex = 0; // ابدأ من النشيد الوطني
+    ytPlayer.loadVideoById(musicQueue[0].id);
+    ytPlayer.setVolume(50);
+    isAudioPlaying = true;
+    document.getElementById('audioPlayBtn').textContent = '⏸️';
+  };
+
+  window.toggleAudio = function() {
+    if (!ytPlayer) return;
+    if (isAudioPlaying) {
+      ytPlayer.pauseVideo();
+      isAudioPlaying = false;
+      document.getElementById('audioPlayBtn').textContent = '▶️';
+    } else {
+      ytPlayer.playVideo();
+      isAudioPlaying = true;
+      document.getElementById('audioPlayBtn').textContent = '⏸️';
+    }
+  };
+
+  window.setAudioVolume = function(val) {
+    if (ytPlayer) ytPlayer.setVolume(val);
+  };
+
+  // التحقق من URL parameter
+  function checkURLParameter() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const roleParam = urlParams.get('role');
+    
+    if (roleParam === 'player') {
+      // إخفاء شاشة الاختيار والانتقال مباشرة لصفحة اللاعب
+      document.getElementById('roleScreen').classList.add('hidden');
+      startAs('player');
+    }
+  }
+
+  // تشغيل عند تحميل الصفحة
+  window.addEventListener('load', checkURLParameter);
+
+  window.startAs = function(role) {
+    myRole = role;
+    document.getElementById('roleScreen').classList.add('hidden');
+    document.getElementById(role + 'Screen').classList.remove('hidden');
+    if (role === 'player' || role === 'spectator') {
+      document.getElementById('audioControlPanel').classList.remove('hidden');
+      playStageMusic('pregame');
+    }
+    if (role === 'host') {
+      initHost();
+      // عرض رابط اللاعبين
+      const playerUrl = window.location.origin + window.location.pathname + '?role=player';
+      document.getElementById('playerLink').value = playerUrl;
+    }
+    if (role === 'player') initPlayer();
+    if (role === 'spectator') initSpectator();
+  };
+
+  // دالة نسخ الرابط
+  window.copyPlayerLink = function() {
+    const linkInput = document.getElementById('playerLink');
+    linkInput.select();
+    linkInput.setSelectionRange(0, 99999);
+    document.execCommand('copy');
+    notify(' تم نسخ الرابط!');
+  };
+
+  // دالة القائمة المنسدلة
+  window.toggleCollapsible = function(id) {
+    const content = document.getElementById(id);
+    const arrow = document.getElementById(id.replace('List', 'Arrow'));
+    content.classList.toggle('active');
+    arrow.textContent = content.classList.contains('active') ? '▲' : '▼';
+  };
+
+  function initHost() {
+    onValue(ref(db, 'players'), (snapshot) => {
+      const players = snapshot.val() || {};
+      renderHostPlayers(players);
+    });
+    onValue(ref(db, 'gameState'), (snapshot) => {
+      const state = snapshot.val() || {};
+      document.getElementById('hostRound').textContent = state.round ? `الجولة ${state.round}` : '-';
+      document.getElementById('hostQNum').textContent = state.qIndex >= 0 ? `${state.qIndex + 1}/50` : '0/50';
+      const q = getQ(state.round, state.qIndex);
+      const cqDiv = document.getElementById('currentQuestion');
+      if (q) {
+        cqDiv.innerHTML = `<div class="question-box">السؤال ${state.qIndex+1}: ${q.q}</div>
+        <p style="text-align:center; color:#ffd700; font-size:1.2em;">الإجابة الصحيحة: <strong>${q.c[q.a]}</strong></p>`;
+      } else {
+        cqDiv.innerHTML = '';
+      }
+    });
+    onValue(ref(db, 'winners'), (snapshot) => {
+      const winners = snapshot.val() || {};
+      const arr = Object.values(winners);
+      document.getElementById('hostWinners').textContent = arr.length;
+      document.getElementById('winnersLog').innerHTML = arr.length ? arr.map((w,i) => 
+        `<div class="winner-card">🏆 ${i+1}. ${w.name} - الجولة ${w.round} (${w.score} نقطة)</div>`
+      ).join('') : '<p style="opacity:.7; text-align:center;">لا يوجد فائزون بعد</p>';
+    });
+    onValue(ref(db, 'winnerRequests'), (snapshot) => {
+      const requests = snapshot.val();
+      if (!requests) return;
+      for (const [reqId, req] of Object.entries(requests)) {
+        processWinnerRequest(reqId, req);
+      }
+    });
+  }
+
+  function processWinnerRequest(reqId, req) {
+    get(ref(db, `players/${req.id}`)).then(ps => {
+      const p = ps.val();
+      if (!p || p.score < 3) {
+        remove(ref(db, `winnerRequests/${reqId}`));
+        return;
+      }
+      get(ref(db, 'gameState')).then(gs => {
+        const currentRound = gs.val()?.round || 1;
+        const winnersRef = ref(db, 'winners');
+        get(winnersRef).then(ws => {
+          const currentWinners = Object.values(ws.val() || {}).filter(w => w.round === currentRound);
+          if (currentWinners.length >= maxWinners[currentRound]) {
+            remove(ref(db, `winnerRequests/${reqId}`));
+            update(ref(db, `players/${req.id}`), { status: 'eliminated_round_full' });
+            return;
+          }
+          const newWinnerRef = push(winnersRef);
+          set(newWinnerRef, { id: req.id, name: req.name, round: currentRound, score: req.score });
+          update(ref(db, `players/${req.id}`), { status: 'winner' });
+          remove(ref(db, `winnerRequests/${reqId}`));
+          notify(`🎉 مبروك! ${req.name} فاز في الجولة ${currentRound}`);
+        });
+      });
+    });
+  }
+
+  function renderHostPlayers(players) {
+    let pendingHtml = '', registeredHtml = '';
+    let pCount = 0;
+    for (const [id, p] of Object.entries(players)) {
+      if (p.status === 'pending') {
+        pendingHtml += `<div class="player-item" style="margin:8px 0;">
+          <span>👤 ${p.name}</span>
+          <div>
+            <button class="btn btn-small" style="padding:6px 14px; font-size:.9em;" onclick="acceptPlayer('${id}','${p.name}')">✅</button>
+            <button class="btn btn-red btn-small" style="padding:6px 14px; font-size:.9em;" onclick="rejectPlayer('${id}')">❌</button>
+          </div>
+        </div>`;
+      } else if (p.status === 'accepted' || p.status === 'winner') {
+        pCount++;
+        registeredHtml += `<div class="player-item">
+          <span>👤 ${p.name} ${p.status==='winner'?'🏆':''}</span>
+          <span class="score-badge">${p.score || 0}</span>
+          <button class="delete-btn" onclick="deletePlayer('${id}','${p.name}')" title="حذف اللاعب">×</button>
+        </div>`;
+      }
+    }
+    document.getElementById('pendingList').innerHTML = pendingHtml || '<p style="opacity:.7; text-align:center;">لا توجد طلبات</p>';
+    document.getElementById('registeredList').innerHTML = registeredHtml || '<p style="opacity:.7; text-align:center;">لا يوجد لاعبون</p>';
+    document.getElementById('hostPlayerCount').textContent = pCount;
+    document.getElementById('playerCountDisplay').textContent = pCount;
+  }
+
+  window.acceptPlayer = function(id, name) {
+    update(ref(db, `players/${id}`), { status: 'accepted', score: 0 });
+    notify(`تم قبول ${name}`);
+  };
+
+  window.rejectPlayer = function(id) {
+    remove(ref(db, `players/${id}`));
+  };
+
+  window.deletePlayer = function(id, name) {
+    if (confirm(`هل تريد حذف اللاعب "${name}"؟`)) {
+      remove(ref(db, `players/${id}`));
+      notify(`تم حذف ${name}`);
+    }
+  };
+
+  window.deleteAllPlayers = function() {
+    if (confirm('️ هل أنت متأكد من حذف جميع اللاعبين؟ هذا الإجراء لا يمكن التراجع عنه!')) {
+      set(ref(db, 'players'), {});
+      notify('تم حذف جميع اللاعبين');
+    }
+  };
+
+  window.clearWinners = function() {
+    if (confirm('⚠️ هل تريد حذف سجل الفائزين؟')) {
+      set(ref(db, 'winners'), {});
+      notify('تم حذف سجل الفائزين');
+    }
+  };
+
+  window.startRound = function(n) {
+    if (n === 2) {
+      get(ref(db, 'winners')).then(s => {
+        const w = Object.values(s.val() || {}).filter(x => x.round === 1);
+        if (w.length === 0) { alert('يجب إكمال الجولة الأولى أولاً!'); return; }
+        executeStartRound(n);
+      });
+    } else if (n === 3) {
+      get(ref(db, 'winners')).then(s => {
+        const w = Object.values(s.val() || {}).filter(x => x.round === 2);
+        if (w.length === 0) { alert('يجب إكمال الجولة الثانية أولاً!'); return; }
+        executeStartRound(n);
+      });
+    } else {
+      executeStartRound(n);
+    }
+  };
+
+  function executeStartRound(n) {
+    get(ref(db, 'players')).then(snapshot => {
+      const players = snapshot.val() || {};
+      const updates = {};
+      for (const [id, p] of Object.entries(players)) {
+        if (p.status === 'accepted' || p.status === 'winner') {
+          if (n > 1 && p.status !== 'winner') {
+            updates[`players/${id}/status`] = 'eliminated';
+          } else {
+            updates[`players/${id}/score`] = 0;
+            updates[`players/${id}/answered`] = false;
+          }
+        }
+      }
+      updates['gameState/round'] = n;
+      updates['gameState/qIndex'] = -1;
+      updates['gameState/title'] = roundTitles[n];
+      updates['gameState/points'] = pointsPerRound[n];
+      update(ref(db), updates);
+      playStageMusic('pregame'); // إعادة تشغيل النشيد عند بدء كل جولة
+      notify(`بدأت الجولة ${n}`);
+    });
+  }
+
+  window.nextQuestion = function() {
+    get(ref(db, 'gameState')).then(snapshot => {
+      const state = snapshot.val() || {};
+      const round = state.round;
+      let qIndex = (state.qIndex || -1) + 1;
+      if (qIndex >= 50) { alert('انتهت أسئلة هذه الجولة!'); return; }
+      const q = getQ(round, qIndex);
+      if (!q) { alert('لا توجد أسئلة كافية'); return; }
+      get(ref(db, 'players')).then(ps => {
+        const pUpdates = {};
+        for (const [id, p] of Object.entries(ps.val() || {})) {
+          if (p.status === 'accepted' || p.status === 'winner') {
+            pUpdates[`players/${id}/answered`] = false;
+          }
+        }
+        update(ref(db), {
+          ...pUpdates,
+          'gameState/qIndex': qIndex,
+          'currentQuestion/round': round,
+          'currentQuestion/qIndex': qIndex,
+          'currentQuestion/q': q.q,
+          'currentQuestion/choices': q.c,
+          'currentQuestion/correctIndex': q.a,
+          'currentQuestion/points': pointsPerRound[round]
+        });
+      });
+    });
+  };
+
+  window.resetGame = function() {
+    if (!confirm('هل تريد إعادة اللعبة بالكامل؟')) return;
+    set(ref(db, 'gameState'), { round: 0, qIndex: -1 });
+    set(ref(db, 'players'), {});
+    set(ref(db, 'winners'), {});
+    set(ref(db, 'currentQuestion'), {});
+    set(ref(db, 'winnerRequests'), {});
+    playStageMusic('pregame');
+    notify('تم إعادة اللعبة');
+  };
+
+  function initPlayer() {
+    onValue(ref(db, 'players/' + myId), (snapshot) => {
+      const p = snapshot.val();
+      if (!p) return;
+      if (p.status === 'accepted' || p.status === 'winner') {
+        document.getElementById('registerBox').classList.add('hidden');
+        document.getElementById('gameBox').classList.remove('hidden');
+        document.getElementById('myName').textContent = myName;
+        document.getElementById('myScore').textContent = p.score || 0;
+        myScore = p.score || 0;
+      } else if (p.status === 'rejected' || p.status === 'eliminated_round_full') {
+        document.getElementById('regStatus').innerHTML = '❌ تم رفض طلبك أو اكتمل العدد';
+        document.getElementById('regStatus').style.color = '#f87171';
+      }
+    });
+    onValue(ref(db, 'gameState'), (snapshot) => {
+      const state = snapshot.val() || {};
+      document.getElementById('myRound').textContent = state.round ? `الجولة ${state.round}` : '-';
+      if (state.title && state.qIndex === -1) {
+        document.getElementById('playerQuestion').textContent = state.title;
+        document.getElementById('playerChoices').innerHTML = '';
+        document.getElementById('winnerBtn').classList.add('hidden');
+        document.getElementById('playerMsg').textContent = '';
+        answeredThisQ = false;
+      }
+    });
+    onValue(ref(db, 'currentQuestion'), (snapshot) => {
+      const cq = snapshot.val();
+      if (!cq || !cq.q) return;
+      get(ref(db, `players/${myId}`)).then(ps => {
+        const p = ps.val();
+        if (p?.answered) {
+          document.getElementById('playerMsg').innerHTML = '⏳ في انتظار السؤال التالي...';
+          document.getElementById('playerMsg').style.color = '#ffd700';
+          document.getElementById('playerChoices').innerHTML = '';
+          return;
+        }
+        document.getElementById('playerQuestion').textContent = cq.q;
+        document.getElementById('playerChoices').innerHTML = cq.choices.map((c, i) => 
+          `<button class="choice-btn" onclick="answerQuestion(${i}, ${cq.correctIndex}, ${cq.points})">${c}</button>`
+        ).join('');
+        document.getElementById('winnerBtn').classList.add('hidden');
+        document.getElementById('playerMsg').textContent = '';
+        answeredThisQ = false;
+      });
+    });
+  }
+
+  window.sendJoinRequest = function() {
+    const name = document.getElementById('playerName').value.trim();
+    if (!name) { alert('اكتب اسمك!'); return; }
+    myName = name;
+    document.getElementById('regStatus').innerHTML = '⏳ في انتظار موافقة المتحكم...';
+    set(ref(db, `players/${myId}`), { name: myName, status: 'pending', score: 0 });
+  };
+
+  window.answerQuestion = function(myIdx, correctIdx, points) {
+    if (answeredThisQ) return;
+    answeredThisQ = true;
+    const buttons = document.querySelectorAll('#playerChoices .choice-btn');
+    buttons.forEach((b, i) => {
+      b.disabled = true;
+      if (i === correctIdx) b.classList.add('correct');
+      if (i === myIdx && myIdx !== correctIdx) b.classList.add('wrong');
+    });
+    if (myIdx === correctIdx) {
+      const newScore = myScore + points;
+      update(ref(db, `players/${myId}`), { score: newScore, answered: true });
+      myScore = newScore;
+      document.getElementById('myScore').textContent = myScore;
+      document.getElementById('playerMsg').innerHTML = `✅ إجابة صحيحة! +${points} نقطة`;
+      document.getElementById('playerMsg').style.color = '#4ade80';
+      if (myScore >= 3) {
+        document.getElementById('winnerBtn').classList.remove('hidden');
+      }
+    } else {
+      update(ref(db, `players/${myId}`), { answered: true });
+      document.getElementById('playerMsg').innerHTML = '❌ إجابة خاطئة! انتظر السؤال التالي';
+      document.getElementById('playerMsg').style.color = '#f87171';
+    }
+  };
+
+  window.declareWinner = function() {
+    if (myScore < 3) return;
+    push(ref(db, 'winnerRequests'), { id: myId, name: myName, score: myScore, timestamp: Date.now() });
+    document.getElementById('winnerBtn').disabled = true;
+    document.getElementById('playerMsg').innerHTML = '🏆 تم إرسال طلب الفوز!';
+    document.getElementById('playerMsg').style.color = '#ffd700';
+  };
+
+  function initSpectator() {
+    onValue(ref(db, 'gameState'), (snapshot) => {
+      const state = snapshot.val() || {};
+      document.getElementById('specRound').textContent = state.round ? `الجولة ${state.round}` : '-';
+      document.getElementById('specQNum').textContent = state.qIndex >= 0 ? `${state.qIndex + 1}/50` : '0/50';
+      if (state.title && state.qIndex === -1) {
+        document.getElementById('specQuestion').textContent = state.title;
+        document.getElementById('specChoices').innerHTML = '';
+      }
+    });
+    onValue(ref(db, 'currentQuestion'), (snapshot) => {
+      const cq = snapshot.val();
+      if (!cq || !cq.q) return;
+      document.getElementById('specQuestion').textContent = cq.q;
+      document.getElementById('specChoices').innerHTML = cq.choices.map((c, i) => 
+        `<div class="choice-btn" style="cursor:default; ${i===cq.correctIndex?'background:linear-gradient(135deg,#28a745,#1e7e34);border-color:#fff;':''}">
+          ${c} ${i===cq.correctIndex?'✅':''}
+        </div>`
+      ).join('');
+    });
+    onValue(ref(db, 'players'), (snapshot) => {
+      const players = snapshot.val() || {};
+      let count = 0;
+      let html = '';
+      for (const [id, p] of Object.entries(players)) {
+        if (p.status === 'accepted' || p.status === 'winner') {
+          count++;
+          html += `<div class="player-item"><span>👤 ${p.name} ${p.status==='winner'?'🏆':''}</span><span class="score-badge">${p.score || 0}</span></div>`;
+        }
+      }
+      document.getElementById('specPlayerCount').textContent = count;
+      document.getElementById('specCountDisplay').textContent = count;
+      document.getElementById('specScores').innerHTML = html || '<p style="opacity:.7; text-align:center;">لا يوجد لاعبون</p>';
+    });
+    onValue(ref(db, 'winners'), (snapshot) => {
+      const winners = snapshot.val() || {};
+      const arr = Object.values(winners);
+      document.getElementById('specWinners').innerHTML = arr.length ? arr.map((w,i) => 
+        `<div class="winner-card">🏆 ${i+1}. ${w.name} - الجولة ${w.round}</div>`
+      ).join('') : '<p style="opacity:.7; text-align:center;">لا يوجد فائزون بعد</p>';
+    });
+  }
+
+  function notify(text) {
+    const n = document.createElement('div');
+    n.className = 'notification';
+    n.textContent = text;
+    document.body.appendChild(n);
+    setTimeout(() => n.remove(), 4000);
+  }
+</script>
+</body>
+</html>
