@@ -3,307 +3,11 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>🇸🇦 لعبة اليوم الوطني 96 - عزّنا بطبعنا</title>
+<title>اليوم الوطني 96 - عزّنا بطبعنا</title>
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
   import { getDatabase, ref, set, onValue, update, push, get, remove } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-database.js";
-  window.fb = { initializeApp, getDatabase, ref, set, onValue, update, push, get, remove };
-</script>
-<style>
-  * { margin:0; padding:0; box-sizing:border-box; font-family:'Segoe UI', Tahoma, sans-serif; }
-  body {
-    min-height:100vh;
-    background: linear-gradient(135deg, #0a3d2e 0%, #065f46 50%, #052e1f 100%);
-    color:#fff; padding:20px; overflow-x:hidden;
-  }
-  .container { max-width:1000px; margin:auto; position:relative; z-index:1; }
-  .logo {
-    text-align:center; padding:20px; margin-bottom:20px;
-    background: rgba(0,0,0,0.4); border-radius:20px;
-    backdrop-filter: blur(10px); border:3px solid rgba(255,215,0,0.5);
-    box-shadow: 0 0 30px rgba(255,215,0,0.3);
-  }
-  .logo h1 { font-size:2.5em; color:#ffd700; text-shadow:0 0 20px rgba(255,215,0,0.8); }
-  .logo .slogan { font-size:1.8em; color:#fff; margin-top:10px; font-weight:bold; }
-  .logo .flag { font-size:4em; margin:10px 0; }
-  .logo .year { font-size:1.5em; color:#ffd700; margin-top:5px; }
-  .btn {
-    padding:14px 30px; border:none; border-radius:12px; font-size:1.1em; font-weight:bold;
-    cursor:pointer; transition:all .3s; margin:5px; color:#fff;
-    background: linear-gradient(135deg, #00a651, #006c35);
-    box-shadow:0 4px 15px rgba(0,0,0,0.3);
-  }
-  .btn:hover { transform:translateY(-2px); box-shadow:0 6px 20px rgba(0,166,81,0.5); }
-  .btn-gold { background: linear-gradient(135deg, #ffd700, #daa520); color:#000; }
-  .btn-red { background: linear-gradient(135deg, #dc3545, #a71d2a); }
-  .btn-blue { background: linear-gradient(135deg, #007bff, #0056b3); }
-  .btn-small { padding:8px 16px; font-size:0.9em; }
-  .btn:disabled { opacity:.5; cursor:not-allowed; }
-  .card {
-    background: rgba(0,0,0,0.5); border-radius:18px; padding:25px;
-    backdrop-filter: blur(10px); border:2px solid rgba(255,215,0,0.3);
-    margin-bottom:20px; box-shadow:0 8px 32px rgba(0,0,0,0.4);
-  }
-  .card h2 { color:#ffd700; margin-bottom:15px; font-size:1.5em; border-bottom:2px solid #ffd700; padding-bottom:10px; }
-  input[type=text] {
-    width:100%; padding:14px; border-radius:10px; border:2px solid rgba(255,215,0,0.5);
-    background: rgba(255,255,255,0.1); color:#fff; font-size:1.1em; margin:10px 0;
-  }
-  input[type=text]::placeholder { color:rgba(255,255,255,0.6); }
-  .choice-btn {
-    display:block; width:100%; padding:18px; margin:10px 0;
-    background: linear-gradient(135deg, rgba(255,255,255,0.15), rgba(255,255,255,0.05));
-    border:2px solid rgba(255,215,0,0.4); border-radius:12px;
-    color:#fff; font-size:1.1em; cursor:pointer; transition:all .3s; text-align:right;
-  }
-  .choice-btn:hover:not(:disabled) {
-    background: linear-gradient(135deg, #00a651, #006c35);
-    transform:translateX(-5px); border-color:#ffd700;
-  }
-  .choice-btn.correct { background: linear-gradient(135deg, #28a745, #1e7e34) !important; border-color:#fff; }
-  .choice-btn.wrong { background: linear-gradient(135deg, #dc3545, #a71d2a) !important; border-color:#fff; }
-  .collapsible {
-    background: rgba(255,215,0,0.2);
-    border: 2px solid #ffd700;
-    border-radius: 12px;
-    padding: 15px;
-    cursor: pointer;
-    margin-bottom: 10px;
-  }
-  .collapsible-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    font-weight: bold;
-    color: #ffd700;
-  }
-  .collapsible-content {
-    display: none;
-    max-height: 400px;
-    overflow-y: auto;
-    margin-top: 10px;
-  }
-  .collapsible-content.active { display: block; }
-  .player-list { display:grid; grid-template-columns:repeat(auto-fill, minmax(180px, 1fr)); gap:10px; }
-  .player-item {
-    background: rgba(255,255,255,0.1); padding:12px; border-radius:10px;
-    display:flex; justify-content:space-between; align-items:center;
-    border:1px solid rgba(255,255,255,0.2);
-    position: relative;
-  }
-  .player-item .delete-btn {
-    position: absolute;
-    left: 5px; top: 5px;
-    background: #dc3545; color: white; border: none;
-    border-radius: 50%; width: 24px; height: 24px;
-    cursor: pointer; font-size: 0.8em;
-  }
-  .score-badge { background:#ffd700; color:#000; padding:4px 12px; border-radius:20px; font-weight:bold; }
-  .question-box {
-    background: linear-gradient(135deg, rgba(255,215,0,0.25), rgba(255,215,0,0.05));
-    border:3px solid #ffd700; border-radius:15px; padding:25px; margin:20px 0;
-    font-size:1.4em; text-align:center; font-weight:bold; line-height: 1.6;
-    box-shadow: 0 0 20px rgba(255,215,0,0.3);
-  }
-  .status-bar {
-    display:flex; justify-content:space-around; flex-wrap:wrap; gap:10px;
-    background:rgba(0,0,0,0.6); padding:15px; border-radius:12px; margin-bottom:20px;
-    border: 2px solid rgba(255,215,0,0.3);
-  }
-  .status-item { text-align:center; }
-  .status-item .label { font-size:.85em; opacity:.8; }
-  .status-item .value { font-size:1.6em; font-weight:bold; color:#ffd700; }
-  .winner-card {
-    background: linear-gradient(135deg, #ffd700, #ff8c00);
-    color:#000; padding:15px; border-radius:12px; margin:8px 0;
-    text-align:center; font-size:1.1em; font-weight:bold;
-  }
-  .audio-controls {
-    position: fixed; bottom: 20px; left: 20px; z-index: 1000;
-    background: rgba(0,0,0,0.8); padding: 15px; border-radius: 15px;
-    display: flex; align-items: center; gap: 10px; border: 2px solid #ffd700;
-  }
-  .audio-controls button {
-    background: #ffd700; color: #000; border: none; width: 40px; height: 40px;
-    border-radius: 50%; font-size: 1.2em; cursor: pointer;
-  }
-  .audio-controls input[type=range] { width: 100px; accent-color: #ffd700; }
-  .hidden { display:none !important; }
-  .role-select { text-align:center; padding:40px; }
-  .role-btn {
-    display:inline-block; padding:25px 40px; margin:15px;
-    background: linear-gradient(135deg, #00a651, #006c35);
-    border-radius:20px; cursor:pointer; font-size:1.2em; font-weight:bold;
-    transition:all .3s; border:3px solid rgba(255,215,0,0.5);
-  }
-  .role-btn:hover { transform:scale(1.05); border-color:#ffd700; }
-  .notification {
-    position:fixed; top:20px; left:50%; transform:translateX(-50%);
-    background:#ffd700; color:#000; padding:15px 30px; border-radius:10px;
-    font-weight:bold; z-index:1000; animation:slideDown .5s;
-  }
-  @keyframes slideDown { from { top:-100px; } to { top:20px; } }
-  .control-panel {
-    background: rgba(0,0,0,0.4);
-    padding: 15px; border-radius: 10px;
-    margin-bottom: 15px;
-    border: 1px solid rgba(255,215,0,0.3);
-  }
-  @media(max-width:600px) {
-    .logo h1 { font-size:1.8em; }
-    .logo .slogan { font-size:1.3em; }
-    .question-box { font-size:1.1em; }
-  }
-</style>
-</head>
-<body>
-
-<div class="container">
-  <div id="roleScreen">
-    <div class="logo">
-      <div class="flag">🇸🇦</div>
-      <h1>اليوم الوطني السعودي 96</h1>
-      <div class="slogan">✨ عزّنا بطبعنا ✨</div>
-      <div class="year">2026 - 1448هـ</div>
-    </div>
-    <div class="role-select">
-      <h2 style="color:#ffd700; margin-bottom:30px;">اختر دورك للبدء</h2>
-      <div class="role-btn" onclick="startAs('host')">🎛️ متحكم</div>
-      <div class="role-btn" onclick="startAs('player')"> لاعب</div>
-      <div class="role-btn" onclick="startAs('spectator')">️ مشاهد</div>
-    </div>
-  </div>
-
-  <div id="hostScreen" class="hidden">
-    <div class="logo">
-      <div class="flag">🇦</div>
-      <h1>لوحة المتحكم</h1>
-      <div class="slogan">عزّنا بطبعنا</div>
-    </div>
-    <div class="status-bar">
-      <div class="status-item"><div class="label">الجولة</div><div class="value" id="hostRound">-</div></div>
-      <div class="status-item"><div class="label">السؤال</div><div class="value" id="hostQNum">0/50</div></div>
-      <div class="status-item"><div class="label">اللاعبون</div><div class="value" id="hostPlayerCount">0</div></div>
-      <div class="status-item"><div class="label">الفائزون</div><div class="value" id="hostWinners">0</div></div>
-    </div>
-    
-    <div class="card">
-      <h2> طلبات التسجيل</h2>
-      <div id="pendingList"></div>
-    </div>
-    
-    <div class="card">
-      <h2>🎯 اللاعبون المسجلون</h2>
-      <div class="collapsible" onclick="toggleCollapsible('playersList')">
-        <div class="collapsible-header">
-          <span>📂 اضغط لعرض اللاعبين (<span id="playerCountDisplay">0</span>)</span>
-          <span id="playersArrow">▼</span>
-        </div>
-      </div>
-      <div id="playersList" class="collapsible-content">
-        <div id="registeredList" class="player-list"></div>
-      </div>
-      <div class="control-panel">
-        <button class="btn btn-red btn-small" onclick="deleteAllPlayers()">🗑️ حذف جميع اللاعبين</button>
-      </div>
-    </div>
-    
-    <div class="card">
-      <h2>🏆 سجل الفائزين</h2>
-      <div id="winnersLog"></div>
-      <div class="control-panel">
-        <button class="btn btn-red btn-small" onclick="clearWinners()">🗑️ حذف سجل الفائزين</button>
-      </div>
-    </div>
-    
-    <div class="card">
-      <h2>🎮 التحكم بالجولة</h2>
-      <div id="roundControl">
-        <button class="btn btn-gold" onclick="startRound(1)">🟢 بدء الجولة الأولى</button>
-        <button class="btn btn-gold" onclick="startRound(2)">🟢 بدء الجولة الثانية</button>
-        <button class="btn btn-gold" onclick="startRound(3)">⚡ بدء الجولة الثالثة</button>
-        <button class="btn btn-blue" onclick="nextQuestion()">➡️ السؤال التالي</button>
-        <button class="btn btn-red" onclick="resetGame()">🔄 إعادة اللعبة</button>
-      </div>
-      <div id="currentQuestion" style="margin-top:20px;"></div>
-    </div>
-    
-    <div class="card">
-      <h2>🔗 رابط اللاعبين</h2>
-      <p style="margin-bottom:10px;">شارك هذا الرابط مع اللاعبين:</p>
-      <input type="text" id="playerLink" readonly style="direction: ltr; text-align: center; font-size: 0.9em;">
-      <button class="btn btn-blue btn-small" onclick="copyPlayerLink()">📋 نسخ الرابط</button>
-    </div>
-  </div>
-
-  <div id="playerScreen" class="hidden">
-    <div class="logo">
-      <div class="flag">🇸🇦</div>
-      <h1>منطقة اللاعب</h1>
-      <div class="slogan">عزّنا بطبعنا</div>
-    </div>
-    <div id="registerBox" class="card">
-      <h2>📝 التسجيل للمشاركة</h2>
-      <input type="text" id="playerName" placeholder="اكتب اسمك هنا...">
-      <button class="btn btn-gold" onclick="sendJoinRequest()">📨 إرسال طلب التسجيل</button>
-      <div id="regStatus" style="margin-top:15px; font-size:1.1em;"></div>
-    </div>
-    <div id="gameBox" class="hidden">
-      <div class="status-bar">
-        <div class="status-item"><div class="label">اسمك</div><div class="value" id="myName" style="font-size:1.1em;">-</div></div>
-        <div class="status-item"><div class="label">الجولة</div><div class="value" id="myRound">-</div></div>
-        <div class="status-item"><div class="label">نقاطك</div><div class="value" id="myScore">0</div></div>
-      </div>
-      <div id="playerGameArea" class="card">
-        <div class="question-box" id="playerQuestion">في انتظار بدء الجولة...</div>
-        <div id="playerChoices"></div>
-        <button class="btn btn-gold hidden" id="winnerBtn" onclick="declareWinner()">🏆 إعلان الفوز بالجولة</button>
-        <div id="playerMsg" style="margin-top:15px; font-size:1.1em; text-align:center;"></div>
-      </div>
-    </div>
-  </div>
-
-  <div id="spectatorScreen" class="hidden">
-    <div class="logo">
-      <div class="flag">🇸🇦</div>
-      <h1>شاشة المشاهدين</h1>
-      <div class="slogan">عزّنا بطبعنا</div>
-    </div>
-    <div class="status-bar">
-      <div class="status-item"><div class="label">الجولة</div><div class="value" id="specRound">-</div></div>
-      <div class="status-item"><div class="label">السؤال</div><div class="value" id="specQNum">0/50</div></div>
-      <div class="status-item"><div class="label">اللاعبون</div><div class="value" id="specPlayerCount">0</div></div>
-    </div>
-    <div class="card">
-      <div class="question-box" id="specQuestion">في انتظار بدء اللعبة...</div>
-      <div id="specChoices"></div>
-    </div>
-    <div class="card">
-      <h2>🏆 سجل الفائزين</h2>
-      <div id="specWinners"></div>
-    </div>
-    <div class="card">
-      <h2>📊 لوحة النقاط</h2>
-      <div class="collapsible" onclick="toggleCollapsible('specPlayersList')">
-        <div class="collapsible-header">
-          <span>📂 عرض اللاعبين (<span id="specCountDisplay">0</span>)</span>
-          <span id="specPlayersArrow">▼</span>
-        </div>
-      </div>
-      <div id="specPlayersList" class="collapsible-content">
-        <div id="specScores" class="player-list"></div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<div id="audioControlPanel" class="audio-controls hidden">
-  <button onclick="toggleAudio()" id="audioPlayBtn">▶️</button>
-  <input type="range" min="0" max="100" value="50" oninput="setAudioVolume(this.value)">
-  <span style="color:#ffd700;">🔊</span>
-</div>
-
-<script type="module">
+  
   const firebaseConfig = {
     apiKey: "AIzaSyCHEowAgf2fUKg1gucjIlTfIHRI9VG4MNs",
     authDomain: "ks-alk.firebaseapp.com",
@@ -314,10 +18,10 @@
     appId: "1:57029154329:web:37de976f48333b48c13c88"
   };
 
-  const { initializeApp, getDatabase, ref, set, onValue, update, push, get, remove } = window.fb;
   const app = initializeApp(firebaseConfig);
   const db = getDatabase(app);
 
+  // تعريف المتغيرات
   let myRole = null;
   let myId = 'p_' + Math.random().toString(36).substr(2,9);
   let myName = '';
@@ -327,13 +31,13 @@
   const roundTitles = {
     1: '🟢 الجولة الأولى — اعرف وطنك (نقطة لكل إجابة)',
     2: '🟢 الجولة الثانية — عزّنا بطبعنا (نقطتان لكل إجابة)',
-    3: ' الجولة الثالثة — التحدي الوطني (3 نقاط لكل إجابة)'
+    3: '⚡ الجولة الثالثة — التحدي الوطني (3 نقاط لكل إجابة)'
   };
 
   const maxWinners = { 1: 21, 2: 14, 3: 7 };
   const pointsPerRound = { 1: 1, 2: 2, 3: 3 };
 
-  // دالة لخلط الخيارات
+  // دالة خلط الخيارات
   function shuffleArray(array) {
     const newArray = [...array];
     for (let i = newArray.length - 1; i > 0; i--) {
@@ -505,27 +209,31 @@
     {q:"ما اسم المدينة التي تقع فيها جامعة الملك سعود؟", c:["الرياض","جدة","الدمام","مكة"], a:0},
   ];
 
-  function startAs(role) {
+  // ============ الدوال الرئيسية ============
+
+  // ✅ دالة startAs - مهمة جداً!
+  window.startAs = function(role) {
+    console.log('تم اختيار الدور:', role);
     myRole = role;
-    document.getElementById('roleScreen').classList.add('hidden');
-    document.getElementById(role + 'Screen').classList.remove('hidden');
-    if (role === 'host') initHost();
-    if (role === 'player') initPlayer();
-    if (role === 'spectator') initSpectator();
-  }
-
-  window.copyPlayerLink = function() {
-    const linkInput = document.getElementById('playerLink');
-    linkInput.select();
-    document.execCommand('copy');
-    notify('📋 تم نسخ الرابط!');
-  };
-
-  window.toggleCollapsible = function(id) {
-    const content = document.getElementById(id);
-    const arrow = document.getElementById(id.replace('List', 'Arrow'));
-    content.classList.toggle('active');
-    arrow.textContent = content.classList.contains('active') ? '▲' : '▼';
+    
+    // إخفاء شاشة الاختيار
+    document.getElementById('roleScreen').style.display = 'none';
+    
+    // إظهار الشاشة المناسبة
+    if (role === 'host') {
+      document.getElementById('hostScreen').style.display = 'block';
+      initHost();
+      const playerUrl = window.location.origin + window.location.pathname + '?role=player';
+      document.getElementById('playerLink').value = playerUrl;
+    } else if (role === 'player') {
+      document.getElementById('playerScreen').style.display = 'block';
+      initPlayer();
+    } else if (role === 'spectator') {
+      document.getElementById('spectatorScreen').style.display = 'block';
+      initSpectator();
+    }
+    
+    console.log('تم الدخول إلى شاشة:', role);
   };
 
   function initHost() {
@@ -553,7 +261,7 @@
       const arr = Object.values(winners);
       document.getElementById('hostWinners').textContent = arr.length;
       document.getElementById('winnersLog').innerHTML = arr.length ? arr.map((w,i) => 
-        `<div class="winner-card"> ${i+1}. ${w.name} - الجولة ${w.round} (${w.score} نقطة)</div>`
+        `<div class="winner-card">🏆 ${i+1}. ${w.name} - الجولة ${w.round} (${w.score} نقطة)</div>`
       ).join('') : '<p style="opacity:.7; text-align:center;">لا يوجد فائزون بعد</p>';
     });
     onValue(ref(db, 'winnerRequests'), (snapshot) => {
@@ -607,7 +315,7 @@
       } else if (p.status === 'accepted' || p.status === 'winner') {
         pCount++;
         registeredHtml += `<div class="player-item">
-          <span> ${p.name} ${p.status==='winner'?'🏆':''}</span>
+          <span>👤 ${p.name} ${p.status==='winner'?'🏆':''}</span>
           <span class="score-badge">${p.score || 0}</span>
           <button class="delete-btn" onclick="deletePlayer('${id}','${p.name}')">×</button>
         </div>`;
@@ -690,7 +398,6 @@
     });
   }
 
-  // ✅ الدالة المصححة نهائياً
   window.nextQuestion = async function() {
     console.log('🔵 بدء الانتقال للسؤال التالي...');
     
@@ -712,7 +419,6 @@
         return; 
       }
       
-      // جلب السؤال الأصلي من البنك
       const bank = [null, Q1, Q2, Q3][round];
       const originalQ = bank[qIndex];
       
@@ -722,9 +428,8 @@
         return; 
       }
       
-      console.log(`✅ السؤال الأصلي: ${originalQ.q.substring(0, 50)}...`);
+      console.log(`✅ السؤال الأصلي: ${originalQ.q}`);
       
-      // خلط الخيارات
       const choicesWithAnswer = originalQ.c.map((text, idx) => ({
         text: text,
         isCorrect: idx === originalQ.a
@@ -733,9 +438,8 @@
       const correctIndex = shuffledChoices.findIndex(c => c.isCorrect);
       
       console.log(`📝 الخيارات بعد الخلط:`, shuffledChoices.map(c => c.text));
-      console.log(`✅ الإجابة الصحيحة (رقم ${correctIndex}): ${shuffledChoices[correctIndex].text}`);
+      console.log(`✅ الإجابة الصحيحة: ${shuffledChoices[correctIndex].text}`);
       
-      // إعداد السؤال الجديد
       const newQuestion = {
         round: round,
         qIndex: qIndex,
@@ -745,9 +449,6 @@
         points: pointsPerRound[round]
       };
       
-      console.log(' إرسال السؤال الجديد لـ Firebase...');
-      
-      // تحديث اللاعبين
       const playersSnap = await get(ref(db, 'players'));
       const players = playersSnap.val() || {};
       const playerUpdates = {};
@@ -758,7 +459,6 @@
         }
       }
       
-      // تحديث كل شيء معاً
       const updates = {
         ...playerUpdates,
         'gameState/qIndex': qIndex,
@@ -767,11 +467,10 @@
       
       await update(ref(db), updates);
       console.log('✅✅✅ تم تحديث السؤال بنجاح!');
-      console.log('السؤال الجديد:', newQuestion.q);
       notify(`📝 السؤال ${qIndex + 1} من 50`);
       
     } catch (error) {
-      console.error('❌ خطأ فادح:', error);
+      console.error('❌ خطأ:', error);
       alert('حدث خطأ: ' + error.message);
     }
   };
@@ -791,8 +490,8 @@
       const p = snapshot.val();
       if (!p) return;
       if (p.status === 'accepted' || p.status === 'winner') {
-        document.getElementById('registerBox').classList.add('hidden');
-        document.getElementById('gameBox').classList.remove('hidden');
+        document.getElementById('registerBox').style.display = 'none';
+        document.getElementById('gameBox').style.display = 'block';
         document.getElementById('myName').textContent = myName;
         document.getElementById('myScore').textContent = p.score || 0;
         myScore = p.score || 0;
@@ -807,7 +506,7 @@
       if (state.title && state.qIndex === -1) {
         document.getElementById('playerQuestion').textContent = state.title;
         document.getElementById('playerChoices').innerHTML = '';
-        document.getElementById('winnerBtn').classList.add('hidden');
+        document.getElementById('winnerBtn').style.display = 'none';
         document.getElementById('playerMsg').textContent = '';
         answeredThisQ = false;
       }
@@ -828,7 +527,7 @@
         document.getElementById('playerChoices').innerHTML = cq.choices.map((c, i) => 
           `<button class="choice-btn" onclick="answerQuestion(${i}, ${cq.correctIndex}, ${cq.points})">${c}</button>`
         ).join('');
-        document.getElementById('winnerBtn').classList.add('hidden');
+        document.getElementById('winnerBtn').style.display = 'none';
         document.getElementById('playerMsg').textContent = '';
         answeredThisQ = false;
       });
@@ -839,7 +538,7 @@
     const name = document.getElementById('playerName').value.trim();
     if (!name) { alert('اكتب اسمك!'); return; }
     myName = name;
-    document.getElementById('regStatus').innerHTML = '⏳ في انتظار موافقة المتحكم...';
+    document.getElementById('regStatus').innerHTML = ' في انتظار موافقة المتحكم...';
     set(ref(db, `players/${myId}`), { name: myName, status: 'pending', score: 0 });
   };
 
@@ -860,7 +559,7 @@
       document.getElementById('playerMsg').innerHTML = `✅ إجابة صحيحة! +${points} نقطة`;
       document.getElementById('playerMsg').style.color = '#4ade80';
       if (myScore >= 3) {
-        document.getElementById('winnerBtn').classList.remove('hidden');
+        document.getElementById('winnerBtn').style.display = 'block';
       }
     } else {
       update(ref(db, `players/${myId}`), { answered: true });
@@ -920,6 +619,13 @@
     });
   }
 
+  window.copyPlayerLink = function() {
+    const linkInput = document.getElementById('playerLink');
+    linkInput.select();
+    document.execCommand('copy');
+    notify(' تم نسخ الرابط!');
+  };
+
   function notify(text) {
     const n = document.createElement('div');
     n.className = 'notification';
@@ -927,6 +633,260 @@
     document.body.appendChild(n);
     setTimeout(() => n.remove(), 4000);
   }
+
+  // التحقق من URL parameter
+  const urlParams = new URLSearchParams(window.location.search);
+  if (urlParams.get('role') === 'player') {
+    document.addEventListener('DOMContentLoaded', () => {
+      document.getElementById('roleScreen').style.display = 'none';
+      document.getElementById('playerScreen').style.display = 'block';
+      initPlayer();
+    });
+  }
 </script>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; font-family:'Segoe UI', Tahoma, sans-serif; }
+  body {
+    min-height:100vh;
+    background: linear-gradient(135deg, #0a3d2e 0%, #065f46 50%, #052e1f 100%);
+    color:#fff; padding:20px; overflow-x:hidden;
+  }
+  .container { max-width:1000px; margin:auto; position:relative; z-index:1; }
+  .logo {
+    text-align:center; padding:20px; margin-bottom:20px;
+    background: rgba(0,0,0,0.4); border-radius:20px;
+    backdrop-filter: blur(10px); border:3px solid rgba(255,215,0,0.5);
+    box-shadow: 0 0 30px rgba(255,215,0,0.3);
+  }
+  .logo h1 { font-size:2.5em; color:#ffd700; text-shadow:0 0 20px rgba(255,215,0,0.8); }
+  .logo .slogan { font-size:1.8em; color:#fff; margin-top:10px; font-weight:bold; }
+  .logo .flag { font-size:4em; margin:10px 0; }
+  .logo .year { font-size:1.5em; color:#ffd700; margin-top:5px; }
+  .btn {
+    padding:14px 30px; border:none; border-radius:12px; font-size:1.1em; font-weight:bold;
+    cursor:pointer; transition:all .3s; margin:5px; color:#fff;
+    background: linear-gradient(135deg, #00a651, #006c35);
+    box-shadow:0 4px 15px rgba(0,0,0,0.3);
+  }
+  .btn:hover { transform:translateY(-2px); box-shadow:0 6px 20px rgba(0,166,81,0.5); }
+  .btn-gold { background: linear-gradient(135deg, #ffd700, #daa520); color:#000; }
+  .btn-red { background: linear-gradient(135deg, #dc3545, #a71d2a); }
+  .btn-blue { background: linear-gradient(135deg, #007bff, #0056b3); }
+  .btn-small { padding:8px 16px; font-size:0.9em; }
+  .btn:disabled { opacity:.5; cursor:not-allowed; }
+  .card {
+    background: rgba(0,0,0,0.5); border-radius:18px; padding:25px;
+    backdrop-filter: blur(10px); border:2px solid rgba(255,215,0,0.3);
+    margin-bottom:20px; box-shadow:0 8px 32px rgba(0,0,0,0.4);
+  }
+  .card h2 { color:#ffd700; margin-bottom:15px; font-size:1.5em; border-bottom:2px solid #ffd700; padding-bottom:10px; }
+  input[type=text] {
+    width:100%; padding:14px; border-radius:10px; border:2px solid rgba(255,215,0,0.5);
+    background: rgba(255,255,255,0.1); color:#fff; font-size:1.1em; margin:10px 0;
+  }
+  input[type=text]::placeholder { color:rgba(255,255,255,0.6); }
+  .choice-btn {
+    display:block; width:100%; padding:18px; margin:10px 0;
+    background: linear-gradient(135deg, rgba(255,255,255,0.15), rgba(255,255,255,0.05));
+    border:2px solid rgba(255,215,0,0.4); border-radius:12px;
+    color:#fff; font-size:1.1em; cursor:pointer; transition:all .3s; text-align:right;
+  }
+  .choice-btn:hover:not(:disabled) {
+    background: linear-gradient(135deg, #00a651, #006c35);
+    transform:translateX(-5px); border-color:#ffd700;
+  }
+  .choice-btn.correct { background: linear-gradient(135deg, #28a745, #1e7e34) !important; border-color:#fff; }
+  .choice-btn.wrong { background: linear-gradient(135deg, #dc3545, #a71d2a) !important; border-color:#fff; }
+  .player-list { display:grid; grid-template-columns:repeat(auto-fill, minmax(180px, 1fr)); gap:10px; }
+  .player-item {
+    background: rgba(255,255,255,0.1); padding:12px; border-radius:10px;
+    display:flex; justify-content:space-between; align-items:center;
+    border:1px solid rgba(255,255,255,0.2);
+    position: relative;
+  }
+  .player-item .delete-btn {
+    position: absolute;
+    left: 5px; top: 5px;
+    background: #dc3545; color: white; border: none;
+    border-radius: 50%; width: 24px; height: 24px;
+    cursor: pointer; font-size: 0.8em;
+  }
+  .score-badge { background:#ffd700; color:#000; padding:4px 12px; border-radius:20px; font-weight:bold; }
+  .question-box {
+    background: linear-gradient(135deg, rgba(255,215,0,0.25), rgba(255,215,0,0.05));
+    border:3px solid #ffd700; border-radius:15px; padding:25px; margin:20px 0;
+    font-size:1.4em; text-align:center; font-weight:bold; line-height: 1.6;
+    box-shadow: 0 0 20px rgba(255,215,0,0.3);
+  }
+  .status-bar {
+    display:flex; justify-content:space-around; flex-wrap:wrap; gap:10px;
+    background:rgba(0,0,0,0.6); padding:15px; border-radius:12px; margin-bottom:20px;
+    border: 2px solid rgba(255,215,0,0.3);
+  }
+  .status-item { text-align:center; }
+  .status-item .label { font-size:.85em; opacity:.8; }
+  .status-item .value { font-size:1.6em; font-weight:bold; color:#ffd700; }
+  .winner-card {
+    background: linear-gradient(135deg, #ffd700, #ff8c00);
+    color:#000; padding:15px; border-radius:12px; margin:8px 0;
+    text-align:center; font-size:1.1em; font-weight:bold;
+  }
+  .hidden { display:none !important; }
+  .role-select { text-align:center; padding:40px; }
+  .role-btn {
+    display:block; width:80%; max-width:300px; margin:15px auto;
+    padding:25px 40px;
+    background: linear-gradient(135deg, #00a651, #006c35);
+    border-radius:20px; cursor:pointer; font-size:1.3em; font-weight:bold;
+    transition:all .3s; border:3px solid rgba(255,215,0,0.5);
+    color:#fff;
+  }
+  .role-btn:hover { transform:scale(1.05); border-color:#ffd700; box-shadow: 0 0 20px rgba(255,215,0,0.5); }
+  .notification {
+    position:fixed; top:20px; left:50%; transform:translateX(-50%);
+    background:#ffd700; color:#000; padding:15px 30px; border-radius:10px;
+    font-weight:bold; z-index:1000; animation:slideDown .5s;
+  }
+  @keyframes slideDown { from { top:-100px; } to { top:20px; } }
+  .control-panel {
+    background: rgba(0,0,0,0.4);
+    padding: 15px; border-radius: 10px;
+    margin-bottom: 15px;
+    border: 1px solid rgba(255,215,0,0.3);
+  }
+  @media(max-width:600px) {
+    .logo h1 { font-size:1.8em; }
+    .logo .slogan { font-size:1.3em; }
+    .question-box { font-size:1.1em; }
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <!-- شاشة اختيار الدور -->
+  <div id="roleScreen">
+    <div class="logo">
+      <div class="flag">🇸🇦</div>
+      <h1>اليوم الوطني السعودي 96</h1>
+      <div class="slogan">✨ عزّنا بطبعنا </div>
+      <div class="year">2026 - 1448هـ</div>
+    </div>
+    <div class="role-select">
+      <h2 style="color:#ffd700; margin-bottom:30px;">اختر دورك للبدء</h2>
+      <button class="role-btn" onclick="startAs('host')">🎛️ متحكم</button>
+      <button class="role-btn" onclick="startAs('player')">🎮 لاعب</button>
+      <button class="role-btn" onclick="startAs('spectator')">👁️ مشاهد</button>
+    </div>
+  </div>
+
+  <!-- شاشة المتحكم -->
+  <div id="hostScreen" style="display:none;">
+    <div class="logo">
+      <div class="flag">🇸🇦</div>
+      <h1>لوحة المتحكم</h1>
+      <div class="slogan">عزّنا بطبعنا</div>
+    </div>
+    <div class="status-bar">
+      <div class="status-item"><div class="label">الجولة</div><div class="value" id="hostRound">-</div></div>
+      <div class="status-item"><div class="label">السؤال</div><div class="value" id="hostQNum">0/50</div></div>
+      <div class="status-item"><div class="label">اللاعبون</div><div class="value" id="hostPlayerCount">0</div></div>
+      <div class="status-item"><div class="label">الفائزون</div><div class="value" id="hostWinners">0</div></div>
+    </div>
+    
+    <div class="card">
+      <h2>📋 طلبات التسجيل</h2>
+      <div id="pendingList"></div>
+    </div>
+    
+    <div class="card">
+      <h2>🎯 اللاعبون المسجلون (<span id="playerCountDisplay">0</span>)</h2>
+      <div id="registeredList" class="player-list"></div>
+      <div class="control-panel">
+        <button class="btn btn-red btn-small" onclick="deleteAllPlayers()">️ حذف جميع اللاعبين</button>
+      </div>
+    </div>
+    
+    <div class="card">
+      <h2>🏆 سجل الفائزين</h2>
+      <div id="winnersLog"></div>
+      <div class="control-panel">
+        <button class="btn btn-red btn-small" onclick="clearWinners()">️ حذف سجل الفائزين</button>
+      </div>
+    </div>
+    
+    <div class="card">
+      <h2> التحكم بالجولة</h2>
+      <button class="btn btn-gold" onclick="startRound(1)">🟢 بدء الجولة الأولى</button>
+      <button class="btn btn-gold" onclick="startRound(2)">🟢 بدء الجولة الثانية</button>
+      <button class="btn btn-gold" onclick="startRound(3)">⚡ بدء الجولة الثالثة</button>
+      <button class="btn btn-blue" onclick="nextQuestion()">➡️ السؤال التالي</button>
+      <button class="btn btn-red" onclick="resetGame()">🔄 إعادة اللعبة</button>
+      <div id="currentQuestion" style="margin-top:20px;"></div>
+    </div>
+    
+    <div class="card">
+      <h2>🔗 رابط اللاعبين</h2>
+      <p style="margin-bottom:10px;">شارك هذا الرابط مع اللاعبين:</p>
+      <input type="text" id="playerLink" readonly style="direction: ltr; text-align: center; font-size: 0.9em;">
+      <button class="btn btn-blue btn-small" onclick="copyPlayerLink()">📋 نسخ الرابط</button>
+    </div>
+  </div>
+
+  <!-- شاشة اللاعب -->
+  <div id="playerScreen" style="display:none;">
+    <div class="logo">
+      <div class="flag">🇸🇦</div>
+      <h1>منطقة اللاعب</h1>
+      <div class="slogan">عزّنا بطبعنا</div>
+    </div>
+    <div id="registerBox" class="card">
+      <h2>📝 التسجيل للمشاركة</h2>
+      <input type="text" id="playerName" placeholder="اكتب اسمك هنا...">
+      <button class="btn btn-gold" onclick="sendJoinRequest()">📨 إرسال طلب التسجيل</button>
+      <div id="regStatus" style="margin-top:15px; font-size:1.1em;"></div>
+    </div>
+    <div id="gameBox" style="display:none;">
+      <div class="status-bar">
+        <div class="status-item"><div class="label">اسمك</div><div class="value" id="myName" style="font-size:1.1em;">-</div></div>
+        <div class="status-item"><div class="label">الجولة</div><div class="value" id="myRound">-</div></div>
+        <div class="status-item"><div class="label">نقاطك</div><div class="value" id="myScore">0</div></div>
+      </div>
+      <div class="card">
+        <div class="question-box" id="playerQuestion">في انتظار بدء الجولة...</div>
+        <div id="playerChoices"></div>
+        <button class="btn btn-gold" id="winnerBtn" style="display:none;" onclick="declareWinner()">🏆 إعلان الفوز بالجولة</button>
+        <div id="playerMsg" style="margin-top:15px; font-size:1.1em; text-align:center;"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- شاشة المشاهد -->
+  <div id="spectatorScreen" style="display:none;">
+    <div class="logo">
+      <div class="flag">🇸🇦</div>
+      <h1>شاشة المشاهدين</h1>
+      <div class="slogan">عزّنا بطبعنا</div>
+    </div>
+    <div class="status-bar">
+      <div class="status-item"><div class="label">الجولة</div><div class="value" id="specRound">-</div></div>
+      <div class="status-item"><div class="label">السؤال</div><div class="value" id="specQNum">0/50</div></div>
+      <div class="status-item"><div class="label">اللاعبون</div><div class="value" id="specPlayerCount">0</div></div>
+    </div>
+    <div class="card">
+      <div class="question-box" id="specQuestion">في انتظار بدء اللعبة...</div>
+      <div id="specChoices"></div>
+    </div>
+    <div class="card">
+      <h2>🏆 سجل الفائزين</h2>
+      <div id="specWinners"></div>
+    </div>
+    <div class="card">
+      <h2> لوحة النقاط (<span id="specCountDisplay">0</span>)</h2>
+      <div id="specScores" class="player-list"></div>
+    </div>
+  </div>
+</div>
+
 </body>
 </html>
