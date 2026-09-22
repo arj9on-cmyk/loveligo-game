@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>🇸🇦  اليوم الوطني السعودي 96 - عزّنا بطبعنا</title>
+<title>🇸🇦 لعبة اليوم الوطني 96 - عزّنا بطبعنا</title>
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
   import { getDatabase, ref, set, onValue, update, push, get, remove } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-database.js";
@@ -163,22 +163,22 @@
     <div class="logo">
       <div class="flag">🇸🇦</div>
       <h1>اليوم الوطني السعودي 96</h1>
-      <div class="slogan">✨ عزّنا بطبعنا   ✨</div>
+      <div class="slogan">✨ عزّنا بطبعنا ✨</div>
       <div class="year">2026 - 1448هـ</div>
     </div>
     <div class="role-select">
       <h2 style="color:#ffd700; margin-bottom:30px;">اختر دورك للبدء</h2>
       <div class="role-btn" onclick="startAs('host')">🎛️ متحكم</div>
-      <div class="role-btn" onclick="startAs('player')">🎮 لاعب</div>
-      <div class="role-btn" onclick="startAs('spectator')">👁️ مشاهد</div>
+      <div class="role-btn" onclick="startAs('player')"> لاعب</div>
+      <div class="role-btn" onclick="startAs('spectator')">️ مشاهد</div>
     </div>
   </div>
 
   <div id="hostScreen" class="hidden">
     <div class="logo">
-      <div class="flag">🇸🇦</div>
+      <div class="flag">🇦</div>
       <h1>لوحة المتحكم</h1>
-      <div class="slogan">عزّنا بطبعنا </div>
+      <div class="slogan">عزّنا بطبعنا</div>
     </div>
     <div class="status-bar">
       <div class="status-item"><div class="label">الجولة</div><div class="value" id="hostRound">-</div></div>
@@ -188,7 +188,7 @@
     </div>
     
     <div class="card">
-      <h2>📋 طلبات التسجيل</h2>
+      <h2> طلبات التسجيل</h2>
       <div id="pendingList"></div>
     </div>
     
@@ -196,7 +196,7 @@
       <h2>🎯 اللاعبون المسجلون</h2>
       <div class="collapsible" onclick="toggleCollapsible('playersList')">
         <div class="collapsible-header">
-          <span> اضغط لعرض اللاعبين (<span id="playerCountDisplay">0</span>)</span>
+          <span>📂 اضغط لعرض اللاعبين (<span id="playerCountDisplay">0</span>)</span>
           <span id="playersArrow">▼</span>
         </div>
       </div>
@@ -209,7 +209,7 @@
     </div>
     
     <div class="card">
-      <h2> سجل الفائزين</h2>
+      <h2>🏆 سجل الفائزين</h2>
       <div id="winnersLog"></div>
       <div class="control-panel">
         <button class="btn btn-red btn-small" onclick="clearWinners()">🗑️ حذف سجل الفائزين</button>
@@ -229,10 +229,10 @@
     </div>
     
     <div class="card">
-      <h2> رابط اللاعبين</h2>
+      <h2>🔗 رابط اللاعبين</h2>
       <p style="margin-bottom:10px;">شارك هذا الرابط مع اللاعبين:</p>
       <input type="text" id="playerLink" readonly style="direction: ltr; text-align: center; font-size: 0.9em;">
-      <button class="btn btn-blue btn-small" onclick="copyPlayerLink()"> نسخ الرابط</button>
+      <button class="btn btn-blue btn-small" onclick="copyPlayerLink()">📋 نسخ الرابط</button>
     </div>
   </div>
 
@@ -240,7 +240,7 @@
     <div class="logo">
       <div class="flag">🇸🇦</div>
       <h1>منطقة اللاعب</h1>
-      <div class="slogan">عزّنا بطبعنا </div>
+      <div class="slogan">عزّنا بطبعنا</div>
     </div>
     <div id="registerBox" class="card">
       <h2>📝 التسجيل للمشاركة</h2>
@@ -267,7 +267,7 @@
     <div class="logo">
       <div class="flag">🇸🇦</div>
       <h1>شاشة المشاهدين</h1>
-      <div class="slogan">عزّنا بطبعنا </div>
+      <div class="slogan">عزّنا بطبعنا</div>
     </div>
     <div class="status-bar">
       <div class="status-item"><div class="label">الجولة</div><div class="value" id="specRound">-</div></div>
@@ -323,47 +323,27 @@
   let myName = '';
   let myScore = 0;
   let answeredThisQ = false;
-  let audioElement = null;
-  let isAudioPlaying = false;
-  let currentMusicIndex = 0;
-
-  const musicQueue = [
-    { url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3', name: 'الموسيقى 1' },
-    { url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3', name: 'الموسيقى 2' },
-    { url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3', name: 'الموسيقى 3' },
-    { url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-4.mp3', name: 'الموسيقى 4' }
-  ];
 
   const roundTitles = {
     1: '🟢 الجولة الأولى — اعرف وطنك (نقطة لكل إجابة)',
-    2: '🟢 الجولة الثانية — عزّ لنا طبع (نقطتان لكل إجابة)',
-    3: '⚡ الجولة الثالثة — التحدي الوطني (3 نقاط لكل إجابة)'
+    2: '🟢 الجولة الثانية — عزّنا بطبعنا (نقطتان لكل إجابة)',
+    3: ' الجولة الثالثة — التحدي الوطني (3 نقاط لكل إجابة)'
   };
 
   const maxWinners = { 1: 21, 2: 14, 3: 7 };
   const pointsPerRound = { 1: 1, 2: 2, 3: 3 };
 
-  // ✅ خلط الخيارات مرة واحدة فقط
-  function shuffleChoices(question) {
-    const choices = question.c.map((text, index) => ({ text, isCorrect: index === question.a }));
-    for (let i = choices.length - 1; i > 0; i--) {
+  // دالة لخلط الخيارات
+  function shuffleArray(array) {
+    const newArray = [...array];
+    for (let i = newArray.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
-      [choices[i], choices[j]] = [choices[j], choices[i]];
+      [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
     }
-    return {
-      q: question.q,
-      c: choices.map(c => c.text),
-      a: choices.findIndex(c => c.isCorrect)
-    };
+    return newArray;
   }
 
-  // ✅ جلب السؤال بدون خلط (الخلط يتم مرة واحدة فقط)
-  function getQ(round, idx) {
-    const bank = [null, Q1, Q2, Q3][round];
-    return bank && bank[idx] ? bank[idx] : null;
-  }
-
-  // ============ الأسئلة - الجولة الأولى (50 سؤال) ============
+  // الأسئلة - الجولة الأولى (50 سؤال)
   const Q1 = [
     {q:"في أي تاريخ تحتفل السعودية باليوم الوطني؟", c:["23 سبتمبر","1 أكتوبر","4 أغسطس","2 ديسمبر"], a:0},
     {q:"ماذا يخلّد اليوم الوطني السعودي؟", c:["توحيد المملكة","تأسيس الجيش","استقلال اقتصادي","بناء الرياض"], a:0},
@@ -417,7 +397,7 @@
     {q:"ما اسم البحر الذي يفصل السعودية عن مصر؟", c:["البحر الأحمر","البحر المتوسط","بحر العرب","خليج العقبة"], a:0},
   ];
 
-  // ============ الأسئلة - الجولة الثانية (50 سؤال) ============
+  // الأسئلة - الجولة الثانية (50 سؤال)
   const Q2 = [
     {q:"شخص رأى ضيفًا جديدًا فبادر بالترحيب به وإكرامه، ما الصفة؟", c:["الكرم","الخوف","الغضب","البخل"], a:0},
     {q:"شخص واجه صعوبة كبيرة ولم يستسلم، ما الصفة؟", c:["الشجاعة","الجبن","الكسل","اليأس"], a:0},
@@ -471,7 +451,7 @@
     {q:"شخص يضع رؤية طويلة المدى لوطنه، يمثل أي قيمة؟", c:["الرؤية","الفوضى","الجمود","العشوائية"], a:0},
   ];
 
-  // ============ الأسئلة - الجولة الثالثة (50 سؤال) ============
+  // الأسئلة - الجولة الثالثة (50 سؤال)
   const Q3 = [
     {q:"صح أم خطأ: اليوم الوطني السعودي يكون في 23 سبتمبر.", c:["صح","خطأ","غير معروف","أحيانًا"], a:0},
     {q:"صح أم خطأ: عاصمة السعودية هي جدة.", c:["خطأ","صح","أحيانًا","جزئيًا"], a:0},
@@ -525,79 +505,18 @@
     {q:"ما اسم المدينة التي تقع فيها جامعة الملك سعود؟", c:["الرياض","جدة","الدمام","مكة"], a:0},
   ];
 
-  // نظام تشغيل الموسيقى
-  function initAudio() {
-    audioElement = new Audio();
-    audioElement.volume = 0.5;
-    audioElement.addEventListener('ended', playNextMusic);
-  }
-
-  function playNextMusic() {
-    currentMusicIndex = (currentMusicIndex + 1) % musicQueue.length;
-    if (isAudioPlaying && audioElement) {
-      audioElement.src = musicQueue[currentMusicIndex].url;
-      audioElement.play().catch(e => console.log('Audio play error:', e));
-    }
-  }
-
-  window.playStageMusic = function(stage) {
-    if (!audioElement) initAudio();
-    currentMusicIndex = 0;
-    audioElement.src = musicQueue[0].url;
-    if (isAudioPlaying) {
-      audioElement.play().catch(e => console.log('Audio play error:', e));
-    }
-  };
-
-  window.toggleAudio = function() {
-    if (!audioElement) initAudio();
-    if (isAudioPlaying) {
-      audioElement.pause();
-      isAudioPlaying = false;
-      document.getElementById('audioPlayBtn').textContent = '▶️';
-    } else {
-      audioElement.play().catch(e => console.log('Audio play error:', e));
-      isAudioPlaying = true;
-      document.getElementById('audioPlayBtn').textContent = '⏸️';
-    }
-  };
-
-  window.setAudioVolume = function(val) {
-    if (audioElement) audioElement.volume = val / 100;
-  };
-
-  function checkURLParameter() {
-    const urlParams = new URLSearchParams(window.location.search);
-    const roleParam = urlParams.get('role');
-    if (roleParam === 'player') {
-      document.getElementById('roleScreen').classList.add('hidden');
-      startAs('player');
-    }
-  }
-
-  window.addEventListener('load', checkURLParameter);
-
-  window.startAs = function(role) {
+  function startAs(role) {
     myRole = role;
     document.getElementById('roleScreen').classList.add('hidden');
     document.getElementById(role + 'Screen').classList.remove('hidden');
-    if (role === 'player' || role === 'spectator') {
-      document.getElementById('audioControlPanel').classList.remove('hidden');
-      playStageMusic('pregame');
-    }
-    if (role === 'host') {
-      initHost();
-      const playerUrl = window.location.origin + window.location.pathname + '?role=player';
-      document.getElementById('playerLink').value = playerUrl;
-    }
+    if (role === 'host') initHost();
     if (role === 'player') initPlayer();
     if (role === 'spectator') initSpectator();
-  };
+  }
 
   window.copyPlayerLink = function() {
     const linkInput = document.getElementById('playerLink');
     linkInput.select();
-    linkInput.setSelectionRange(0, 99999);
     document.execCommand('copy');
     notify('📋 تم نسخ الرابط!');
   };
@@ -619,7 +538,6 @@
       document.getElementById('hostRound').textContent = state.round ? `الجولة ${state.round}` : '-';
       document.getElementById('hostQNum').textContent = state.qIndex >= 0 ? `${state.qIndex + 1}/50` : '0/50';
     });
-    // ✅ عرض السؤال من currentQuestion مباشرة (بدون إعادة خلط)
     onValue(ref(db, 'currentQuestion'), (snapshot) => {
       const cq = snapshot.val();
       const cqDiv = document.getElementById('currentQuestion');
@@ -635,7 +553,7 @@
       const arr = Object.values(winners);
       document.getElementById('hostWinners').textContent = arr.length;
       document.getElementById('winnersLog').innerHTML = arr.length ? arr.map((w,i) => 
-        `<div class="winner-card">🏆 ${i+1}. ${w.name} - الجولة ${w.round} (${w.score} نقطة)</div>`
+        `<div class="winner-card"> ${i+1}. ${w.name} - الجولة ${w.round} (${w.score} نقطة)</div>`
       ).join('') : '<p style="opacity:.7; text-align:center;">لا يوجد فائزون بعد</p>';
     });
     onValue(ref(db, 'winnerRequests'), (snapshot) => {
@@ -689,7 +607,7 @@
       } else if (p.status === 'accepted' || p.status === 'winner') {
         pCount++;
         registeredHtml += `<div class="player-item">
-          <span>👤 ${p.name} ${p.status==='winner'?'🏆':''}</span>
+          <span> ${p.name} ${p.status==='winner'?'🏆':''}</span>
           <span class="score-badge">${p.score || 0}</span>
           <button class="delete-btn" onclick="deletePlayer('${id}','${p.name}')">×</button>
         </div>`;
@@ -772,12 +690,13 @@
     });
   }
 
-  // ✅ الدالة المصححة - تخلط الخيارات مرة واحدة فقط
-  window.nextQuestion = function() {
-    console.log(' بدء الانتقال للسؤال التالي...');
+  // ✅ الدالة المصححة نهائياً
+  window.nextQuestion = async function() {
+    console.log('🔵 بدء الانتقال للسؤال التالي...');
     
-    get(ref(db, 'gameState')).then(snapshot => {
-      const state = snapshot.val() || {};
+    try {
+      const gameStateSnap = await get(ref(db, 'gameState'));
+      const state = gameStateSnap.val() || {};
       const round = state.round;
       
       if (!round) {
@@ -786,7 +705,6 @@
       }
       
       let qIndex = (state.qIndex || -1) + 1;
-      
       console.log(`📊 الجولة: ${round}, السؤال القادم: ${qIndex}`);
       
       if (qIndex >= 50) { 
@@ -794,54 +712,68 @@
         return; 
       }
       
-      const q = getQ(round, qIndex);
-      if (!q) { 
-        alert('لا توجد أسئلة كافية'); 
+      // جلب السؤال الأصلي من البنك
+      const bank = [null, Q1, Q2, Q3][round];
+      const originalQ = bank[qIndex];
+      
+      if (!originalQ) { 
+        console.error('❌ لم يتم العثور على السؤال رقم', qIndex);
+        alert('لا يوجد سؤال رقم ' + (qIndex + 1));
         return; 
       }
       
-      // ✅ خلط الخيارات مرة واحدة فقط هنا
-      const shuffled = shuffleChoices(q);
+      console.log(`✅ السؤال الأصلي: ${originalQ.q.substring(0, 50)}...`);
       
-      console.log(`✅ السؤال: ${shuffled.q.substring(0, 40)}...`);
-      console.log(`📝 الخيارات: ${JSON.stringify(shuffled.c)}`);
-      console.log(`✅ الإجابة الصحيحة: ${shuffled.c[shuffled.a]}`);
+      // خلط الخيارات
+      const choicesWithAnswer = originalQ.c.map((text, idx) => ({
+        text: text,
+        isCorrect: idx === originalQ.a
+      }));
+      const shuffledChoices = shuffleArray(choicesWithAnswer);
+      const correctIndex = shuffledChoices.findIndex(c => c.isCorrect);
       
-      get(ref(db, 'players')).then(ps => {
-        const pUpdates = {};
-        const players = ps.val() || {};
-        
-        for (const [id, p] of Object.entries(players)) {
-          if (p.status === 'accepted' || p.status === 'winner') {
-            pUpdates[`players/${id}/answered`] = false;
-          }
+      console.log(`📝 الخيارات بعد الخلط:`, shuffledChoices.map(c => c.text));
+      console.log(`✅ الإجابة الصحيحة (رقم ${correctIndex}): ${shuffledChoices[correctIndex].text}`);
+      
+      // إعداد السؤال الجديد
+      const newQuestion = {
+        round: round,
+        qIndex: qIndex,
+        q: originalQ.q,
+        choices: shuffledChoices.map(c => c.text),
+        correctIndex: correctIndex,
+        points: pointsPerRound[round]
+      };
+      
+      console.log(' إرسال السؤال الجديد لـ Firebase...');
+      
+      // تحديث اللاعبين
+      const playersSnap = await get(ref(db, 'players'));
+      const players = playersSnap.val() || {};
+      const playerUpdates = {};
+      
+      for (const [id, p] of Object.entries(players)) {
+        if (p.status === 'accepted' || p.status === 'winner') {
+          playerUpdates[`players/${id}/answered`] = false;
         }
-        
-        const updates = {
-          ...pUpdates,
-          'gameState/qIndex': qIndex,
-          'currentQuestion/round': round,
-          'currentQuestion/qIndex': qIndex,
-          'currentQuestion/q': shuffled.q,
-          'currentQuestion/choices': shuffled.c,
-          'currentQuestion/correctIndex': shuffled.a,
-          'currentQuestion/points': pointsPerRound[round]
-        };
-        
-        console.log('📤 إرسال التحديثات لـ Firebase...');
-        update(ref(db), updates)
-          .then(() => {
-            console.log('✅ تم تحديث السؤال بنجاح!');
-            notify(`📝 السؤال ${qIndex + 1} من 50`);
-          })
-          .catch(error => {
-            console.error('❌ خطأ في التحديث:', error);
-            alert('حدث خطأ في تحديث السؤال: ' + error.message);
-          });
-      });
-    }).catch(error => {
-      console.error('❌ خطأ في قراءة الحالة:', error);
-    });
+      }
+      
+      // تحديث كل شيء معاً
+      const updates = {
+        ...playerUpdates,
+        'gameState/qIndex': qIndex,
+        'currentQuestion': newQuestion
+      };
+      
+      await update(ref(db), updates);
+      console.log('✅✅✅ تم تحديث السؤال بنجاح!');
+      console.log('السؤال الجديد:', newQuestion.q);
+      notify(`📝 السؤال ${qIndex + 1} من 50`);
+      
+    } catch (error) {
+      console.error('❌ خطأ فادح:', error);
+      alert('حدث خطأ: ' + error.message);
+    }
   };
 
   window.resetGame = function() {
@@ -880,7 +812,6 @@
         answeredThisQ = false;
       }
     });
-    // ✅ قراءة السؤال من currentQuestion مباشرة
     onValue(ref(db, 'currentQuestion'), (snapshot) => {
       const cq = snapshot.val();
       if (!cq || !cq.q) return;
@@ -908,7 +839,7 @@
     const name = document.getElementById('playerName').value.trim();
     if (!name) { alert('اكتب اسمك!'); return; }
     myName = name;
-    document.getElementById('regStatus').innerHTML = ' في انتظار موافقة المتحكم...';
+    document.getElementById('regStatus').innerHTML = '⏳ في انتظار موافقة المتحكم...';
     set(ref(db, `players/${myId}`), { name: myName, status: 'pending', score: 0 });
   };
 
@@ -942,7 +873,7 @@
     if (myScore < 3) return;
     push(ref(db, 'winnerRequests'), { id: myId, name: myName, score: myScore, timestamp: Date.now() });
     document.getElementById('winnerBtn').disabled = true;
-    document.getElementById('playerMsg').innerHTML = ' تم إرسال طلب الفوز!';
+    document.getElementById('playerMsg').innerHTML = '🏆 تم إرسال طلب الفوز!';
     document.getElementById('playerMsg').style.color = '#ffd700';
   };
 
@@ -956,7 +887,6 @@
         document.getElementById('specChoices').innerHTML = '';
       }
     });
-    // ✅ قراءة السؤال من currentQuestion مباشرة
     onValue(ref(db, 'currentQuestion'), (snapshot) => {
       const cq = snapshot.val();
       if (!cq || !cq.q) return;
@@ -974,7 +904,7 @@
       for (const [id, p] of Object.entries(players)) {
         if (p.status === 'accepted' || p.status === 'winner') {
           count++;
-          html += `<div class="player-item"><span>👤 ${p.name} ${p.status==='winner'?'':''}</span><span class="score-badge">${p.score || 0}</span></div>`;
+          html += `<div class="player-item"><span> ${p.name} ${p.status==='winner'?'🏆':''}</span><span class="score-badge">${p.score || 0}</span></div>`;
         }
       }
       document.getElementById('specPlayerCount').textContent = count;
@@ -985,7 +915,7 @@
       const winners = snapshot.val() || {};
       const arr = Object.values(winners);
       document.getElementById('specWinners').innerHTML = arr.length ? arr.map((w,i) => 
-        `<div class="winner-card"> ${i+1}. ${w.name} - الجولة ${w.round}</div>`
+        `<div class="winner-card">🏆 ${i+1}. ${w.name} - الجولة ${w.round}</div>`
       ).join('') : '<p style="opacity:.7; text-align:center;">لا يوجد فائزون بعد</p>';
     });
   }
@@ -999,4 +929,4 @@
   }
 </script>
 </body>
-        </html>
+</html>
