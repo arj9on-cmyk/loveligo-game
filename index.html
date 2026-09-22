@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>🇸 لعبة اليوم الوطني 96 - عزّ لنا طبع</title>
+<title>🇸🇦  اليوم الوطني السعودي 96 - عزّنا بطبعنا  </title>
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
   import { getDatabase, ref, set, onValue, update, push, get, remove } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-database.js";
@@ -197,7 +197,7 @@
     <div class="logo">
       <div class="flag">🇸🇦</div>
       <h1>اليوم الوطني السعودي 96</h1>
-      <div class="slogan">✨ عزّ لنا طبع ✨</div>
+      <div class="slogan">✨ عزّنا بطبعنا    </div>
       <div class="year">2026 - 1448هـ</div>
     </div>
     <div class="role-select">
@@ -240,24 +240,24 @@
         <div id="registeredList" class="player-list"></div>
       </div>
       <div class="control-panel">
-        <button class="btn btn-red btn-small" onclick="deleteAllPlayers()">🗑️ حذف جميع اللاعبين</button>
+        <button class="btn btn-red btn-small" onclick="deleteAllPlayers()">️ حذف جميع اللاعبين</button>
       </div>
     </div>
     
     <div class="card">
-      <h2>🏆 سجل الفائزين</h2>
+      <h2> سجل الفائزين</h2>
       <div id="winnersLog"></div>
       <div class="control-panel">
-        <button class="btn btn-red btn-small" onclick="clearWinners()">🗑️ حذف سجل الفائزين</button>
+        <button class="btn btn-red btn-small" onclick="clearWinners()">️ حذف سجل الفائزين</button>
       </div>
     </div>
     
     <div class="card">
-      <h2>🎮 التحكم بالجولة</h2>
+      <h2> التحكم بالجولة</h2>
       <div id="roundControl">
-        <button class="btn btn-gold" onclick="startRound(1)"> بدء الجولة الأولى</button>
+        <button class="btn btn-gold" onclick="startRound(1)">🟢 بدء الجولة الأولى</button>
         <button class="btn btn-gold" onclick="startRound(2)">🟢 بدء الجولة الثانية</button>
-        <button class="btn btn-gold" onclick="startRound(3)">⚡ بدء الجولة الثالثة</button>
+        <button class="btn btn-gold" onclick="startRound(3)"> بدء الجولة الثالثة</button>
         <button class="btn btn-blue" onclick="nextQuestion()">➡️ السؤال التالي</button>
         <button class="btn btn-red" onclick="resetGame()">🔄 إعادة اللعبة</button>
       </div>
@@ -275,14 +275,14 @@
   <!-- شاشة اللاعب -->
   <div id="playerScreen" class="hidden">
     <div class="logo">
-      <div class="flag">🇦</div>
+      <div class="flag">🇸🇦</div>
       <h1>منطقة اللاعب</h1>
       <div class="slogan">عزّ لنا طبع</div>
     </div>
     <div id="registerBox" class="card">
-      <h2>📝 التسجيل للمشاركة</h2>
+      <h2> التسجيل للمشاركة</h2>
       <input type="text" id="playerName" placeholder="اكتب اسمك هنا...">
-      <button class="btn btn-gold" onclick="sendJoinRequest()">📨 إرسال طلب التسجيل</button>
+      <button class="btn btn-gold" onclick="sendJoinRequest()"> إرسال طلب التسجيل</button>
       <div id="regStatus" style="margin-top:15px; font-size:1.1em;"></div>
     </div>
     <div id="gameBox" class="hidden">
@@ -317,7 +317,7 @@
       <div id="specChoices"></div>
     </div>
     <div class="card">
-      <h2>🏆 سجل الفائزين</h2>
+      <h2> سجل الفائزين</h2>
       <div id="specWinners"></div>
     </div>
     <div class="card">
@@ -376,7 +376,7 @@
   const roundTitles = {
     1: '🟢 الجولة الأولى — اعرف وطنك (نقطة لكل إجابة)',
     2: '🟢 الجولة الثانية — عزّ لنا طبع (نقطتان لكل إجابة)',
-    3: '⚡ الجولة الثالثة — التحدي الوطني (3 نقاط لكل إجابة)'
+    3: ' الجولة الثالثة — التحدي الوطني (3 نقاط لكل إجابة)'
   };
 
   const maxWinners = { 1: 21, 2: 14, 3: 7 };
@@ -596,7 +596,7 @@
     } else {
       audioElement.play().catch(e => console.log('Audio play error:', e));
       isAudioPlaying = true;
-      document.getElementById('audioPlayBtn').textContent = '⏸️';
+      document.getElementById('audioPlayBtn').textContent = '️';
     }
   };
 
@@ -705,7 +705,7 @@
           set(newWinnerRef, { id: req.id, name: req.name, round: currentRound, score: req.score });
           update(ref(db, `players/${req.id}`), { status: 'winner' });
           remove(ref(db, `winnerRequests/${reqId}`));
-          notify(` مبروك! ${req.name} فاز في الجولة ${currentRound}`);
+          notify(`🎉 مبروك! ${req.name} فاز في الجولة ${currentRound}`);
         });
       });
     });
@@ -717,7 +717,7 @@
     for (const [id, p] of Object.entries(players)) {
       if (p.status === 'pending') {
         pendingHtml += `<div class="player-item" style="margin:8px 0;">
-          <span> ${p.name}</span>
+          <span>👤 ${p.name}</span>
           <div>
             <button class="btn btn-small" style="padding:6px 14px; font-size:.9em;" onclick="acceptPlayer('${id}','${p.name}')">✅</button>
             <button class="btn btn-red btn-small" style="padding:6px 14px; font-size:.9em;" onclick="rejectPlayer('${id}')">❌</button>
@@ -726,7 +726,7 @@
       } else if (p.status === 'accepted' || p.status === 'winner') {
         pCount++;
         registeredHtml += `<div class="player-item">
-          <span>👤 ${p.name} ${p.status==='winner'?'🏆':''}</span>
+          <span>👤 ${p.name} ${p.status==='winner'?'':''}</span>
           <span class="score-badge">${p.score || 0}</span>
           <button class="delete-btn" onclick="deletePlayer('${id}','${p.name}')" title="حذف اللاعب">×</button>
         </div>`;
@@ -806,7 +806,7 @@
       updates['gameState/points'] = pointsPerRound[n];
       update(ref(db), updates);
       playStageMusic('pregame');
-      notify(`بدأت الجولة ${n}`);
+      notify(`🎮 بدأت ${roundTitles[n]}`);
     });
   }
 
@@ -882,7 +882,7 @@
       get(ref(db, `players/${myId}`)).then(ps => {
         const p = ps.val();
         if (p?.answered) {
-          document.getElementById('playerMsg').innerHTML = '⏳ في انتظار السؤال التالي...';
+          document.getElementById('playerMsg').innerHTML = ' في انتظار السؤال التالي...';
           document.getElementById('playerMsg').style.color = '#ffd700';
           document.getElementById('playerChoices').innerHTML = '';
           return;
@@ -992,4 +992,4 @@
   }
 </script>
 </body>
-  </html>
+</html>
