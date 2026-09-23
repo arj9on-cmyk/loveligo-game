@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>🇸🇦 اليوم الوطني 96 - عزّنا بطبعنا | تصميم: أوتريد</title>
+<title>🇸 اليوم الوطني 96 - عزّنا بطبعنا | تصميم: أوتريد</title>
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
   import { getDatabase, ref, set, onValue, update, push, get, remove } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-database.js";
@@ -31,16 +31,18 @@
   let currentTrackIndex = 0;
   let userInteracted = false;
 
+  const HOST_ACCESS_CODE = 'KSUTRED';
+
   const musicPlaylist = [
     { id: 'hDuOGrWD2xc', name: '🇸🇦 النشيد الوطني السعودي' },
-    { id: 'EYJWafsw3RA', name: '🎵 وطني وطني' },
+    { id: 'EYJWafsw3RA', name: ' وطني وطني' },
     { id: 'fcMCLPlaCx8', name: '🎵 سلامُ على منْ سارَ في الدربِ رائداً' },
     { id: 'Fw7evTfZg7Q', name: '🎵 بلادي بلادي' }
   ];
 
   const roundTitles = {
     1: '🟢 الجولة الأولى — اعرف وطنك (نقطة لكل إجابة)',
-    2: ' الجولة الثانية — عزّنا بطبعنا (نقطتان لكل إجابة)',
+    2: '🟢 الجولة الثانية — عزّنا بطبعنا (نقطتان لكل إجابة)',
     3: '⚡ الجولة الثالثة — التحدي الوطني (3 نقاط لكل إجابة)'
   };
 
@@ -299,7 +301,7 @@
   window.nextTrack = function() {
     userInteracted = true;
     playNextTrack();
-    notify(' ' + musicPlaylist[currentTrackIndex].name);
+    notify('🎵 ' + musicPlaylist[currentTrackIndex].name);
   };
 
   window.prevTrack = function() {
@@ -308,22 +310,72 @@
     notify('🎵 ' + musicPlaylist[currentTrackIndex].name);
   };
 
+  // ✅ دالة طلب رمز الدخول للمتحكم
+  window.requestHostAccess = function() {
+    const modal = document.getElementById('hostAccessModal');
+    if (modal) {
+      modal.classList.remove('hidden');
+      modal.style.display = 'flex';
+      const input = document.getElementById('hostAccessCode');
+      if (input) {
+        input.value = '';
+        setTimeout(() => input.focus(), 100);
+      }
+    }
+  };
+
+  // ✅ دالة التحقق من رمز الدخول
+  window.verifyHostAccess = function() {
+    const input = document.getElementById('hostAccessCode');
+    const enteredCode = input.value.trim();
+    
+    if (enteredCode === HOST_ACCESS_CODE) {
+      // الرمز صحيح - إخفاء الـ modal والدخول كمتحكم
+      const modal = document.getElementById('hostAccessModal');
+      if (modal) {
+        modal.classList.add('hidden');
+        modal.style.display = 'none';
+      }
+      startAs('host');
+      notify('✅ تم الدخول كمتحكم بنجاح');
+    } else {
+      // الرمز خاطئ
+      notify('❌ رمز الدخول غير صحيح!');
+      input.value = '';
+      input.focus();
+      input.style.borderColor = '#dc3545';
+      setTimeout(() => {
+        input.style.borderColor = 'rgba(255,215,0,0.5)';
+      }, 1000);
+    }
+  };
+
+  // ✅ إغلاق الـ modal
+  window.closeHostAccessModal = function() {
+    const modal = document.getElementById('hostAccessModal');
+    if (modal) {
+      modal.classList.add('hidden');
+      modal.style.display = 'none';
+    }
+  };
+
   window.startAs = function(role) {
     userInteracted = true;
     myRole = role;
-    document.getElementById('roleScreen').classList.add('hidden');
+    const roleScreen = document.getElementById('roleScreen');
+    if (roleScreen) {
+      roleScreen.classList.add('hidden');
+      roleScreen.style.display = 'none';
+    }
     document.getElementById(role + 'Screen').classList.remove('hidden');
     
-    // ✅ إظهار أدوات الموسيقى وإعداد الرابط
     if (role === 'host') {
       initHost();
       const playerUrl = window.location.origin + window.location.pathname + '?role=player';
       const linkField = document.getElementById('playerLink');
       if (linkField) {
         linkField.value = playerUrl;
-        console.log('Player link set:', playerUrl);
       }
-      // إظهار أدوات الموسيقى للمتحكم
       const audioPanel = document.getElementById('audioControlPanel');
       if (audioPanel) {
         audioPanel.classList.remove('hidden');
@@ -357,7 +409,7 @@
           await update(ref(db, 'players/' + id), { answered: false });
         }
       }
-      notify('📝 تم عرض السؤال رقم ' + (qIndex + 1));
+      notify(' تم عرض السؤال رقم ' + (qIndex + 1));
     } catch (error) {
       console.error('خطأ:', error);
       alert('خطأ: ' + error.message);
@@ -386,7 +438,7 @@
       }
     }
     await update(ref(db, 'gameState'), { round: n, currentQIndex: -1, title: roundTitles[n] });
-    notify('🎮 بدأت ' + roundTitles[n]);
+    notify(' بدأت ' + roundTitles[n]);
   };
 
   window.resetGame = async function() {
@@ -433,7 +485,7 @@
     if (linkInput && linkInput.value) {
       linkInput.select();
       document.execCommand('copy');
-      notify(' تم نسخ الرابط!');
+      notify('📋 تم نسخ الرابط!');
     } else {
       notify('❌ لا يوجد رابط للنسخ!');
     }
@@ -451,7 +503,7 @@
     if (!name) { alert('اكتب اسمك!'); return; }
     myName = name;
     userInteracted = true;
-    document.getElementById('regStatus').innerHTML = '⏳ في انتظار موافقة المتحكم...';
+    document.getElementById('regStatus').innerHTML = ' في انتظار موافقة المتحكم...';
     set(ref(db, 'players/' + myId), { name: name, status: 'pending', score: 0 });
     setTimeout(tryAutoPlay, 500);
   };
@@ -555,7 +607,7 @@
     set(newWinnerRef, { id: req.id, name: req.name, round: currentRound, score: req.score });
     update(ref(db, 'players/' + req.id), { status: 'winner' });
     remove(ref(db, 'winnerRequests/' + reqId));
-    notify(' مبروك! ' + req.name + ' فاز في الجولة ' + currentRound);
+    notify('🎉 مبروك! ' + req.name + ' فاز في الجولة ' + currentRound);
   }
 
   function renderHostPlayers(players) {
@@ -665,11 +717,19 @@
     });
   }
 
-  window.addEventListener('load', () => {
+  window.addEventListener('DOMContentLoaded', () => {
     const urlParams = new URLSearchParams(window.location.search);
-    if (urlParams.get('role') === 'player') {
-      document.getElementById('roleScreen').classList.add('hidden');
-      startAs('player');
+    const roleParam = urlParams.get('role');
+    
+    if (roleParam === 'player') {
+      const roleScreen = document.getElementById('roleScreen');
+      if (roleScreen) {
+        roleScreen.style.display = 'none';
+        roleScreen.classList.add('hidden');
+      }
+      setTimeout(() => {
+        startAs('player');
+      }, 100);
     }
   });
 </script>
@@ -737,6 +797,7 @@
   input[type=text] { 
     width:100%; padding:14px; border-radius:10px; border:2px solid rgba(255,215,0,0.5); 
     background: rgba(255,255,255,0.1); color:#fff; font-size:1.1em; margin:10px 0; 
+    transition: border-color 0.3s;
   }
   input[type=text]::placeholder { color:rgba(255,255,255,0.6); }
   
@@ -820,7 +881,6 @@
   .collapsible-content { display: none; max-height: 400px; overflow-y: auto; margin-top: 10px; }
   .collapsible-content.active { display: block; }
   
-  /* أدوات التحكم بالموسيقى */
   .audio-controls {
     position: relative;
     background: linear-gradient(135deg, rgba(0,0,0,0.85), rgba(20,20,20,0.9)); 
@@ -861,7 +921,6 @@
   .audio-controls input[type=range] { width: 80px; accent-color: #ffd700; }
   .audio-controls .volume-icon { color: #ffd700; font-size: 1em; }
   
-  /* صندوق رابط اللاعب */
   .player-link-box {
     background: linear-gradient(135deg, rgba(0,123,255,0.2), rgba(0,86,179,0.2));
     border: 2px solid #007bff;
@@ -877,6 +936,91 @@
     padding: 12px;
     border-radius: 8px;
     margin: 10px 0;
+  }
+  
+  /* ✅ Modal رمز الدخول */
+  .host-access-modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.85);
+    z-index: 2000;
+    justify-content: center;
+    align-items: center;
+    backdrop-filter: blur(5px);
+  }
+  .host-access-modal.active {
+    display: flex;
+  }
+  .host-access-content {
+    background: linear-gradient(135deg, #0a3d2e, #065f46);
+    border: 3px solid #ffd700;
+    border-radius: 20px;
+    padding: 30px;
+    max-width: 400px;
+    width: 90%;
+    text-align: center;
+    box-shadow: 0 0 50px rgba(255,215,0,0.5);
+  }
+  .host-access-content h3 {
+    color: #ffd700;
+    font-size: 1.5em;
+    margin-bottom: 15px;
+  }
+  .host-access-content p {
+    color: #fff;
+    margin-bottom: 20px;
+    font-size: 1.1em;
+  }
+  .host-access-content input {
+    width: 100%;
+    padding: 15px;
+    border-radius: 10px;
+    border: 2px solid #ffd700;
+    background: rgba(0,0,0,0.4);
+    color: #ffd700;
+    font-size: 1.3em;
+    text-align: center;
+    letter-spacing: 3px;
+    margin-bottom: 20px;
+    text-transform: uppercase;
+  }
+  .host-access-content input::placeholder {
+    color: rgba(255,215,0,0.5);
+    letter-spacing: 1px;
+    font-size: 0.9em;
+  }
+  .host-access-buttons {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+  }
+  .host-access-buttons button {
+    padding: 12px 25px;
+    border: none;
+    border-radius: 10px;
+    font-size: 1em;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s;
+  }
+  .host-access-buttons .confirm-btn {
+    background: linear-gradient(135deg, #ffd700, #daa520);
+    color: #000;
+  }
+  .host-access-buttons .confirm-btn:hover {
+    transform: scale(1.05);
+    box-shadow: 0 4px 15px rgba(255,215,0,0.5);
+  }
+  .host-access-buttons .cancel-btn {
+    background: linear-gradient(135deg, #dc3545, #a71d2a);
+    color: #fff;
+  }
+  .host-access-buttons .cancel-btn:hover {
+    transform: scale(1.05);
   }
   
   .footer-credit {
@@ -897,12 +1041,27 @@
     .q-btn { padding: 10px; font-size: 0.9em; }
     .audio-controls { padding: 8px 12px; }
     .audio-controls button { width: 28px; height: 28px; font-size: 0.9em; }
+    .host-access-content { padding: 20px; }
+    .host-access-content h3 { font-size: 1.3em; }
   }
 </style>
 </head>
 <body>
 
 <div id="yt-player" style="position:fixed; width:1px; height:1px; opacity:0; pointer-events:none; z-index:-1;"></div>
+
+<!-- ✅ Modal رمز الدخول للمتحكم -->
+<div id="hostAccessModal" class="host-access-modal hidden">
+  <div class="host-access-content">
+    <h3>🔐 دخول المتحكم</h3>
+    <p>أدخل رمز الدخول للوصول إلى لوحة التحكم:</p>
+    <input type="text" id="hostAccessCode" placeholder="أدخل الرمز هنا..." onkeypress="if(event.key==='Enter')verifyHostAccess()">
+    <div class="host-access-buttons">
+      <button class="confirm-btn" onclick="verifyHostAccess()">✅ دخول</button>
+      <button class="cancel-btn" onclick="closeHostAccessModal()">❌ إلغاء</button>
+    </div>
+  </div>
+</div>
 
 <div class="container">
   <div id="roleScreen">
@@ -914,7 +1073,7 @@
     </div>
     <div class="role-select">
       <h2 style="color:#ffd700; margin-bottom:25px;">اختر دورك للبدء</h2>
-      <button class="role-btn" onclick="startAs('host')">🎛️ متحكم</button>
+      <button class="role-btn" onclick="requestHostAccess()">🎛️ متحكم</button>
       <button class="role-btn" onclick="startAs('player')">🎮 لاعب</button>
       <button class="role-btn" onclick="startAs('spectator')">👁️ مشاهد</button>
     </div>
@@ -934,11 +1093,10 @@
       <div class="status-item"><div class="label">الفائزون</div><div class="value" id="hostWinners">0</div></div>
     </div>
     
-    <!-- ✅ أدوات الموسيقى للمتحكم -->
     <div id="audioControlPanel" class="audio-controls hidden">
-      <div class="track-name" id="trackName"> النشيد الوطني السعودي</div>
+      <div class="track-name" id="trackName">🎵 النشيد الوطني السعودي</div>
       <div class="controls-row">
-        <button onclick="prevTrack()" title="السابقة">️</button>
+        <button onclick="prevTrack()" title="السابقة">⏮️</button>
         <button onclick="toggleAudio()" id="audioPlayBtn" title="تشغيل/إيقاف">▶️</button>
         <button onclick="nextTrack()" title="التالية">⏭️</button>
         <span class="volume-icon">🔊</span>
@@ -949,9 +1107,9 @@
     <div class="card"><h2>📋 طلبات التسجيل</h2><div id="pendingList"></div></div>
     
     <div class="card">
-      <h2> اللاعبون المسجلون</h2>
+      <h2>🎯 اللاعبون المسجلون</h2>
       <div class="collapsible" onclick="toggleCollapsible('playersList')">
-        <div class="collapsible-header"><span>📂 اضغط لعرض اللاعبين (<span id="playerCountDisplay">0</span>)</span><span id="playersArrow">▼</span></div>
+        <div class="collapsible-header"><span> اضغط لعرض اللاعبين (<span id="playerCountDisplay">0</span>)</span><span id="playersArrow">▼</span></div>
       </div>
       <div id="playersList" class="collapsible-content"><div id="registeredList" class="player-list"></div></div>
       <div class="control-panel"><button class="btn btn-red btn-small" onclick="deleteAllPlayers()">🗑️ حذف جميع اللاعبين</button></div>
@@ -964,7 +1122,7 @@
     </div>
     
     <div class="card">
-      <h2>🎮 التحكم بالجولة</h2>
+      <h2> التحكم بالجولة</h2>
       <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px;">
         <button class="btn btn-gold" onclick="startRound(1)">🟢 بدء الجولة الأولى</button>
         <button class="btn btn-gold" onclick="startRound(2)">🟢 بدء الجولة الثانية</button>
@@ -972,7 +1130,7 @@
         <button class="btn btn-red" onclick="resetGame()">🔄 إعادة اللعبة</button>
       </div>
       
-      <h3 style="color:#ffd700; margin-bottom:12px; text-align:center;"> اختر السؤال لعرضه على اللاعبين:</h3>
+      <h3 style="color:#ffd700; margin-bottom:12px; text-align:center;">🎯 اختر السؤال لعرضه على اللاعبين:</h3>
       <div id="questionGrid" style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; margin-bottom: 20px;"></div>
       
       <div id="currentQuestion" style="margin-top:20px;"></div>
@@ -981,23 +1139,23 @@
     <div class="card">
       <h2>🔗 رابط اللاعبين</h2>
       <div class="player-link-box">
-        <p style="margin-bottom:10px; color:#ffd700; font-weight:bold;">📱 شارك هذا الرابط مع اللاعبين:</p>
+        <p style="margin-bottom:10px; color:#ffd700; font-weight:bold;"> شارك هذا الرابط مع اللاعبين:</p>
         <input type="text" id="playerLink" readonly style="width:100%; direction: ltr; text-align: center;">
-        <button class="btn btn-blue" onclick="copyPlayerLink()" style="width:100%; margin-top:10px;"> نسخ الرابط</button>
+        <button class="btn btn-blue" onclick="copyPlayerLink()" style="width:100%; margin-top:10px;">📋 نسخ الرابط</button>
       </div>
     </div>
     
-    <div class="footer-credit">تصميم وتطوير: <strong>أوتريد</strong> 🇸🇦</div>
+    <div class="footer-credit">تصميم وتطوير: <strong>أوتريد</strong> 🇦</div>
   </div>
 
   <div id="playerScreen" class="hidden">
     <div class="logo">
       <div class="flag">🇸🇦</div>
-      <h1>اليوم الوطني السعودي🇸🇦 96 </h1>
+      <h1>منطقة اللاعب</h1>
       <div class="slogan">عزّنا بطبعنا</div>
     </div>
     <div id="registerBox" class="card">
-      <h2>📝 التسجيل للمشاركة</h2>
+      <h2> التسجيل للمشاركة</h2>
       <input type="text" id="playerName" placeholder="اكتب اسمك هنا...">
       <button class="btn btn-gold" onclick="sendJoinRequest()">📨 إرسال طلب التسجيل</button>
       <div id="regStatus" style="margin-top:15px; font-size:1.1em;"></div>
@@ -1025,7 +1183,7 @@
         <div id="playerMsg" style="margin-top:15px; font-size:1.1em; text-align:center;"></div>
       </div>
     </div>
-    <div class="footer-credit">تصميم وتطوير: <strong>أوتريد</strong> 🇦</div>
+    <div class="footer-credit">تصميم وتطوير: <strong>أوتريد</strong> 🇸🇦</div>
   </div>
 
   <div id="spectatorScreen" class="hidden">
@@ -1040,7 +1198,7 @@
       <div class="status-item"><div class="label">اللاعبون</div><div class="value" id="specPlayerCount">0</div></div>
     </div>
     <div class="audio-controls">
-      <div class="track-name" id="trackName"> النشيد الوطني السعودي</div>
+      <div class="track-name" id="trackName">🎵 النشيد الوطني السعودي</div>
       <div class="controls-row">
         <button onclick="prevTrack()" title="السابقة">⏮️</button>
         <button onclick="toggleAudio()" id="audioPlayBtn" title="تشغيل/إيقاف">▶️</button>
@@ -1055,13 +1213,13 @@
     </div>
     <div class="card"><h2>🏆 سجل الفائزين</h2><div id="specWinners"></div></div>
     <div class="card">
-      <h2>📊 لوحة النقاط</h2>
+      <h2> لوحة النقاط</h2>
       <div class="collapsible" onclick="toggleCollapsible('specPlayersList')">
-        <div class="collapsible-header"><span> عرض اللاعبين (<span id="specCountDisplay">0</span>)</span><span id="specPlayersArrow">▼</span></div>
+        <div class="collapsible-header"><span>📂 عرض اللاعبين (<span id="specCountDisplay">0</span>)</span><span id="specPlayersArrow">▼</span></div>
       </div>
       <div id="specPlayersList" class="collapsible-content"><div id="specScores" class="player-list"></div></div>
     </div>
-    <div class="footer-credit">تصميم وتطوير: <strong>أوتريد</strong> 🇸🇦</div>
+    <div class="footer-credit">تصميم وتطوير: <strong>أوتريد</strong> 🇸</div>
   </div>
 </div>
 
@@ -1091,8 +1249,11 @@
   }
   
   window.addEventListener('load', () => {
-    if (document.getElementById('questionGrid')) {
-      renderQuestionGrid();
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('role') !== 'player') {
+      if (document.getElementById('questionGrid')) {
+        renderQuestionGrid();
+      }
     }
   });
 </script>
