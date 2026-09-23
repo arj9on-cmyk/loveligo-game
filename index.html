@@ -28,8 +28,8 @@
   let answeredThisQ = false;
 
   const roundTitles = {
-    1: '🟢 الجولة الأولى — اعرف وطنك (نقطة لكل إجابة)',
-    2: '🟢 الجولة الثانية — عزّنا بطبعنا (نقطتان لكل إجابة)',
+    1: ' الجولة الأولى — اعرف وطنك (نقطة لكل إجابة)',
+    2: ' الجولة الثانية — عزّنا بطبعنا (نقطتان لكل إجابة)',
     3: '⚡ الجولة الثالثة — التحدي الوطني (3 نقاط لكل إجابة)'
   };
 
@@ -236,47 +236,54 @@
     if (role === 'spectator') initSpectator();
   };
 
+  // ✅ الحل النهائي: استخدام push() مع معرف فريد
   window.nextQuestion = async function() {
-    console.log('🔵 بدء الانتقال للسؤال التالي...');
     try {
       const gameStateSnap = await get(ref(db, 'gameState'));
       const state = gameStateSnap.val() || {};
-      const round = parseInt(state.round);
-      if (!round) { alert('يرجى بدء جولة أولاً!'); return; }
+      const round = parseInt(state.round) || 1;
       let qIndex = (parseInt(state.qIndex) || -1) + 1;
-      console.log(' الجولة:', round, 'السؤال القادم:', qIndex);
-      if (qIndex >= 50) { alert('انتهت أسئلة هذه الجولة!'); return; }
+      
+      if (qIndex >= 50) { alert('انتهت الأسئلة!'); return; }
+      
       const bank = [null, Q1, Q2, Q3][round];
-      const originalQ = bank[qIndex];
-      if (!originalQ) { alert('لا يوجد سؤال رقم ' + (qIndex + 1)); return; }
-      console.log('✅ السؤال الأصلي:', originalQ.q);
-      const shuffled = shuffleChoices(originalQ);
-      console.log('📝 الخيارات بعد الخلط:', shuffled.c);
-      console.log('✅ الإجابة الصحيحة:', shuffled.c[shuffled.a]);
-      const questionData = {
-        round: String(round),
-        qIndex: String(qIndex),
-        q: String(shuffled.q),
-        choices: shuffled.c.map(c => String(c)),
-        correctIndex: String(shuffled.a),
-        points: String(pointsPerRound[round]),
-        timestamp: String(Date.now()) + '_' + String(Math.random().toString(36).substr(2, 9))
-      };
-      console.log('📤 إرسال السؤال لـ Firebase...');
-      await set(ref(db, 'currentQuestion'), questionData);
-      await update(ref(db, { 'gameState/qIndex': String(qIndex) }));
-      const playersSnap = await get(ref(db, 'players'));
-      const players = playersSnap.val() || {};
-      for (const [id, p] of Object.entries(players)) {
-        if (p.status === 'accepted' || p.status === 'winner') {
-          await update(ref(db, 'players/' + id), { answered: false });
-        }
+      const q = bank[qIndex];
+      
+      const choices = q.c.map((text, idx) => ({ text: String(text), isCorrect: idx === q.a }));
+      for (let i = choices.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [choices[i], choices[j]] = [choices[j], choices[i]];
       }
-      console.log('✅✅✅ تم تحديث السؤال بنجاح!');
-      notify('📝 السؤال ' + (qIndex + 1) + ' من 50');
+      const correctIdx = choices.findIndex(c => c.isCorrect);
+      
+      // ✅ استخدام push() لإنشاء مسار فريد - يحل مشكلة s.replace
+      const newQRef = push(ref(db, 'questions'));
+      await set(newQRef, {
+        q: q.q,
+        c1: choices[0].text,
+        c2: choices[1].text,
+        c3: choices[2].text,
+        c4: choices[3].text,
+        a: correctIdx,
+        round: round,
+        num: qIndex,
+        ts: Date.now()
+      });
+      
+      await update(ref(db, { 'gameState/qIndex': qIndex }));
+      
+      // حذف السؤال القديم (قبل الأخير)
+      const allQ = await get(ref(db, 'questions'));
+      const qList = Object.keys(allQ.val() || {});
+      if (qList.length > 1) {
+        await remove(ref(db, 'questions/' + qList[0]));
+      }
+      
+      notify('السؤال ' + (qIndex + 1) + ' من 50');
+      
     } catch (error) {
-      console.error('❌ خطأ:', error);
-      alert('حدث خطأ: ' + error.message);
+      console.error('خطأ:', error);
+      alert('خطأ: ' + error.message);
     }
   };
 
@@ -302,21 +309,21 @@
       }
     }
     await update(ref(db, {
-      'gameState/round': String(n),
-      'gameState/qIndex': String(-1),
-      'gameState/title': String(roundTitles[n]),
-      'gameState/points': String(pointsPerRound[n])
+      'gameState/round': n,
+      'gameState/qIndex': -1,
+      'gameState/title': roundTitles[n],
+      'gameState/points': pointsPerRound[n]
     }));
-    await remove(ref(db, 'currentQuestion'));
+    await remove(ref(db, 'questions'));
     notify('🎮 بدأت ' + roundTitles[n]);
   };
 
   window.resetGame = async function() {
     if (!confirm('هل تريد إعادة اللعبة بالكامل؟')) return;
-    await set(ref(db, 'gameState'), { round: '0', qIndex: '-1' });
+    await set(ref(db, 'gameState'), { round: 0, qIndex: -1 });
     await set(ref(db, 'players'), {});
     await set(ref(db, 'winners'), {});
-    await remove(ref(db, 'currentQuestion'));
+    await remove(ref(db, 'questions'));
     await set(ref(db, 'winnerRequests'), {});
     notify('تم إعادة اللعبة');
   };
@@ -415,15 +422,18 @@
     onValue(ref(db, 'gameState'), (snapshot) => {
       const state = snapshot.val() || {};
       document.getElementById('hostRound').textContent = state.round ? 'الجولة ' + state.round : '-';
-      document.getElementById('hostQNum').textContent = state.qIndex !== undefined && state.qIndex !== '-1' ? (parseInt(state.qIndex) + 1) + '/50' : '0/50';
+      document.getElementById('hostQNum').textContent = state.qIndex >= 0 ? (state.qIndex + 1) + '/50' : '0/50';
     });
-    onValue(ref(db, 'currentQuestion'), (snapshot) => {
-      const cq = snapshot.val();
+    // ✅ الاستماع لأحدث سؤال
+    onValue(ref(db, 'questions'), (snapshot) => {
+      const qList = snapshot.val() || {};
+      const keys = Object.keys(qList);
       const cqDiv = document.getElementById('currentQuestion');
-      console.log(' استلام سؤال جديد:', cq);
-      if (cq && cq.q) {
-        cqDiv.innerHTML = '<div class="question-box">السؤال ' + (parseInt(cq.qIndex) + 1) + ': ' + cq.q + '</div>' +
-          '<p style="text-align:center; color:#ffd700; font-size:1.2em;">الإجابة الصحيحة: <strong>' + cq.choices[parseInt(cq.correctIndex)] + '</strong></p>';
+      if (keys.length > 0) {
+        const lastQ = qList[keys[keys.length - 1]];
+        const choices = [lastQ.c1, lastQ.c2, lastQ.c3, lastQ.c4];
+        cqDiv.innerHTML = '<div class="question-box">السؤال ' + (lastQ.num + 1) + ': ' + lastQ.q + '</div>' +
+          '<p style="text-align:center; color:#ffd700; font-size:1.2em;">الإجابة الصحيحة: <strong>' + choices[lastQ.a] + '</strong></p>';
       } else {
         cqDiv.innerHTML = '';
       }
@@ -450,7 +460,7 @@
     const p = ps.val();
     if (!p || p.score < 3) { remove(ref(db, 'winnerRequests/' + reqId)); return; }
     const gs = await get(ref(db, 'gameState'));
-    const currentRound = parseInt(gs.val()?.round) || 1;
+    const currentRound = gs.val()?.round || 1;
     const ws = await get(ref(db, 'winners'));
     const currentWinners = Object.values(ws.val() || {}).filter(w => w.round === currentRound);
     if (currentWinners.length >= maxWinners[currentRound]) {
@@ -470,10 +480,10 @@
     let pCount = 0;
     for (const [id, p] of Object.entries(players)) {
       if (p.status === 'pending') {
-        pendingHtml += '<div class="player-item" style="margin:8px 0;"><span>👤 ' + p.name + '</span><div><button class="btn btn-small" style="padding:6px 14px; font-size:.9em;" onclick="acceptPlayer(\'' + id + '\',\'' + p.name + '\')">✅</button><button class="btn btn-red btn-small" style="padding:6px 14px; font-size:.9em;" onclick="rejectPlayer(\'' + id + '\')">❌</button></div></div>';
+        pendingHtml += '<div class="player-item" style="margin:8px 0;"><span> ' + p.name + '</span><div><button class="btn btn-small" style="padding:6px 14px; font-size:.9em;" onclick="acceptPlayer(\'' + id + '\',\'' + p.name + '\')">✅</button><button class="btn btn-red btn-small" style="padding:6px 14px; font-size:.9em;" onclick="rejectPlayer(\'' + id + '\')"></button></div></div>';
       } else if (p.status === 'accepted' || p.status === 'winner') {
         pCount++;
-        registeredHtml += '<div class="player-item"><span>👤 ' + p.name + (p.status==='winner'?' 🏆':'') + '</span><span class="score-badge">' + (p.score || 0) + '</span><button class="delete-btn" onclick="deletePlayer(\'' + id + '\',\'' + p.name + '\')" title="حذف">×</button></div>';
+        registeredHtml += '<div class="player-item"><span> ' + p.name + (p.status==='winner'?' 🏆':'') + '</span><span class="score-badge">' + (p.score || 0) + '</span><button class="delete-btn" onclick="deletePlayer(\'' + id + '\',\'' + p.name + '\')" title="حذف">×</button></div>';
       }
     }
     document.getElementById('pendingList').innerHTML = pendingHtml || '<p style="opacity:.7; text-align:center;">لا توجد طلبات</p>';
@@ -500,7 +510,7 @@
     onValue(ref(db, 'gameState'), (snapshot) => {
       const state = snapshot.val() || {};
       document.getElementById('myRound').textContent = state.round ? 'الجولة ' + state.round : '-';
-      if (state.title && state.qIndex === '-1') {
+      if (state.title && state.qIndex === -1) {
         document.getElementById('playerQuestion').textContent = state.title;
         document.getElementById('playerChoices').innerHTML = '';
         document.getElementById('winnerBtn').classList.add('hidden');
@@ -508,10 +518,14 @@
         answeredThisQ = false;
       }
     });
-    onValue(ref(db, 'currentQuestion'), (snapshot) => {
-      const cq = snapshot.val();
-      console.log('📡 لاعب استلم سؤال:', cq);
-      if (!cq || !cq.q) return;
+    // ✅ الاستماع لأحدث سؤال
+    onValue(ref(db, 'questions'), (snapshot) => {
+      const qList = snapshot.val() || {};
+      const keys = Object.keys(qList);
+      if (keys.length === 0) return;
+      const lastQ = qList[keys[keys.length - 1]];
+      const choices = [lastQ.c1, lastQ.c2, lastQ.c3, lastQ.c4];
+      
       get(ref(db, 'players/' + myId)).then(ps => {
         const p = ps.val();
         if (p && p.answered) {
@@ -520,9 +534,9 @@
           document.getElementById('playerChoices').innerHTML = '';
           return;
         }
-        document.getElementById('playerQuestion').textContent = cq.q;
-        document.getElementById('playerChoices').innerHTML = cq.choices.map((c, i) => 
-          '<button class="choice-btn" onclick="answerQuestion(' + i + ', ' + parseInt(cq.correctIndex) + ', ' + parseInt(cq.points) + ')">' + c + '</button>'
+        document.getElementById('playerQuestion').textContent = lastQ.q;
+        document.getElementById('playerChoices').innerHTML = choices.map((c, i) => 
+          '<button class="choice-btn" onclick="answerQuestion(' + i + ', ' + lastQ.a + ', ' + pointsPerRound[lastQ.round] + ')">' + c + '</button>'
         ).join('');
         document.getElementById('winnerBtn').classList.add('hidden');
         document.getElementById('playerMsg').textContent = '';
@@ -535,19 +549,21 @@
     onValue(ref(db, 'gameState'), (snapshot) => {
       const state = snapshot.val() || {};
       document.getElementById('specRound').textContent = state.round ? 'الجولة ' + state.round : '-';
-      document.getElementById('specQNum').textContent = state.qIndex !== undefined && state.qIndex !== '-1' ? (parseInt(state.qIndex) + 1) + '/50' : '0/50';
-      if (state.title && state.qIndex === '-1') {
+      document.getElementById('specQNum').textContent = state.qIndex >= 0 ? (state.qIndex + 1) + '/50' : '0/50';
+      if (state.title && state.qIndex === -1) {
         document.getElementById('specQuestion').textContent = state.title;
         document.getElementById('specChoices').innerHTML = '';
       }
     });
-    onValue(ref(db, 'currentQuestion'), (snapshot) => {
-      const cq = snapshot.val();
-      console.log('📡 مشاهد استلم سؤال:', cq);
-      if (!cq || !cq.q) return;
-      document.getElementById('specQuestion').textContent = cq.q;
-      document.getElementById('specChoices').innerHTML = cq.choices.map((c, i) => 
-        '<div class="choice-btn" style="cursor:default; ' + (i===parseInt(cq.correctIndex)?'background:linear-gradient(135deg,#28a745,#1e7e34);border-color:#fff;':'') + '">' + c + (i===parseInt(cq.correctIndex)?' ✅':'') + '</div>'
+    onValue(ref(db, 'questions'), (snapshot) => {
+      const qList = snapshot.val() || {};
+      const keys = Object.keys(qList);
+      if (keys.length === 0) return;
+      const lastQ = qList[keys[keys.length - 1]];
+      const choices = [lastQ.c1, lastQ.c2, lastQ.c3, lastQ.c4];
+      document.getElementById('specQuestion').textContent = lastQ.q;
+      document.getElementById('specChoices').innerHTML = choices.map((c, i) => 
+        '<div class="choice-btn" style="cursor:default; ' + (i===lastQ.a?'background:linear-gradient(135deg,#28a745,#1e7e34);border-color:#fff;':'') + '">' + c + (i===lastQ.a?' ✅':'') + '</div>'
       ).join('');
     });
     onValue(ref(db, 'players'), (snapshot) => {
@@ -557,7 +573,7 @@
       for (const [id, p] of Object.entries(players)) {
         if (p.status === 'accepted' || p.status === 'winner') {
           count++;
-          html += '<div class="player-item"><span> ' + p.name + (p.status==='winner'?' 🏆':'') + '</span><span class="score-badge">' + (p.score || 0) + '</span></div>';
+          html += '<div class="player-item"><span>👤 ' + p.name + (p.status==='winner'?' 🏆':'') + '</span><span class="score-badge">' + (p.score || 0) + '</span></div>';
         }
       }
       document.getElementById('specPlayerCount').textContent = count;
@@ -675,9 +691,9 @@
       <div class="control-panel"><button class="btn btn-red btn-small" onclick="clearWinners()">🗑️ حذف سجل الفائزين</button></div>
     </div>
     <div class="card">
-      <h2>🎮 التحكم بالجولة</h2>
+      <h2> التحكم بالجولة</h2>
       <div id="roundControl">
-        <button class="btn btn-gold" onclick="startRound(1)">🟢 بدء الجولة الأولى</button>
+        <button class="btn btn-gold" onclick="startRound(1)"> بدء الجولة الأولى</button>
         <button class="btn btn-gold" onclick="startRound(2)">🟢 بدء الجولة الثانية</button>
         <button class="btn btn-gold" onclick="startRound(3)">⚡ بدء الجولة الثالثة</button>
         <button class="btn btn-blue" onclick="nextQuestion()">➡️ السؤال التالي</button>
@@ -695,14 +711,14 @@
 
   <div id="playerScreen" class="hidden">
     <div class="logo">
-      <div class="flag">🇸</div>
+      <div class="flag">🇸🇦</div>
       <h1>منطقة اللاعب</h1>
       <div class="slogan">عزّنا بطبعنا</div>
     </div>
     <div id="registerBox" class="card">
-      <h2>📝 التسجيل للمشاركة</h2>
+      <h2> التسجيل للمشاركة</h2>
       <input type="text" id="playerName" placeholder="اكتب اسمك هنا...">
-      <button class="btn btn-gold" onclick="sendJoinRequest()">📨 إرسال طلب التسجيل</button>
+      <button class="btn btn-gold" onclick="sendJoinRequest()"> إرسال طلب التسجيل</button>
       <div id="regStatus" style="margin-top:15px; font-size:1.1em;"></div>
     </div>
     <div id="gameBox" class="hidden">
