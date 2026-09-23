@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>🇸🇦 اليوم الوطني 96 - عزّنا بطبعنا</title>
+<title>🇸🇦 اليوم الوطني 96 - عزّنا بطبعنا | تصميم: أوتريد</title>
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
   import { getDatabase, ref, set, onValue, update, push, get, remove } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-database.js";
@@ -29,20 +29,19 @@
   let ytPlayer = null;
   let isAudioPlaying = false;
   let currentTrackIndex = 0;
+  let userInteracted = false;
 
-  // قائمة الأغاني (YouTube Video IDs)
   const musicPlaylist = [
     { id: 'hDuOGrWD2xc', name: '🇸🇦 النشيد الوطني السعودي' },
-    { id: 'EYJWafsw3RA', name: ' وطني وطني' },
+    { id: 'EYJWafsw3RA', name: '🎵 وطني وطني' },
     { id: 'fcMCLPlaCx8', name: '🎵 سلامُ على منْ سارَ في الدربِ رائداً' },
-    { id: 'Fw7evTfZg7Q', name: '🎵 بلادي بلادي' },
-    { id: 'dQw4w9WgXcQ', name: '🎵 أغنية وطنية 5' }
+    { id: 'Fw7evTfZg7Q', name: '🎵 بلادي بلادي' }
   ];
 
   const roundTitles = {
     1: '🟢 الجولة الأولى — اعرف وطنك (نقطة لكل إجابة)',
     2: '🟢 الجولة الثانية — عزّنا بطبعنا (نقطتان لكل إجابة)',
-    3: ' الجولة الثالثة — التحدي الوطني (3 نقاط لكل إجابة)'
+    3: '⚡ الجولة الثالثة — التحدي الوطني (3 نقاط لكل إجابة)'
   };
 
   const maxWinners = { 1: 21, 2: 14, 3: 7 };
@@ -231,20 +230,10 @@
   // ============ نظام الموسيقى ============
   window.onYouTubeIframeAPIReady = function() {
     ytPlayer = new YT.Player('yt-player', {
-      height: '1',
-      width: '1',
+      height: '1', width: '1',
       videoId: musicPlaylist[0].id,
-      playerVars: {
-        'autoplay': 0,
-        'controls': 0,
-        'loop': 0,
-        'rel': 0,
-        'modestbranding': 1
-      },
-      events: {
-        'onReady': onPlayerReady,
-        'onStateChange': onPlayerStateChange
-      }
+      playerVars: { 'autoplay': 0, 'controls': 0, 'loop': 0, 'rel': 0, 'modestbranding': 1 },
+      events: { 'onReady': onPlayerReady, 'onStateChange': onPlayerStateChange }
     });
   };
 
@@ -254,7 +243,6 @@
   }
 
   function onPlayerStateChange(event) {
-    // عند انتهاء الأغنية، شغل التالية تلقائياً
     if (event.data === YT.PlayerState.ENDED) {
       playNextTrack();
     }
@@ -272,22 +260,28 @@
     currentTrackIndex = (currentTrackIndex - 1 + musicPlaylist.length) % musicPlaylist.length;
     if (ytPlayer) {
       ytPlayer.loadVideoById(musicPlaylist[currentTrackIndex].id);
-      if (isAudioPlaying) {
-        ytPlayer.playVideo();
-      }
+      if (isAudioPlaying) ytPlayer.playVideo();
       updateTrackInfo();
     }
   }
 
   function updateTrackInfo() {
     const trackName = document.getElementById('trackName');
-    if (trackName) {
-      trackName.textContent = musicPlaylist[currentTrackIndex].name;
+    if (trackName) trackName.textContent = musicPlaylist[currentTrackIndex].name;
+  }
+
+  function tryAutoPlay() {
+    if (ytPlayer && !isAudioPlaying && userInteracted) {
+      ytPlayer.playVideo();
+      isAudioPlaying = true;
+      const btn = document.getElementById('audioPlayBtn');
+      if (btn) btn.textContent = '⏸️';
     }
   }
 
   window.toggleAudio = function() {
     if (!ytPlayer) return;
+    userInteracted = true;
     if (isAudioPlaying) {
       ytPlayer.pauseVideo();
       isAudioPlaying = false;
@@ -304,38 +298,39 @@
   };
 
   window.nextTrack = function() {
+    userInteracted = true;
     playNextTrack();
-    notify(' الأغنية التالية: ' + musicPlaylist[currentTrackIndex].name);
+    notify('🎵 ' + musicPlaylist[currentTrackIndex].name);
   };
 
   window.prevTrack = function() {
+    userInteracted = true;
     playPrevTrack();
-    notify('🎵 الأغنية السابقة: ' + musicPlaylist[currentTrackIndex].name);
+    notify('🎵 ' + musicPlaylist[currentTrackIndex].name);
   };
 
   window.startAs = function(role) {
+    userInteracted = true;
     myRole = role;
     document.getElementById('roleScreen').classList.add('hidden');
     document.getElementById(role + 'Screen').classList.remove('hidden');
     
-    // ✅ إظهار أدوات التحكم بالموسيقى للجميع (المتحكم، اللاعب، المشاهد)
-    document.getElementById('audioControlPanel').classList.remove('hidden');
-    
-    // تشغيل الموسيقى تلقائياً عند الدخول (لجميع الأدوار)
-    setTimeout(() => {
-      if (ytPlayer && !isAudioPlaying) {
-        ytPlayer.playVideo();
-        isAudioPlaying = true;
-        document.getElementById('audioPlayBtn').textContent = '⏸️';
-      }
-    }, 1000);
+    // إظهار أدوات الموسيقى للمتحكم والمشاهد
+    if (role === 'host' || role === 'spectator') {
+      document.getElementById('audioControlPanel').classList.remove('hidden');
+      setTimeout(tryAutoPlay, 500);
+    }
     
     if (role === 'host') {
       initHost();
       const playerUrl = window.location.origin + window.location.pathname + '?role=player';
       document.getElementById('playerLink').value = playerUrl;
     }
-    if (role === 'player') initPlayer();
+    if (role === 'player') {
+      initPlayer();
+      // محاولة تشغيل الموسيقى تلقائياً للاعب
+      setTimeout(tryAutoPlay, 500);
+    }
     if (role === 'spectator') initSpectator();
   };
 
@@ -344,12 +339,7 @@
       const gameStateSnap = await get(ref(db, 'gameState'));
       const state = gameStateSnap.val() || {};
       const currentRound = state.round || 1;
-
-      await update(ref(db, 'gameState'), {
-        currentQIndex: qIndex,
-        round: currentRound
-      });
-
+      await update(ref(db, 'gameState'), { currentQIndex: qIndex, round: currentRound });
       const playersSnap = await get(ref(db, 'players'));
       const players = playersSnap.val() || {};
       for (const [id, p] of Object.entries(players)) {
@@ -357,7 +347,6 @@
           await update(ref(db, 'players/' + id), { answered: false });
         }
       }
-      
       notify('📝 تم عرض السؤال رقم ' + (qIndex + 1));
     } catch (error) {
       console.error('خطأ:', error);
@@ -375,7 +364,6 @@
       const w = Object.values(s.val() || {}).filter(x => x.round === 2);
       if (w.length === 0) { alert('يجب إكمال الجولة الثانية أولاً!'); return; }
     }
-    
     const snapshot = await get(ref(db, 'players'));
     const players = snapshot.val() || {};
     for (const [id, p] of Object.entries(players)) {
@@ -387,14 +375,8 @@
         }
       }
     }
-    
-    await update(ref(db, 'gameState'), {
-      round: n,
-      currentQIndex: -1,
-      title: roundTitles[n]
-    });
-    
-    notify('🎮 بدأت ' + roundTitles[n]);
+    await update(ref(db, 'gameState'), { round: n, currentQIndex: -1, title: roundTitles[n] });
+    notify(' بدأت ' + roundTitles[n]);
   };
 
   window.resetGame = async function() {
@@ -454,8 +436,11 @@
     const name = document.getElementById('playerName').value.trim();
     if (!name) { alert('اكتب اسمك!'); return; }
     myName = name;
+    userInteracted = true;
     document.getElementById('regStatus').innerHTML = '⏳ في انتظار موافقة المتحكم...';
     set(ref(db, 'players/' + myId), { name: name, status: 'pending', score: 0 });
+    // محاولة تشغيل الموسيقى بعد التسجيل
+    setTimeout(tryAutoPlay, 500);
   };
 
   window.answerQuestion = function(myIdx, correctIdx, points) {
@@ -497,14 +482,11 @@
       const players = snapshot.val() || {};
       renderHostPlayers(players);
     });
-    
     onValue(ref(db, 'gameState'), (snapshot) => {
       const state = snapshot.val() || {};
       document.getElementById('hostRound').textContent = state.round ? 'الجولة ' + state.round : '-';
-      
       const qIdx = state.currentQIndex;
       document.getElementById('hostQNum').textContent = qIdx >= 0 ? (qIdx + 1) + '/50' : '0/50';
-      
       const cqDiv = document.getElementById('currentQuestion');
       if (qIdx >= 0 && state.round) {
         const bank = [null, Q1, Q2, Q3][state.round];
@@ -518,16 +500,14 @@
         cqDiv.innerHTML = '<p style="text-align:center; opacity:0.7;">اختر سؤالاً من الشبكة أدناه</p>';
       }
     });
-
     onValue(ref(db, 'winners'), (snapshot) => {
       const winners = snapshot.val() || {};
       const arr = Object.values(winners);
       document.getElementById('hostWinners').textContent = arr.length;
       document.getElementById('winnersLog').innerHTML = arr.length ? arr.map((w,i) => 
-        '<div class="winner-card">🏆 ' + (i+1) + '. ' + w.name + ' - الجولة ' + w.round + ' (' + w.score + ' نقطة)</div>'
+        '<div class="winner-card"> ' + (i+1) + '. ' + w.name + ' - الجولة ' + w.round + ' (' + w.score + ' نقطة)</div>'
       ).join('') : '<p style="opacity:.7; text-align:center;">لا يوجد فائزون بعد</p>';
     });
-
     onValue(ref(db, 'winnerRequests'), (snapshot) => {
       const requests = snapshot.val();
       if (!requests) return;
@@ -565,7 +545,7 @@
         pendingHtml += '<div class="player-item" style="margin:8px 0;"><span>👤 ' + p.name + '</span><div><button class="btn btn-small" style="padding:6px 14px; font-size:.9em;" onclick="acceptPlayer(\'' + id + '\',\'' + p.name + '\')">✅</button><button class="btn btn-red btn-small" style="padding:6px 14px; font-size:.9em;" onclick="rejectPlayer(\'' + id + '\')">❌</button></div></div>';
       } else if (p.status === 'accepted' || p.status === 'winner') {
         pCount++;
-        registeredHtml += '<div class="player-item"><span>👤 ' + p.name + (p.status==='winner'?' ':'') + '</span><span class="score-badge">' + (p.score || 0) + '</span><button class="delete-btn" onclick="deletePlayer(\'' + id + '\',\'' + p.name + '\')" title="حذف">×</button></div>';
+        registeredHtml += '<div class="player-item"><span>👤 ' + p.name + (p.status==='winner'?' 🏆':'') + '</span><span class="score-badge">' + (p.score || 0) + '</span><button class="delete-btn" onclick="deletePlayer(\'' + id + '\',\'' + p.name + '\')" title="حذف">×</button></div>';
       }
     }
     document.getElementById('pendingList').innerHTML = pendingHtml || '<p style="opacity:.7; text-align:center;">لا توجد طلبات</p>';
@@ -589,13 +569,10 @@
         document.getElementById('regStatus').style.color = '#f87171';
       }
     });
-    
     onValue(ref(db, 'gameState'), (snapshot) => {
       const state = snapshot.val() || {};
       const qIdx = state.currentQIndex;
-      
       document.getElementById('myRound').textContent = state.round ? 'الجولة ' + state.round : '-';
-      
       if (qIdx === -1 && state.title) {
         document.getElementById('playerQuestion').textContent = state.title;
         document.getElementById('playerChoices').innerHTML = '';
@@ -604,19 +581,15 @@
         answeredThisQ = false;
         return;
       }
-
       if (qIdx >= 0 && state.round) {
         const bank = [null, Q1, Q2, Q3][state.round];
         const localQ = bank[qIdx];
-        
         if (localQ) {
           const shuffled = shuffleChoices(localQ);
-          
           document.getElementById('playerQuestion').textContent = (qIdx + 1) + "- " + shuffled.q;
           document.getElementById('playerChoices').innerHTML = shuffled.c.map((c, i) => 
             '<button class="choice-btn" onclick="answerQuestion(' + i + ', ' + shuffled.a + ', ' + pointsPerRound[state.round] + ')">' + c + '</button>'
           ).join('');
-          
           document.getElementById('winnerBtn').classList.add('hidden');
           document.getElementById('playerMsg').textContent = '';
           answeredThisQ = false;
@@ -629,16 +602,13 @@
     onValue(ref(db, 'gameState'), (snapshot) => {
       const state = snapshot.val() || {};
       const qIdx = state.currentQIndex;
-      
       document.getElementById('specRound').textContent = state.round ? 'الجولة ' + state.round : '-';
       document.getElementById('specQNum').textContent = qIdx >= 0 ? (qIdx + 1) + '/50' : '0/50';
-      
       if (qIdx === -1 && state.title) {
         document.getElementById('specQuestion').textContent = state.title;
         document.getElementById('specChoices').innerHTML = '';
         return;
       }
-
       if (qIdx >= 0 && state.round) {
         const bank = [null, Q1, Q2, Q3][state.round];
         const localQ = bank[qIdx];
@@ -651,7 +621,6 @@
         }
       }
     });
-    
     onValue(ref(db, 'players'), (snapshot) => {
       const players = snapshot.val() || {};
       let count = 0;
@@ -666,7 +635,6 @@
       document.getElementById('specCountDisplay').textContent = count;
       document.getElementById('specScores').innerHTML = html || '<p style="opacity:.7; text-align:center;">لا يوجد لاعبون</p>';
     });
-    
     onValue(ref(db, 'winners'), (snapshot) => {
       const winners = snapshot.val() || {};
       const arr = Object.values(winners);
@@ -689,128 +657,234 @@
   * { margin:0; padding:0; box-sizing:border-box; font-family:'Segoe UI', Tahoma, sans-serif; }
   body { 
     min-height:100vh; 
-    background: url('https://i.pinimg.com/originals/8a/5c/4f/8a5c4f8e9c8b7a6d5e4f3a2b1c0d9e8f.jpg') center/cover fixed;
+    background: linear-gradient(135deg, #0a3d2e 0%, #065f46 50%, #052e1f 100%);
     color:#fff; 
-    padding:20px;
+    padding:15px;
     position: relative;
   }
-  body::before {
-    content:""; 
-    position:fixed; 
-    inset:0; 
-    background: rgba(10, 61, 46, 0.75);
-    pointer-events:none; 
-    z-index: 0;
+  .container { max-width:1100px; margin:auto; position: relative; z-index: 1; }
+  
+  .logo { 
+    text-align:center; padding:20px; margin-bottom:20px; 
+    background: linear-gradient(135deg, rgba(0,108,53,0.9), rgba(0,77,37,0.9)); 
+    border-radius:20px; 
+    border:3px solid #ffd700;
+    box-shadow: 0 0 30px rgba(255,215,0,0.3);
   }
-  .container { max-width:1000px; margin:auto; position: relative; z-index: 1; }
-  .logo { text-align:center; padding:20px; margin-bottom:20px; background: rgba(0,0,0,0.6); border-radius:20px; border:3px solid rgba(255,215,0,0.5); backdrop-filter: blur(10px); }
-  .logo h1 { font-size:2.5em; color:#ffd700; text-shadow: 0 0 20px rgba(255,215,0,0.5); }
-  .logo .slogan { font-size:1.8em; color:#fff; margin-top:10px; font-weight:bold; }
-  .logo .flag { font-size:4em; }
-  .logo .year { font-size:1.5em; color:#ffd700; margin-top:5px; }
-  .btn { padding:14px 30px; border:none; border-radius:12px; font-size:1.1em; font-weight:bold; cursor:pointer; margin:5px; color:#fff; background: linear-gradient(135deg, #00a651, #006c35); box-shadow:0 4px 15px rgba(0,0,0,0.3); }
-  .btn:hover { transform:translateY(-2px); }
+  .logo h1 { font-size:2.2em; color:#ffd700; text-shadow: 0 0 20px rgba(255,215,0,0.5); }
+  .logo .slogan { font-size:1.6em; color:#fff; margin-top:10px; font-weight:bold; }
+  .logo .flag { font-size:3.5em; }
+  .logo .year { font-size:1.3em; color:#ffd700; margin-top:5px; }
+  
+  .btn { 
+    padding:14px 28px; border:none; border-radius:12px; font-size:1.05em; font-weight:bold; 
+    cursor:pointer; margin:5px; color:#fff; 
+    background: linear-gradient(135deg, #00a651, #006c35); 
+    box-shadow:0 4px 15px rgba(0,0,0,0.3);
+    transition: all 0.3s;
+  }
+  .btn:hover { transform:translateY(-2px); box-shadow:0 6px 20px rgba(0,166,81,0.5); }
   .btn-gold { background: linear-gradient(135deg, #ffd700, #daa520); color:#000; }
+  .btn-gold:hover { box-shadow:0 6px 20px rgba(255,215,0,0.5); }
   .btn-red { background: linear-gradient(135deg, #dc3545, #a71d2a); }
   .btn-blue { background: linear-gradient(135deg, #007bff, #0056b3); }
   .btn-small { padding:8px 16px; font-size:0.9em; }
+  
   .q-btn { 
-    padding: 10px; border: 2px solid rgba(255,215,0,0.3); border-radius: 8px; 
-    background: rgba(255,255,255,0.1); color: #fff; cursor: pointer; font-weight: bold;
+    padding: 12px; border: 2px solid #ffd700; border-radius: 10px; 
+    background: linear-gradient(135deg, #00a651, #006c35); 
+    color: #fff; cursor: pointer; font-weight: bold; font-size: 1em;
     transition: all 0.2s;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
   }
-  .q-btn:hover { background: #ffd700; color: #000; transform: scale(1.05); }
-  .card { background: rgba(0,0,0,0.6); border-radius:18px; padding:25px; border:2px solid rgba(255,215,0,0.3); margin-bottom:20px; backdrop-filter: blur(10px); }
-  .card h2 { color:#ffd700; margin-bottom:15px; font-size:1.5em; border-bottom:2px solid #ffd700; padding-bottom:10px; }
-  input[type=text] { width:100%; padding:14px; border-radius:10px; border:2px solid rgba(255,215,0,0.5); background: rgba(255,255,255,0.1); color:#fff; font-size:1.1em; margin:10px 0; }
+  .q-btn:hover { 
+    background: linear-gradient(135deg, #ffd700, #daa520); 
+    color: #000; 
+    transform: scale(1.08);
+    box-shadow: 0 4px 15px rgba(255,215,0,0.5);
+  }
+  
+  .card { 
+    background: linear-gradient(135deg, rgba(0,108,53,0.8), rgba(0,77,37,0.8)); 
+    border-radius:18px; padding:22px; 
+    border:2px solid rgba(255,215,0,0.4); 
+    margin-bottom:20px; 
+    box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+  }
+  .card h2 { color:#ffd700; margin-bottom:15px; font-size:1.4em; border-bottom:2px solid #ffd700; padding-bottom:10px; }
+  
+  input[type=text] { 
+    width:100%; padding:14px; border-radius:10px; border:2px solid rgba(255,215,0,0.5); 
+    background: rgba(255,255,255,0.1); color:#fff; font-size:1.1em; margin:10px 0; 
+  }
   input[type=text]::placeholder { color:rgba(255,255,255,0.6); }
-  .choice-btn { display:block; width:100%; padding:18px; margin:10px 0; background: linear-gradient(135deg, rgba(255,255,255,0.15), rgba(255,255,255,0.05)); border:2px solid rgba(255,215,0,0.4); border-radius:12px; color:#fff; font-size:1.1em; cursor:pointer; text-align:right; }
-  .choice-btn:hover:not(:disabled) { background: linear-gradient(135deg, #00a651, #006c35); }
+  
+  .choice-btn { 
+    display:block; width:100%; padding:16px; margin:8px 0; 
+    background: linear-gradient(135deg, rgba(255,255,255,0.15), rgba(255,255,255,0.05)); 
+    border:2px solid rgba(255,215,0,0.4); border-radius:12px; 
+    color:#fff; font-size:1.1em; cursor:pointer; text-align:right;
+    transition: all 0.3s;
+  }
+  .choice-btn:hover:not(:disabled) { 
+    background: linear-gradient(135deg, #00a651, #006c35); 
+    transform:translateX(-5px);
+    border-color:#ffd700;
+  }
   .choice-btn.correct { background: linear-gradient(135deg, #28a745, #1e7e34) !important; border-color:#fff; }
   .choice-btn.wrong { background: linear-gradient(135deg, #dc3545, #a71d2a) !important; border-color:#fff; }
+  
   .player-list { display:grid; grid-template-columns:repeat(auto-fill, minmax(180px, 1fr)); gap:10px; }
-  .player-item { background: rgba(255,255,255,0.1); padding:12px; border-radius:10px; display:flex; justify-content:space-between; align-items:center; border:1px solid rgba(255,255,255,0.2); position: relative; }
-  .player-item .delete-btn { position: absolute; left: 5px; top: 5px; background: #dc3545; color: white; border: none; border-radius: 50%; width: 24px; height: 24px; cursor: pointer; }
+  .player-item { 
+    background: rgba(255,255,255,0.1); padding:12px; border-radius:10px; 
+    display:flex; justify-content:space-between; align-items:center; 
+    border:1px solid rgba(255,255,255,0.2); position: relative; 
+  }
+  .player-item .delete-btn { 
+    position: absolute; left: 5px; top: 5px; 
+    background: #dc3545; color: white; border: none; 
+    border-radius: 50%; width: 24px; height: 24px; cursor: pointer; 
+  }
   .score-badge { background:#ffd700; color:#000; padding:4px 12px; border-radius:20px; font-weight:bold; }
-  .question-box { background: linear-gradient(135deg, rgba(255,215,0,0.25), rgba(255,215,0,0.05)); border:3px solid #ffd700; border-radius:15px; padding:25px; margin:20px 0; font-size:1.4em; text-align:center; font-weight:bold; line-height: 1.6; }
-  .status-bar { display:flex; justify-content:space-around; flex-wrap:wrap; gap:10px; background:rgba(0,0,0,0.6); padding:15px; border-radius:12px; margin-bottom:20px; }
+  
+  .question-box { 
+    background: linear-gradient(135deg, rgba(255,215,0,0.25), rgba(255,215,0,0.05)); 
+    border:3px solid #ffd700; border-radius:15px; padding:25px; margin:10px 0; 
+    font-size:1.3em; text-align:center; font-weight:bold; line-height: 1.6;
+    box-shadow: 0 0 20px rgba(255,215,0,0.3);
+  }
+  
+  .status-bar { 
+    display:flex; justify-content:space-around; flex-wrap:wrap; gap:10px; 
+    background: linear-gradient(135deg, rgba(0,108,53,0.9), rgba(0,77,37,0.9)); 
+    padding:15px; border-radius:12px; margin-bottom:20px;
+    border: 2px solid #ffd700;
+  }
   .status-item { text-align:center; }
   .status-item .label { font-size:.85em; opacity:.8; }
   .status-item .value { font-size:1.6em; font-weight:bold; color:#ffd700; }
-  .winner-card { background: linear-gradient(135deg, #ffd700, #ff8c00); color:#000; padding:15px; border-radius:12px; margin:8px 0; text-align:center; font-size:1.1em; font-weight:bold; }
+  
+  .winner-card { 
+    background: linear-gradient(135deg, #ffd700, #ff8c00); 
+    color:#000; padding:12px; border-radius:12px; margin:8px 0; 
+    text-align:center; font-size:1.05em; font-weight:bold; 
+  }
+  
   .hidden { display:none !important; }
-  .role-select { text-align:center; padding:40px; }
-  .role-btn { display:block; width:300px; margin:15px auto; padding:25px; background: linear-gradient(135deg, #00a651, #006c35); border-radius:20px; cursor:pointer; font-size:1.3em; font-weight:bold; color:#fff; border:3px solid rgba(255,215,0,0.5); }
-  .role-btn:hover { transform:scale(1.05); border-color:#ffd700; }
-  .notification { position:fixed; top:20px; left:50%; transform:translateX(-50%); background:#ffd700; color:#000; padding:15px 30px; border-radius:10px; font-weight:bold; z-index:1000; animation:slideDown .5s; }
+  .role-select { text-align:center; padding:30px; }
+  .role-btn { 
+    display:block; width:280px; margin:12px auto; padding:22px; 
+    background: linear-gradient(135deg, #00a651, #006c35); 
+    border-radius:20px; cursor:pointer; font-size:1.2em; font-weight:bold; 
+    color:#fff; border:3px solid #ffd700;
+    transition: all 0.3s;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+  }
+  .role-btn:hover { 
+    transform:scale(1.05); 
+    box-shadow: 0 6px 25px rgba(255,215,0,0.5);
+  }
+  
+  .notification { 
+    position:fixed; top:20px; left:50%; transform:translateX(-50%); 
+    background:#ffd700; color:#000; padding:15px 30px; border-radius:10px; 
+    font-weight:bold; z-index:1000; animation:slideDown .5s;
+  }
   @keyframes slideDown { from { top:-100px; } to { top:20px; } }
-  .control-panel { background: rgba(0,0,0,0.4); padding: 15px; border-radius: 10px; margin-bottom: 15px; }
-  .collapsible { background: rgba(255,215,0,0.2); border: 2px solid #ffd700; border-radius: 12px; padding: 15px; cursor: pointer; margin-bottom: 10px; }
-  .collapsible-header { display: flex; justify-content: space-between; align-items: center; font-weight: bold; color: #ffd700; }
+  
+  .control-panel { 
+    background: rgba(0,0,0,0.3); padding: 12px; border-radius: 10px; 
+    margin-top: 15px;
+  }
+  .collapsible { 
+    background: rgba(255,215,0,0.15); 
+    border: 2px solid #ffd700; border-radius: 12px; 
+    padding: 12px; cursor: pointer; margin-bottom: 10px; 
+  }
+  .collapsible-header { 
+    display: flex; justify-content: space-between; 
+    align-items: center; font-weight: bold; color: #ffd700; 
+  }
   .collapsible-content { display: none; max-height: 400px; overflow-y: auto; margin-top: 10px; }
   .collapsible-content.active { display: block; }
   
-  /* أدوات التحكم بالموسيقى */
+  /* أدوات التحكم بالموسيقى - صغيرة وموضوعة فوق السؤال */
   .audio-controls {
-    position: fixed; 
-    bottom: 20px; 
-    left: 20px; 
-    z-index: 1000;
-    background: rgba(0,0,0,0.85); 
-    padding: 15px 20px; 
-    border-radius: 15px;
+    position: relative;
+    background: linear-gradient(135deg, rgba(0,0,0,0.85), rgba(20,20,20,0.9)); 
+    padding: 10px 15px; 
+    border-radius: 12px;
     border: 2px solid #ffd700;
-    backdrop-filter: blur(10px);
-    box-shadow: 0 4px 20px rgba(0,0,0,0.5);
-    min-width: 280px;
+    margin-bottom: 15px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+    max-width: 400px;
+    margin-left: auto;
+    margin-right: auto;
   }
   .audio-controls .track-name {
     color: #ffd700;
-    font-size: 0.9em;
-    margin-bottom: 10px;
+    font-size: 0.85em;
+    margin-bottom: 8px;
     text-align: center;
     font-weight: bold;
   }
   .audio-controls .controls-row {
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 8px;
     justify-content: center;
   }
   .audio-controls button {
-    background: #ffd700; 
+    background: linear-gradient(135deg, #ffd700, #daa520); 
     color: #000; 
     border: none; 
-    width: 40px; 
-    height: 40px;
+    width: 32px; 
+    height: 32px;
     border-radius: 50%; 
-    font-size: 1.2em; 
+    font-size: 1em; 
     cursor: pointer;
     transition: all 0.2s;
   }
   .audio-controls button:hover {
-    transform: scale(1.1);
+    transform: scale(1.15);
     background: #fff;
   }
   .audio-controls input[type=range] { 
-    width: 100px; 
+    width: 80px; 
     accent-color: #ffd700;
   }
   .audio-controls .volume-icon {
     color: #ffd700;
-    font-size: 1.2em;
+    font-size: 1em;
+  }
+  
+  /* تذييل الحقوق */
+  .footer-credit {
+    text-align: center;
+    padding: 15px;
+    color: #ffd700;
+    font-size: 0.95em;
+    margin-top: 20px;
+    border-top: 2px solid rgba(255,215,0,0.3);
+  }
+  .footer-credit strong {
+    color: #fff;
+    font-size: 1.1em;
   }
   
   @media(max-width:600px) { 
-    .logo h1 { font-size:1.8em; } 
-    .logo .slogan { font-size:1.3em; } 
-    .question-box { font-size:1.1em; } 
-    .role-btn { width:100%; padding:20px; font-size:1.1em; }
+    .logo h1 { font-size:1.6em; } 
+    .logo .slogan { font-size:1.2em; } 
+    .question-box { font-size:1.05em; padding: 15px; } 
+    .role-btn { width:100%; padding:18px; font-size:1.05em; }
+    .q-btn { padding: 10px; font-size: 0.9em; }
     .audio-controls { 
-      bottom: 10px; 
-      left: 10px; 
-      right: 10px;
-      min-width: auto;
+      padding: 8px 12px;
+    }
+    .audio-controls button {
+      width: 28px;
+      height: 28px;
+      font-size: 0.9em;
     }
   }
 </style>
@@ -829,10 +903,13 @@
       <div class="year">2026 - 1448هـ</div>
     </div>
     <div class="role-select">
-      <h2 style="color:#ffd700; margin-bottom:30px;">اختر دورك للبدء</h2>
+      <h2 style="color:#ffd700; margin-bottom:25px;">اختر دورك للبدء</h2>
       <button class="role-btn" onclick="startAs('host')">🎛️ متحكم</button>
       <button class="role-btn" onclick="startAs('player')">🎮 لاعب</button>
       <button class="role-btn" onclick="startAs('spectator')">👁️ مشاهد</button>
+    </div>
+    <div class="footer-credit">
+      تصميم وتطوير: <strong>أوتريد</strong> 🇸🇦
     </div>
   </div>
 
@@ -849,10 +926,10 @@
       <div class="status-item"><div class="label">الفائزون</div><div class="value" id="hostWinners">0</div></div>
     </div>
     
-    <div class="card"><h2> طلبات التسجيل</h2><div id="pendingList"></div></div>
+    <div class="card"><h2>📋 طلبات التسجيل</h2><div id="pendingList"></div></div>
     
     <div class="card">
-      <h2> اللاعبون المسجلون</h2>
+      <h2>🎯 اللاعبون المسجلون</h2>
       <div class="collapsible" onclick="toggleCollapsible('playersList')">
         <div class="collapsible-header"><span>📂 اضغط لعرض اللاعبين (<span id="playerCountDisplay">0</span>)</span><span id="playersArrow">▼</span></div>
       </div>
@@ -861,22 +938,24 @@
     </div>
     
     <div class="card">
-      <h2>🏆 سجل الفائزين</h2>
+      <h2> سجل الفائزين</h2>
       <div id="winnersLog"></div>
       <div class="control-panel"><button class="btn btn-red btn-small" onclick="clearWinners()">🗑️ حذف سجل الفائزين</button></div>
     </div>
     
     <div class="card">
       <h2>🎮 التحكم بالجولة</h2>
-      <div style="margin-bottom: 15px;">
+      <!-- أزرار الجولات في صفين × 2 -->
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px;">
         <button class="btn btn-gold" onclick="startRound(1)">🟢 بدء الجولة الأولى</button>
         <button class="btn btn-gold" onclick="startRound(2)">🟢 بدء الجولة الثانية</button>
         <button class="btn btn-gold" onclick="startRound(3)">⚡ بدء الجولة الثالثة</button>
         <button class="btn btn-red" onclick="resetGame()">🔄 إعادة اللعبة</button>
       </div>
       
-      <h3 style="color:#ffd700; margin-bottom:10px;">اختر السؤال لعرضه على اللاعبين:</h3>
-      <div id="questionGrid" style="display: grid; grid-template-columns: repeat(10, 1fr); gap: 8px; margin-bottom: 20px;"></div>
+      <h3 style="color:#ffd700; margin-bottom:12px; text-align:center;">🎯 اختر السؤال لعرضه على اللاعبين:</h3>
+      <!-- شبكة الأسئلة: 7 أعمدة × 8 صفوف = 56 (آخر 6 معطلة) -->
+      <div id="questionGrid" style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; margin-bottom: 20px;"></div>
       
       <div id="currentQuestion" style="margin-top:20px;"></div>
     </div>
@@ -885,18 +964,22 @@
       <h2>🔗 رابط اللاعبين</h2>
       <p style="margin-bottom:10px;">شارك هذا الرابط مع اللاعبين:</p>
       <input type="text" id="playerLink" readonly style="direction: ltr; text-align: center; font-size: 0.9em;">
-      <button class="btn btn-blue btn-small" onclick="copyPlayerLink()">📋 نسخ الرابط</button>
+      <button class="btn btn-blue btn-small" onclick="copyPlayerLink()"> نسخ الرابط</button>
+    </div>
+    
+    <div class="footer-credit">
+      تصميم وتطوير: <strong>أوتريد</strong> 🇸🇦
     </div>
   </div>
 
   <div id="playerScreen" class="hidden">
     <div class="logo">
       <div class="flag">🇸🇦</div>
-      <h1> اليوم الوطني السعودي 🇸🇦96</h1>
+      <h1>منطقة اللاعب</h1>
       <div class="slogan">عزّنا بطبعنا</div>
     </div>
     <div id="registerBox" class="card">
-      <h2> التسجيل للمشاركة</h2>
+      <h2>📝 التسجيل للمشاركة</h2>
       <input type="text" id="playerName" placeholder="اكتب اسمك هنا...">
       <button class="btn btn-gold" onclick="sendJoinRequest()">📨 إرسال طلب التسجيل</button>
       <div id="regStatus" style="margin-top:15px; font-size:1.1em;"></div>
@@ -908,11 +991,26 @@
         <div class="status-item"><div class="label">نقاطك</div><div class="value" id="myScore">0</div></div>
       </div>
       <div id="playerGameArea" class="card">
+        <!-- أدوات الموسيقى المصغرة فوق السؤال -->
+        <div class="audio-controls">
+          <div class="track-name" id="trackName"> النشيد الوطني السعودي</div>
+          <div class="controls-row">
+            <button onclick="prevTrack()" title="السابقة">⏮️</button>
+            <button onclick="toggleAudio()" id="audioPlayBtn" title="تشغيل/إيقاف">▶️</button>
+            <button onclick="nextTrack()" title="التالية">️</button>
+            <span class="volume-icon">🔊</span>
+            <input type="range" min="0" max="100" value="50" oninput="setAudioVolume(this.value)" title="مستوى الصوت">
+          </div>
+        </div>
+        
         <div class="question-box" id="playerQuestion">في انتظار بدء الجولة...</div>
         <div id="playerChoices"></div>
         <button class="btn btn-gold hidden" id="winnerBtn" onclick="declareWinner()">🏆 إعلان الفوز بالجولة</button>
         <div id="playerMsg" style="margin-top:15px; font-size:1.1em; text-align:center;"></div>
       </div>
+    </div>
+    <div class="footer-credit">
+      تصميم وتطوير: <strong>أوتريد</strong> 🇸🇦
     </div>
   </div>
 
@@ -927,30 +1025,34 @@
       <div class="status-item"><div class="label">السؤال</div><div class="value" id="specQNum">0/50</div></div>
       <div class="status-item"><div class="label">اللاعبون</div><div class="value" id="specPlayerCount">0</div></div>
     </div>
+    
+    <!-- أدوات الموسيقى للمشاهد -->
+    <div class="audio-controls">
+      <div class="track-name" id="trackName">🎵 النشيد الوطني السعودي</div>
+      <div class="controls-row">
+        <button onclick="prevTrack()" title="السابقة">⏮️</button>
+        <button onclick="toggleAudio()" id="audioPlayBtn" title="تشغيل/إيقاف">▶️</button>
+        <button onclick="nextTrack()" title="التالية">⏭️</button>
+        <span class="volume-icon">🔊</span>
+        <input type="range" min="0" max="100" value="50" oninput="setAudioVolume(this.value)" title="مستوى الصوت">
+      </div>
+    </div>
+    
     <div class="card">
       <div class="question-box" id="specQuestion">في انتظار بدء اللعبة...</div>
       <div id="specChoices"></div>
     </div>
     <div class="card"><h2>🏆 سجل الفائزين</h2><div id="specWinners"></div></div>
     <div class="card">
-      <h2> لوحة النقاط</h2>
+      <h2>📊 لوحة النقاط</h2>
       <div class="collapsible" onclick="toggleCollapsible('specPlayersList')">
         <div class="collapsible-header"><span>📂 عرض اللاعبين (<span id="specCountDisplay">0</span>)</span><span id="specPlayersArrow">▼</span></div>
       </div>
       <div id="specPlayersList" class="collapsible-content"><div id="specScores" class="player-list"></div></div>
     </div>
-  </div>
-</div>
-
-<!-- أدوات التحكم بالموسيقى (تظهر للجميع الآن) -->
-<div id="audioControlPanel" class="audio-controls hidden">
-  <div class="track-name" id="trackName"> النشيد الوطني السعودي</div>
-  <div class="controls-row">
-    <button onclick="prevTrack()" title="الأغنية السابقة">⏮️</button>
-    <button onclick="toggleAudio()" id="audioPlayBtn" title="تشغيل/إيقاف">▶️</button>
-    <button onclick="nextTrack()" title="الأغنية التالية">⏭️</button>
-    <span class="volume-icon">🔊</span>
-    <input type="range" min="0" max="100" value="50" oninput="setAudioVolume(this.value)" title="مستوى الصوت">
+    <div class="footer-credit">
+      تصميم وتطوير: <strong>أوتريد</strong> 🇸
+    </div>
   </div>
 </div>
 
@@ -958,16 +1060,25 @@
 <script src="https://www.youtube.com/iframe_api"></script>
 
 <script>
-  // إنشاء شبكة الأسئلة للمتحكم
+  // إنشاء شبكة الأسئلة (7 أعمدة × 8 صفوف)
   function renderQuestionGrid() {
     const grid = document.getElementById('questionGrid');
     if (!grid) return;
     grid.innerHTML = '';
-    for (let i = 0; i < 50; i++) {
+    for (let i = 1; i <= 56; i++) {
       const btn = document.createElement('button');
       btn.className = 'q-btn';
-      btn.textContent = i + 1;
-      btn.onclick = function() { window.selectQuestion(i); };
+      if (i <= 50) {
+        btn.textContent = i;
+        btn.onclick = (function(idx) {
+          return function() { window.selectQuestion(idx - 1); };
+        })(i);
+      } else {
+        btn.textContent = i;
+        btn.style.opacity = '0.3';
+        btn.style.cursor = 'not-allowed';
+        btn.disabled = true;
+      }
       grid.appendChild(btn);
     }
   }
