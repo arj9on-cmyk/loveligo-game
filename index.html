@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
-a<head>
+<head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>🇸🇦 اليوم الوطني 96 - عزّنا بطبعنا</title>
@@ -26,17 +26,28 @@ a<head>
   let myName = '';
   let myScore = 0;
   let answeredThisQ = false;
+  let ytPlayer = null;
+  let isAudioPlaying = false;
+  let currentTrackIndex = 0;
+
+  // قائمة الأغاني (YouTube Video IDs)
+  const musicPlaylist = [
+    { id: 'hDuOGrWD2xc', name: '🇸🇦 النشيد الوطني السعودي' },
+    { id: 'EYJWafsw3RA', name: '🎵 وطني وطني' },
+    { id: 'fcMCLPlaCx8', name: '🎵 سلامُ على منْ سارَ في الدربِ رائداً' },
+    { id: 'Fw7evTfZg7Q', name: '🎵 بلادي بلادي' },
+    { id: 'dQw4w9WgXcQ', name: '🎵 أغنية وطنية 5' }
+  ];
 
   const roundTitles = {
-    1: '🟢 الجولة الأولى — اعرف وطنك (نقطة لكل إجابة)',
-    2: '🟢 الجولة الثانية — عزّنا بطبعنا (نقطتان لكل إجابة)',
+    1: ' الجولة الأولى — اعرف وطنك (نقطة لكل إجابة)',
+    2: ' الجولة الثانية — عزّنا بطبعنا (نقطتان لكل إجابة)',
     3: '⚡ الجولة الثالثة — التحدي الوطني (3 نقاط لكل إجابة)'
   };
 
   const maxWinners = { 1: 21, 2: 14, 3: 7 };
   const pointsPerRound = { 1: 1, 2: 2, 3: 3 };
 
-  // دالة خلط الخيارات محلياً في جهاز كل لاعب
   function shuffleChoices(question) {
     const choices = question.c.map((text, index) => ({ text: String(text), isCorrect: index === question.a }));
     for (let i = choices.length - 1; i > 0; i--) {
@@ -50,7 +61,6 @@ a<head>
     };
   }
 
-  // بنوك الأسئلة المحلية (نسخة واحدة تكفي في الكود، وكل جهاز يستخدمها)
   const Q1 = [
     {q:"في أي تاريخ تحتفل السعودية باليوم الوطني؟", c:["23 سبتمبر","1 أكتوبر","4 أغسطس","2 ديسمبر"], a:0},
     {q:"ماذا يخلّد اليوم الوطني السعودي؟", c:["توحيد المملكة","تأسيس الجيش","استقلال اقتصادي","بناء الرياض"], a:0},
@@ -218,10 +228,109 @@ a<head>
     setTimeout(() => n.remove(), 3000);
   }
 
+  // ============ نظام الموسيقى ============
+  window.onYouTubeIframeAPIReady = function() {
+    ytPlayer = new YT.Player('yt-player', {
+      height: '1',
+      width: '1',
+      videoId: musicPlaylist[0].id,
+      playerVars: {
+        'autoplay': 0,
+        'controls': 0,
+        'loop': 0,
+        'rel': 0,
+        'modestbranding': 1
+      },
+      events: {
+        'onReady': onPlayerReady,
+        'onStateChange': onPlayerStateChange
+      }
+    });
+  };
+
+  function onPlayerReady(event) {
+    ytPlayer.setVolume(50);
+    updateTrackInfo();
+  }
+
+  function onPlayerStateChange(event) {
+    // عند انتهاء الأغنية، شغل التالية تلقائياً
+    if (event.data === YT.PlayerState.ENDED) {
+      playNextTrack();
+    }
+  }
+
+  function playNextTrack() {
+    currentTrackIndex = (currentTrackIndex + 1) % musicPlaylist.length;
+    if (ytPlayer && isAudioPlaying) {
+      ytPlayer.loadVideoById(musicPlaylist[currentTrackIndex].id);
+      updateTrackInfo();
+    }
+  }
+
+  function playPrevTrack() {
+    currentTrackIndex = (currentTrackIndex - 1 + musicPlaylist.length) % musicPlaylist.length;
+    if (ytPlayer) {
+      ytPlayer.loadVideoById(musicPlaylist[currentTrackIndex].id);
+      if (isAudioPlaying) {
+        ytPlayer.playVideo();
+      }
+      updateTrackInfo();
+    }
+  }
+
+  function updateTrackInfo() {
+    const trackName = document.getElementById('trackName');
+    if (trackName) {
+      trackName.textContent = musicPlaylist[currentTrackIndex].name;
+    }
+  }
+
+  window.toggleAudio = function() {
+    if (!ytPlayer) return;
+    if (isAudioPlaying) {
+      ytPlayer.pauseVideo();
+      isAudioPlaying = false;
+      document.getElementById('audioPlayBtn').textContent = '▶️';
+    } else {
+      ytPlayer.playVideo();
+      isAudioPlaying = true;
+      document.getElementById('audioPlayBtn').textContent = '⏸️';
+    }
+  };
+
+  window.setAudioVolume = function(val) {
+    if (ytPlayer) ytPlayer.setVolume(val);
+  };
+
+  window.nextTrack = function() {
+    playNextTrack();
+    notify('🎵 الأغنية التالية: ' + musicPlaylist[currentTrackIndex].name);
+  };
+
+  window.prevTrack = function() {
+    playPrevTrack();
+    notify(' الأغنية السابقة: ' + musicPlaylist[currentTrackIndex].name);
+  };
+
   window.startAs = function(role) {
     myRole = role;
     document.getElementById('roleScreen').classList.add('hidden');
     document.getElementById(role + 'Screen').classList.remove('hidden');
+    
+    // إظهار أدوات التحكم بالصوت للمتحكم والمشاهد
+    if (role === 'host' || role === 'spectator') {
+      document.getElementById('audioControlPanel').classList.remove('hidden');
+      // تشغيل الموسيقى تلقائياً عند الدخول
+      setTimeout(() => {
+        if (ytPlayer && !isAudioPlaying) {
+          ytPlayer.playVideo();
+          isAudioPlaying = true;
+          document.getElementById('audioPlayBtn').textContent = '⏸️';
+        }
+      }, 1000);
+    }
+    
     if (role === 'host') {
       initHost();
       const playerUrl = window.location.origin + window.location.pathname + '?role=player';
@@ -231,20 +340,17 @@ a<head>
     if (role === 'spectator') initSpectator();
   };
 
-  // ✅ الحل الجديد: المتحكم يرسل رقم السؤال فقط!
   window.selectQuestion = async function(qIndex) {
     try {
       const gameStateSnap = await get(ref(db, 'gameState'));
       const state = gameStateSnap.val() || {};
       const currentRound = state.round || 1;
 
-      // إرسال رقم السؤال فقط (بيانات خفيفة جداً تمنع أي خطأ)
       await update(ref(db, 'gameState'), {
         currentQIndex: qIndex,
         round: currentRound
       });
 
-      // إعادة تعيين حالة الإجابة للاعبين
       const playersSnap = await get(ref(db, 'players'));
       const players = playersSnap.val() || {};
       for (const [id, p] of Object.entries(players)) {
@@ -253,7 +359,7 @@ a<head>
         }
       }
       
-      notify('تم عرض السؤال رقم ' + (qIndex + 1));
+      notify('📝 تم عرض السؤال رقم ' + (qIndex + 1));
     } catch (error) {
       console.error('خطأ:', error);
       alert('خطأ: ' + error.message);
@@ -318,7 +424,7 @@ a<head>
   };
 
   window.deleteAllPlayers = function() {
-    if (confirm('⚠️ هل أنت متأكد من حذف جميع اللاعبين؟')) {
+    if (confirm('️ هل أنت متأكد من حذف جميع اللاعبين؟')) {
       set(ref(db, 'players'), {});
       notify('تم حذف جميع اللاعبين');
     }
@@ -400,7 +506,6 @@ a<head>
       const qIdx = state.currentQIndex;
       document.getElementById('hostQNum').textContent = qIdx >= 0 ? (qIdx + 1) + '/50' : '0/50';
       
-      // عرض السؤال الحالي للمتحكم
       const cqDiv = document.getElementById('currentQuestion');
       if (qIdx >= 0 && state.round) {
         const bank = [null, Q1, Q2, Q3][state.round];
@@ -486,7 +591,6 @@ a<head>
       }
     });
     
-    // ✅ اللاعب يستمع لرقم السؤال فقط، ويجلبه محلياً
     onValue(ref(db, 'gameState'), (snapshot) => {
       const state = snapshot.val() || {};
       const qIdx = state.currentQIndex;
@@ -507,7 +611,6 @@ a<head>
         const localQ = bank[qIdx];
         
         if (localQ) {
-          // الخلط يتم محلياً في جهاز اللاعب
           const shuffled = shuffleChoices(localQ);
           
           document.getElementById('playerQuestion').textContent = (qIdx + 1) + "- " + shuffled.q;
@@ -557,7 +660,7 @@ a<head>
       for (const [id, p] of Object.entries(players)) {
         if (p.status === 'accepted' || p.status === 'winner') {
           count++;
-          html += '<div class="player-item"><span>👤 ' + p.name + (p.status==='winner'?' 🏆':'') + '</span><span class="score-badge">' + (p.score || 0) + '</span></div>';
+          html += '<div class="player-item"><span> ' + p.name + (p.status==='winner'?' 🏆':'') + '</span><span class="score-badge">' + (p.score || 0) + '</span></div>';
         }
       }
       document.getElementById('specPlayerCount').textContent = count;
@@ -585,10 +688,24 @@ a<head>
 
 <style>
   * { margin:0; padding:0; box-sizing:border-box; font-family:'Segoe UI', Tahoma, sans-serif; }
-  body { min-height:100vh; background: linear-gradient(135deg, #0a3d2e 0%, #065f46 50%, #052e1f 100%); color:#fff; padding:20px; }
-  .container { max-width:1000px; margin:auto; }
-  .logo { text-align:center; padding:20px; margin-bottom:20px; background: rgba(0,0,0,0.4); border-radius:20px; border:3px solid rgba(255,215,0,0.5); }
-  .logo h1 { font-size:2.5em; color:#ffd700; }
+  body { 
+    min-height:100vh; 
+    background: url('https://i.pinimg.com/originals/8a/5c/4f/8a5c4f8e9c8b7a6d5e4f3a2b1c0d9e8f.jpg') center/cover fixed;
+    color:#fff; 
+    padding:20px;
+    position: relative;
+  }
+  body::before {
+    content:""; 
+    position:fixed; 
+    inset:0; 
+    background: rgba(10, 61, 46, 0.75);
+    pointer-events:none; 
+    z-index: 0;
+  }
+  .container { max-width:1000px; margin:auto; position: relative; z-index: 1; }
+  .logo { text-align:center; padding:20px; margin-bottom:20px; background: rgba(0,0,0,0.6); border-radius:20px; border:3px solid rgba(255,215,0,0.5); backdrop-filter: blur(10px); }
+  .logo h1 { font-size:2.5em; color:#ffd700; text-shadow: 0 0 20px rgba(255,215,0,0.5); }
   .logo .slogan { font-size:1.8em; color:#fff; margin-top:10px; font-weight:bold; }
   .logo .flag { font-size:4em; }
   .logo .year { font-size:1.5em; color:#ffd700; margin-top:5px; }
@@ -604,7 +721,7 @@ a<head>
     transition: all 0.2s;
   }
   .q-btn:hover { background: #ffd700; color: #000; transform: scale(1.05); }
-  .card { background: rgba(0,0,0,0.5); border-radius:18px; padding:25px; border:2px solid rgba(255,215,0,0.3); margin-bottom:20px; }
+  .card { background: rgba(0,0,0,0.6); border-radius:18px; padding:25px; border:2px solid rgba(255,215,0,0.3); margin-bottom:20px; backdrop-filter: blur(10px); }
   .card h2 { color:#ffd700; margin-bottom:15px; font-size:1.5em; border-bottom:2px solid #ffd700; padding-bottom:10px; }
   input[type=text] { width:100%; padding:14px; border-radius:10px; border:2px solid rgba(255,215,0,0.5); background: rgba(255,255,255,0.1); color:#fff; font-size:1.1em; margin:10px 0; }
   input[type=text]::placeholder { color:rgba(255,255,255,0.6); }
@@ -633,17 +750,83 @@ a<head>
   .collapsible-header { display: flex; justify-content: space-between; align-items: center; font-weight: bold; color: #ffd700; }
   .collapsible-content { display: none; max-height: 400px; overflow-y: auto; margin-top: 10px; }
   .collapsible-content.active { display: block; }
-  @media(max-width:600px) { .logo h1 { font-size:1.8em; } .logo .slogan { font-size:1.3em; } .question-box { font-size:1.1em; } .role-btn { width:100%; padding:20px; font-size:1.1em; } }
+  
+  /* أدوات التحكم بالموسيقى */
+  .audio-controls {
+    position: fixed; 
+    bottom: 20px; 
+    left: 20px; 
+    z-index: 1000;
+    background: rgba(0,0,0,0.85); 
+    padding: 15px 20px; 
+    border-radius: 15px;
+    border: 2px solid #ffd700;
+    backdrop-filter: blur(10px);
+    box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+    min-width: 280px;
+  }
+  .audio-controls .track-name {
+    color: #ffd700;
+    font-size: 0.9em;
+    margin-bottom: 10px;
+    text-align: center;
+    font-weight: bold;
+  }
+  .audio-controls .controls-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    justify-content: center;
+  }
+  .audio-controls button {
+    background: #ffd700; 
+    color: #000; 
+    border: none; 
+    width: 40px; 
+    height: 40px;
+    border-radius: 50%; 
+    font-size: 1.2em; 
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .audio-controls button:hover {
+    transform: scale(1.1);
+    background: #fff;
+  }
+  .audio-controls input[type=range] { 
+    width: 100px; 
+    accent-color: #ffd700;
+  }
+  .audio-controls .volume-icon {
+    color: #ffd700;
+    font-size: 1.2em;
+  }
+  
+  @media(max-width:600px) { 
+    .logo h1 { font-size:1.8em; } 
+    .logo .slogan { font-size:1.3em; } 
+    .question-box { font-size:1.1em; } 
+    .role-btn { width:100%; padding:20px; font-size:1.1em; }
+    .audio-controls { 
+      bottom: 10px; 
+      left: 10px; 
+      right: 10px;
+      min-width: auto;
+    }
+  }
 </style>
 </head>
 <body>
+
+<!-- مشغل YouTube المخفي -->
+<div id="yt-player" style="position:fixed; width:1px; height:1px; opacity:0; pointer-events:none; z-index:-1;"></div>
 
 <div class="container">
   <div id="roleScreen">
     <div class="logo">
       <div class="flag">🇸🇦</div>
       <h1>اليوم الوطني السعودي 96</h1>
-      <div class="slogan">✨ عزّنا بطبعنا ✨</div>
+      <div class="slogan">✨ عزّنا بطبعنا </div>
       <div class="year">2026 - 1448هـ</div>
     </div>
     <div class="role-select">
@@ -675,7 +858,7 @@ a<head>
         <div class="collapsible-header"><span>📂 اضغط لعرض اللاعبين (<span id="playerCountDisplay">0</span>)</span><span id="playersArrow">▼</span></div>
       </div>
       <div id="playersList" class="collapsible-content"><div id="registeredList" class="player-list"></div></div>
-      <div class="control-panel"><button class="btn btn-red btn-small" onclick="deleteAllPlayers()">🗑️ حذف جميع اللاعبين</button></div>
+      <div class="control-panel"><button class="btn btn-red btn-small" onclick="deleteAllPlayers()">️ حذف جميع اللاعبين</button></div>
     </div>
     
     <div class="card">
@@ -760,10 +943,26 @@ a<head>
   </div>
 </div>
 
+<!-- أدوات التحكم بالموسيقى (تظهر للمتحكم والمشاهد فقط) -->
+<div id="audioControlPanel" class="audio-controls hidden">
+  <div class="track-name" id="trackName">🎵 النشيد الوطني السعودي</div>
+  <div class="controls-row">
+    <button onclick="prevTrack()" title="الأغنية السابقة">⏮️</button>
+    <button onclick="toggleAudio()" id="audioPlayBtn" title="تشغيل/إيقاف">▶️</button>
+    <button onclick="nextTrack()" title="الأغنية التالية">⏭️</button>
+    <span class="volume-icon">🔊</span>
+    <input type="range" min="0" max="100" value="50" oninput="setAudioVolume(this.value)" title="مستوى الصوت">
+  </div>
+</div>
+
+<!-- YouTube IFrame API -->
+<script src="https://www.youtube.com/iframe_api"></script>
+
 <script>
-  // ✅ كود JavaScript لإنشاء شبكة الأسئلة للمتحكم
+  // إنشاء شبكة الأسئلة للمتحكم
   function renderQuestionGrid() {
     const grid = document.getElementById('questionGrid');
+    if (!grid) return;
     grid.innerHTML = '';
     for (let i = 0; i < 50; i++) {
       const btn = document.createElement('button');
@@ -774,7 +973,6 @@ a<head>
     }
   }
   
-  // تشغيل شبكة الأسئلة عند تحميل الصفحة
   window.addEventListener('load', () => {
     if (document.getElementById('questionGrid')) {
       renderQuestionGrid();
