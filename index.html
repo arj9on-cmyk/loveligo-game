@@ -28,15 +28,14 @@
   let answeredThisQ = false;
 
   const roundTitles = {
-    1: ' الجولة الأولى — اعرف وطنك (نقطة لكل إجابة)',
-    2: ' الجولة الثانية — عزّنا بطبعنا (نقطتان لكل إجابة)',
+    1: '🟢 الجولة الأولى — اعرف وطنك (نقطة لكل إجابة)',
+    2: '🟢 الجولة الثانية — عزّنا بطبعنا (نقطتان لكل إجابة)',
     3: '⚡ الجولة الثالثة — التحدي الوطني (3 نقاط لكل إجابة)'
   };
 
   const maxWinners = { 1: 21, 2: 14, 3: 7 };
   const pointsPerRound = { 1: 1, 2: 2, 3: 3 };
 
-  // دالة خلط المصفوفة
   function shuffleArray(array) {
     const newArray = [...array];
     for (let i = newArray.length - 1; i > 0; i--) {
@@ -46,7 +45,6 @@
     return newArray;
   }
 
-  // دالة خلط الخيارات
   function shuffleChoices(question) {
     const choices = question.c.map((text, index) => ({ text, isCorrect: index === question.a }));
     const shuffled = shuffleArray(choices);
@@ -219,14 +217,6 @@
     {q:"ما اسم المدينة التي تقع فيها جامعة الملك سعود؟", c:["الرياض","جدة","الدمام","مكة"], a:0}
   ];
 
-  // جلب السؤال مع خلط الخيارات
-  function getQuestion(round, index) {
-    const bank = [null, Q1, Q2, Q3][round];
-    if (!bank || !bank[index]) return null;
-    return shuffleChoices(bank[index]);
-  }
-
-  // إشعار
   function notify(text) {
     const n = document.createElement('div');
     n.className = 'notification';
@@ -235,11 +225,10 @@
     setTimeout(() => n.remove(), 4000);
   }
 
-  // ============ دالة بدء الدور (مهمة جداً - متاحة عالمياً) ============
+  // ============ دالة بدء الدور ============
   window.startAs = function(role) {
     console.log('تم اختيار الدور:', role);
     myRole = role;
-    
     document.getElementById('roleScreen').classList.add('hidden');
     document.getElementById(role + 'Screen').classList.remove('hidden');
     
@@ -252,7 +241,7 @@
     if (role === 'spectator') initSpectator();
   };
 
-  // ============ دالة السؤال التالي ============
+  // ============ دالة السؤال التالي - الحل النهائي ============
   window.nextQuestion = async function() {
     console.log('🔵 بدء الانتقال للسؤال التالي...');
     
@@ -274,43 +263,51 @@
         return; 
       }
       
-      const question = getQuestion(round, qIndex);
+      const bank = [null, Q1, Q2, Q3][round];
+      const originalQ = bank[qIndex];
       
-      if (!question) { 
+      if (!originalQ) { 
         alert('لا يوجد سؤال رقم ' + (qIndex + 1));
         return; 
       }
       
-      console.log('✅ السؤال:', question.q);
-      console.log('📝 الخيارات:', question.c);
-      console.log('✅ الإجابة الصحيحة:', question.c[question.a]);
+      console.log('✅ السؤال الأصلي:', originalQ.q);
       
+      const shuffled = shuffleChoices(originalQ);
+      console.log('📝 الخيارات بعد الخلط:', shuffled.c);
+      console.log('✅ الإجابة الصحيحة:', shuffled.c[shuffled.a]);
+      
+      // ✅ الحل: استخدام set بدلاً من update مع timestamp فريد
+      const questionData = {
+        round: round,
+        qIndex: qIndex,
+        q: shuffled.q,
+        choices: shuffled.c,
+        correctIndex: shuffled.a,
+        points: pointsPerRound[round],
+        timestamp: Date.now() + '_' + Math.random().toString(36).substr(2, 9)
+      };
+      
+      console.log('📤 إرسال السؤال لـ Firebase...');
+      
+      // ✅ استخدام set بدلاً من update
+      await set(ref(db, 'currentQuestion'), questionData);
+      await update(ref(db, {
+        'gameState/qIndex': qIndex
+      }));
+      
+      // إعادة تعيين حالة اللاعبين
       const playersSnap = await get(ref(db, 'players'));
       const players = playersSnap.val() || {};
-      const playerUpdates = {};
-      
       for (const [id, p] of Object.entries(players)) {
         if (p.status === 'accepted' || p.status === 'winner') {
-          playerUpdates['players/' + id + '/answered'] = false;
+          await update(ref(db, 'players/' + id), { answered: false });
         }
       }
       
-      const updates = {
-        ...playerUpdates,
-        'gameState/qIndex': qIndex,
-        'currentQuestion': {
-          round: round,
-          qIndex: qIndex,
-          q: question.q,
-          choices: question.c,
-          correctIndex: question.a,
-          points: pointsPerRound[round]
-        }
-      };
-      
-      await update(ref(db), updates);
       console.log('✅✅✅ تم تحديث السؤال بنجاح!');
-      notify('📝 السؤال ' + (qIndex + 1) + ' من 50');
+      console.log('السؤال الجديد:', questionData.q);
+      notify(' السؤال ' + (qIndex + 1) + ' من 50');
       
     } catch (error) {
       console.error('❌ خطأ:', error);
@@ -332,25 +329,26 @@
     
     const snapshot = await get(ref(db, 'players'));
     const players = snapshot.val() || {};
-    const updates = {};
     
     for (const [id, p] of Object.entries(players)) {
       if (p.status === 'accepted' || p.status === 'winner') {
         if (n > 1 && p.status !== 'winner') {
-          updates['players/' + id + '/status'] = 'eliminated';
+          await update(ref(db, 'players/' + id), { status: 'eliminated' });
         } else {
-          updates['players/' + id + '/score'] = 0;
-          updates['players/' + id + '/answered'] = false;
+          await update(ref(db, 'players/' + id), { score: 0, answered: false });
         }
       }
     }
     
-    updates['gameState/round'] = n;
-    updates['gameState/qIndex'] = -1;
-    updates['gameState/title'] = roundTitles[n];
-    updates['gameState/points'] = pointsPerRound[n];
+    await update(ref(db, {
+      'gameState/round': n,
+      'gameState/qIndex': -1,
+      'gameState/title': roundTitles[n],
+      'gameState/points': pointsPerRound[n]
+    }));
     
-    await update(ref(db), updates);
+    await remove(ref(db, 'currentQuestion'));
+    
     notify('🎮 بدأت ' + roundTitles[n]);
   };
 
@@ -360,7 +358,7 @@
     await set(ref(db, 'gameState'), { round: 0, qIndex: -1 });
     await set(ref(db, 'players'), {});
     await set(ref(db, 'winners'), {});
-    await set(ref(db, 'currentQuestion'), {});
+    await remove(ref(db, 'currentQuestion'));
     await set(ref(db, 'winnerRequests'), {});
     notify('تم إعادة اللعبة');
   };
@@ -394,7 +392,7 @@
 
   // ============ دالة حذف سجل الفائزين ============
   window.clearWinners = function() {
-    if (confirm('️ هل تريد حذف سجل الفائزين؟')) {
+    if (confirm('⚠️ هل تريد حذف سجل الفائزين؟')) {
       set(ref(db, 'winners'), {});
       notify('تم حذف سجل الفائزين');
     }
@@ -405,7 +403,7 @@
     const linkInput = document.getElementById('playerLink');
     linkInput.select();
     document.execCommand('copy');
-    notify('📋 تم نسخ الرابط!');
+    notify(' تم نسخ الرابط!');
   };
 
   // ============ دالة طي القائمة ============
@@ -474,9 +472,11 @@
       document.getElementById('hostQNum').textContent = state.qIndex >= 0 ? (state.qIndex + 1) + '/50' : '0/50';
     });
     
+    // ✅ الاستماع لـ currentQuestion
     onValue(ref(db, 'currentQuestion'), (snapshot) => {
       const cq = snapshot.val();
       const cqDiv = document.getElementById('currentQuestion');
+      console.log('📡 استلام سؤال جديد:', cq);
       if (cq && cq.q) {
         cqDiv.innerHTML = '<div class="question-box">السؤال ' + (cq.qIndex + 1) + ': ' + cq.q + '</div>' +
           '<p style="text-align:center; color:#ffd700; font-size:1.2em;">الإجابة الصحيحة: <strong>' + cq.choices[cq.correctIndex] + '</strong></p>';
@@ -542,7 +542,7 @@
       } else if (p.status === 'accepted' || p.status === 'winner') {
         pCount++;
         registeredHtml += '<div class="player-item">' +
-          '<span> ' + p.name + (p.status==='winner'?' 🏆':'') + '</span>' +
+          '<span>👤 ' + p.name + (p.status==='winner'?' 🏆':'') + '</span>' +
           '<span class="score-badge">' + (p.score || 0) + '</span>' +
           '<button class="delete-btn" onclick="deletePlayer(\'' + id + '\',\'' + p.name + '\')" title="حذف">×</button>' +
           '</div>';
@@ -583,14 +583,16 @@
       }
     });
     
+    // ✅ الاستماع لـ currentQuestion
     onValue(ref(db, 'currentQuestion'), (snapshot) => {
       const cq = snapshot.val();
+      console.log('📡 لاعب استلم سؤال:', cq);
       if (!cq || !cq.q) return;
       
       get(ref(db, 'players/' + myId)).then(ps => {
         const p = ps.val();
         if (p && p.answered) {
-          document.getElementById('playerMsg').innerHTML = ' في انتظار السؤال التالي...';
+          document.getElementById('playerMsg').innerHTML = '⏳ في انتظار السؤال التالي...';
           document.getElementById('playerMsg').style.color = '#ffd700';
           document.getElementById('playerChoices').innerHTML = '';
           return;
@@ -618,8 +620,10 @@
       }
     });
     
+    // ✅ الاستماع لـ currentQuestion
     onValue(ref(db, 'currentQuestion'), (snapshot) => {
       const cq = snapshot.val();
+      console.log('📡 مشاهد استلم سؤال:', cq);
       if (!cq || !cq.q) return;
       document.getElementById('specQuestion').textContent = cq.q;
       document.getElementById('specChoices').innerHTML = cq.choices.map((c, i) => 
@@ -647,12 +651,12 @@
       const winners = snapshot.val() || {};
       const arr = Object.values(winners);
       document.getElementById('specWinners').innerHTML = arr.length ? arr.map((w,i) => 
-        '<div class="winner-card"> ' + (i+1) + '. ' + w.name + ' - الجولة ' + w.round + '</div>'
+        '<div class="winner-card">🏆 ' + (i+1) + '. ' + w.name + ' - الجولة ' + w.round + '</div>'
       ).join('') : '<p style="opacity:.7; text-align:center;">لا يوجد فائزون بعد</p>';
     });
   }
 
-  // التحقق من URL parameter عند التحميل
+  // التحقق من URL parameter
   window.addEventListener('load', () => {
     const urlParams = new URLSearchParams(window.location.search);
     const roleParam = urlParams.get('role');
@@ -668,35 +672,33 @@
   body {
     min-height:100vh;
     background: linear-gradient(135deg, #0a3d2e 0%, #065f46 50%, #052e1f 100%);
-    color:#fff; padding:20px; overflow-x:hidden;
+    color:#fff; padding:20px;
   }
-  .container { max-width:1000px; margin:auto; position:relative; z-index:1; }
+  .container { max-width:1000px; margin:auto; }
   .logo {
     text-align:center; padding:20px; margin-bottom:20px;
     background: rgba(0,0,0,0.4); border-radius:20px;
-    backdrop-filter: blur(10px); border:3px solid rgba(255,215,0,0.5);
-    box-shadow: 0 0 30px rgba(255,215,0,0.3);
+    border:3px solid rgba(255,215,0,0.5);
   }
-  .logo h1 { font-size:2.5em; color:#ffd700; text-shadow:0 0 20px rgba(255,215,0,0.8); }
+  .logo h1 { font-size:2.5em; color:#ffd700; }
   .logo .slogan { font-size:1.8em; color:#fff; margin-top:10px; font-weight:bold; }
-  .logo .flag { font-size:4em; margin:10px 0; }
+  .logo .flag { font-size:4em; }
   .logo .year { font-size:1.5em; color:#ffd700; margin-top:5px; }
   .btn {
     padding:14px 30px; border:none; border-radius:12px; font-size:1.1em; font-weight:bold;
-    cursor:pointer; transition:all .3s; margin:5px; color:#fff;
+    cursor:pointer; margin:5px; color:#fff;
     background: linear-gradient(135deg, #00a651, #006c35);
     box-shadow:0 4px 15px rgba(0,0,0,0.3);
   }
-  .btn:hover { transform:translateY(-2px); box-shadow:0 6px 20px rgba(0,166,81,0.5); }
+  .btn:hover { transform:translateY(-2px); }
   .btn-gold { background: linear-gradient(135deg, #ffd700, #daa520); color:#000; }
   .btn-red { background: linear-gradient(135deg, #dc3545, #a71d2a); }
   .btn-blue { background: linear-gradient(135deg, #007bff, #0056b3); }
   .btn-small { padding:8px 16px; font-size:0.9em; }
-  .btn:disabled { opacity:.5; cursor:not-allowed; }
   .card {
     background: rgba(0,0,0,0.5); border-radius:18px; padding:25px;
-    backdrop-filter: blur(10px); border:2px solid rgba(255,215,0,0.3);
-    margin-bottom:20px; box-shadow:0 8px 32px rgba(0,0,0,0.4);
+    border:2px solid rgba(255,215,0,0.3);
+    margin-bottom:20px;
   }
   .card h2 { color:#ffd700; margin-bottom:15px; font-size:1.5em; border-bottom:2px solid #ffd700; padding-bottom:10px; }
   input[type=text] {
@@ -708,36 +710,13 @@
     display:block; width:100%; padding:18px; margin:10px 0;
     background: linear-gradient(135deg, rgba(255,255,255,0.15), rgba(255,255,255,0.05));
     border:2px solid rgba(255,215,0,0.4); border-radius:12px;
-    color:#fff; font-size:1.1em; cursor:pointer; transition:all .3s; text-align:right;
+    color:#fff; font-size:1.1em; cursor:pointer; text-align:right;
   }
   .choice-btn:hover:not(:disabled) {
     background: linear-gradient(135deg, #00a651, #006c35);
-    transform:translateX(-5px); border-color:#ffd700;
   }
   .choice-btn.correct { background: linear-gradient(135deg, #28a745, #1e7e34) !important; border-color:#fff; }
   .choice-btn.wrong { background: linear-gradient(135deg, #dc3545, #a71d2a) !important; border-color:#fff; }
-  .collapsible {
-    background: rgba(255,215,0,0.2);
-    border: 2px solid #ffd700;
-    border-radius: 12px;
-    padding: 15px;
-    cursor: pointer;
-    margin-bottom: 10px;
-  }
-  .collapsible-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    font-weight: bold;
-    color: #ffd700;
-  }
-  .collapsible-content {
-    display: none;
-    max-height: 400px;
-    overflow-y: auto;
-    margin-top: 10px;
-  }
-  .collapsible-content.active { display: block; }
   .player-list { display:grid; grid-template-columns:repeat(auto-fill, minmax(180px, 1fr)); gap:10px; }
   .player-item {
     background: rgba(255,255,255,0.1); padding:12px; border-radius:10px;
@@ -746,23 +725,20 @@
     position: relative;
   }
   .player-item .delete-btn {
-    position: absolute;
-    left: 5px; top: 5px;
+    position: absolute; left: 5px; top: 5px;
     background: #dc3545; color: white; border: none;
     border-radius: 50%; width: 24px; height: 24px;
-    cursor: pointer; font-size: 0.8em;
+    cursor: pointer;
   }
   .score-badge { background:#ffd700; color:#000; padding:4px 12px; border-radius:20px; font-weight:bold; }
   .question-box {
     background: linear-gradient(135deg, rgba(255,215,0,0.25), rgba(255,215,0,0.05));
     border:3px solid #ffd700; border-radius:15px; padding:25px; margin:20px 0;
     font-size:1.4em; text-align:center; font-weight:bold; line-height: 1.6;
-    box-shadow: 0 0 20px rgba(255,215,0,0.3);
   }
   .status-bar {
     display:flex; justify-content:space-around; flex-wrap:wrap; gap:10px;
     background:rgba(0,0,0,0.6); padding:15px; border-radius:12px; margin-bottom:20px;
-    border: 2px solid rgba(255,215,0,0.3);
   }
   .status-item { text-align:center; }
   .status-item .label { font-size:.85em; opacity:.8; }
@@ -775,13 +751,12 @@
   .hidden { display:none !important; }
   .role-select { text-align:center; padding:40px; }
   .role-btn {
-    display:inline-block; padding:25px 40px; margin:15px;
+    display:block; width:300px; margin:15px auto; padding:25px;
     background: linear-gradient(135deg, #00a651, #006c35);
-    border-radius:20px; cursor:pointer; font-size:1.2em; font-weight:bold;
-    transition:all .3s; border:3px solid rgba(255,215,0,0.5);
-    color: #fff;
+    border-radius:20px; cursor:pointer; font-size:1.3em; font-weight:bold;
+    color:#fff; border:3px solid rgba(255,215,0,0.5);
   }
-  .role-btn:hover { transform:scale(1.05); border-color:#ffd700; box-shadow: 0 0 20px rgba(255,215,0,0.5); }
+  .role-btn:hover { transform:scale(1.05); border-color:#ffd700; }
   .notification {
     position:fixed; top:20px; left:50%; transform:translateX(-50%);
     background:#ffd700; color:#000; padding:15px 30px; border-radius:10px;
@@ -789,23 +764,31 @@
   }
   @keyframes slideDown { from { top:-100px; } to { top:20px; } }
   .control-panel {
-    background: rgba(0,0,0,0.4);
-    padding: 15px; border-radius: 10px;
+    background: rgba(0,0,0,0.4); padding: 15px; border-radius: 10px;
     margin-bottom: 15px;
-    border: 1px solid rgba(255,215,0,0.3);
   }
+  .collapsible {
+    background: rgba(255,215,0,0.2);
+    border: 2px solid #ffd700; border-radius: 12px;
+    padding: 15px; cursor: pointer; margin-bottom: 10px;
+  }
+  .collapsible-header {
+    display: flex; justify-content: space-between;
+    align-items: center; font-weight: bold; color: #ffd700;
+  }
+  .collapsible-content { display: none; max-height: 400px; overflow-y: auto; margin-top: 10px; }
+  .collapsible-content.active { display: block; }
   @media(max-width:600px) {
     .logo h1 { font-size:1.8em; }
     .logo .slogan { font-size:1.3em; }
     .question-box { font-size:1.1em; }
-    .role-btn { padding:20px 30px; font-size:1em; }
+    .role-btn { width:100%; padding:20px; font-size:1.1em; }
   }
 </style>
 </head>
 <body>
 
 <div class="container">
-  <!-- شاشة اختيار الدور -->
   <div id="roleScreen">
     <div class="logo">
       <div class="flag">🇸🇦</div>
@@ -815,16 +798,15 @@
     </div>
     <div class="role-select">
       <h2 style="color:#ffd700; margin-bottom:30px;">اختر دورك للبدء</h2>
-      <div class="role-btn" onclick="startAs('host')">🎛️ متحكم</div>
-      <div class="role-btn" onclick="startAs('player')">🎮 لاعب</div>
-      <div class="role-btn" onclick="startAs('spectator')">👁️ مشاهد</div>
+      <button class="role-btn" onclick="startAs('host')">🎛️ متحكم</button>
+      <button class="role-btn" onclick="startAs('player')">🎮 لاعب</button>
+      <button class="role-btn" onclick="startAs('spectator')">👁️ مشاهد</button>
     </div>
   </div>
 
-  <!-- شاشة المتحكم -->
   <div id="hostScreen" class="hidden">
     <div class="logo">
-      <div class="flag">🇦</div>
+      <div class="flag">🇸🇦</div>
       <h1>لوحة المتحكم</h1>
       <div class="slogan">عزّنا بطبعنا</div>
     </div>
@@ -834,14 +816,12 @@
       <div class="status-item"><div class="label">اللاعبون</div><div class="value" id="hostPlayerCount">0</div></div>
       <div class="status-item"><div class="label">الفائزون</div><div class="value" id="hostWinners">0</div></div>
     </div>
-    
     <div class="card">
       <h2>📋 طلبات التسجيل</h2>
       <div id="pendingList"></div>
     </div>
-    
     <div class="card">
-      <h2> اللاعبون المسجلون</h2>
+      <h2>🎯 اللاعبون المسجلون</h2>
       <div class="collapsible" onclick="toggleCollapsible('playersList')">
         <div class="collapsible-header">
           <span>📂 اضغط لعرض اللاعبين (<span id="playerCountDisplay">0</span>)</span>
@@ -855,7 +835,6 @@
         <button class="btn btn-red btn-small" onclick="deleteAllPlayers()">🗑️ حذف جميع اللاعبين</button>
       </div>
     </div>
-    
     <div class="card">
       <h2>🏆 سجل الفائزين</h2>
       <div id="winnersLog"></div>
@@ -863,19 +842,17 @@
         <button class="btn btn-red btn-small" onclick="clearWinners()">🗑️ حذف سجل الفائزين</button>
       </div>
     </div>
-    
     <div class="card">
       <h2>🎮 التحكم بالجولة</h2>
       <div id="roundControl">
         <button class="btn btn-gold" onclick="startRound(1)">🟢 بدء الجولة الأولى</button>
-        <button class="btn btn-gold" onclick="startRound(2)">🟢 بدء الجولة الثانية</button>
+        <button class="btn btn-gold" onclick="startRound(2)"> بدء الجولة الثانية</button>
         <button class="btn btn-gold" onclick="startRound(3)">⚡ بدء الجولة الثالثة</button>
         <button class="btn btn-blue" onclick="nextQuestion()">➡️ السؤال التالي</button>
         <button class="btn btn-red" onclick="resetGame()">🔄 إعادة اللعبة</button>
       </div>
       <div id="currentQuestion" style="margin-top:20px;"></div>
     </div>
-    
     <div class="card">
       <h2>🔗 رابط اللاعبين</h2>
       <p style="margin-bottom:10px;">شارك هذا الرابط مع اللاعبين:</p>
@@ -884,10 +861,9 @@
     </div>
   </div>
 
-  <!-- شاشة اللاعب -->
   <div id="playerScreen" class="hidden">
     <div class="logo">
-      <div class="flag">🇦</div>
+      <div class="flag">🇸🇦</div>
       <h1>منطقة اللاعب</h1>
       <div class="slogan">عزّنا بطبعنا</div>
     </div>
@@ -912,7 +888,6 @@
     </div>
   </div>
 
-  <!-- شاشة المشاهد -->
   <div id="spectatorScreen" class="hidden">
     <div class="logo">
       <div class="flag">🇸🇦</div>
