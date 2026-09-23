@@ -46,16 +46,15 @@
   }
 
   function shuffleChoices(question) {
-    const choices = question.c.map((text, index) => ({ text, isCorrect: index === question.a }));
+    const choices = question.c.map((text, index) => ({ text: String(text), isCorrect: index === question.a }));
     const shuffled = shuffleArray(choices);
     return {
-      q: question.q,
+      q: String(question.q),
       c: shuffled.map(c => c.text),
       a: shuffled.findIndex(c => c.isCorrect)
     };
   }
 
-  // ============ الأسئلة - الجولة الأولى (50 سؤال) ============
   const Q1 = [
     {q:"في أي تاريخ تحتفل السعودية باليوم الوطني؟", c:["23 سبتمبر","1 أكتوبر","4 أغسطس","2 ديسمبر"], a:0},
     {q:"ماذا يخلّد اليوم الوطني السعودي؟", c:["توحيد المملكة","تأسيس الجيش","استقلال اقتصادي","بناء الرياض"], a:0},
@@ -109,7 +108,6 @@
     {q:"ما اسم البحر الذي يفصل السعودية عن مصر؟", c:["البحر الأحمر","البحر المتوسط","بحر العرب","خليج العقبة"], a:0}
   ];
 
-  // ============ الأسئلة - الجولة الثانية (50 سؤال) ============
   const Q2 = [
     {q:"شخص رأى ضيفًا جديدًا فبادر بالترحيب به وإكرامه، ما الصفة؟", c:["الكرم","الخوف","الغضب","البخل"], a:0},
     {q:"شخص واجه صعوبة كبيرة ولم يستسلم، ما الصفة؟", c:["الشجاعة","الجبن","الكسل","اليأس"], a:0},
@@ -163,7 +161,6 @@
     {q:"شخص يضع رؤية طويلة المدى لوطنه، يمثل أي قيمة؟", c:["الرؤية","الفوضى","الجمود","العشوائية"], a:0}
   ];
 
-  // ============ الأسئلة - الجولة الثالثة (50 سؤال) ============
   const Q3 = [
     {q:"صح أم خطأ: اليوم الوطني السعودي يكون في 23 سبتمبر.", c:["صح","خطأ","غير معروف","أحيانًا"], a:0},
     {q:"صح أم خطأ: عاصمة السعودية هي جدة.", c:["خطأ","صح","أحيانًا","جزئيًا"], a:0},
@@ -225,13 +222,11 @@
     setTimeout(() => n.remove(), 4000);
   }
 
-  // ============ دالة بدء الدور ============
   window.startAs = function(role) {
     console.log('تم اختيار الدور:', role);
     myRole = role;
     document.getElementById('roleScreen').classList.add('hidden');
     document.getElementById(role + 'Screen').classList.remove('hidden');
-    
     if (role === 'host') {
       initHost();
       const playerUrl = window.location.origin + window.location.pathname + '?role=player';
@@ -241,62 +236,35 @@
     if (role === 'spectator') initSpectator();
   };
 
-  // ============ دالة السؤال التالي - الحل النهائي ============
   window.nextQuestion = async function() {
     console.log('🔵 بدء الانتقال للسؤال التالي...');
-    
     try {
       const gameStateSnap = await get(ref(db, 'gameState'));
       const state = gameStateSnap.val() || {};
-      const round = state.round;
-      
-      if (!round) {
-        alert('يرجى بدء جولة أولاً!');
-        return;
-      }
-      
-      let qIndex = (state.qIndex || -1) + 1;
-      console.log('📊 الجولة:', round, 'السؤال القادم:', qIndex);
-      
-      if (qIndex >= 50) { 
-        alert('انتهت أسئلة هذه الجولة!'); 
-        return; 
-      }
-      
+      const round = parseInt(state.round);
+      if (!round) { alert('يرجى بدء جولة أولاً!'); return; }
+      let qIndex = (parseInt(state.qIndex) || -1) + 1;
+      console.log(' الجولة:', round, 'السؤال القادم:', qIndex);
+      if (qIndex >= 50) { alert('انتهت أسئلة هذه الجولة!'); return; }
       const bank = [null, Q1, Q2, Q3][round];
       const originalQ = bank[qIndex];
-      
-      if (!originalQ) { 
-        alert('لا يوجد سؤال رقم ' + (qIndex + 1));
-        return; 
-      }
-      
+      if (!originalQ) { alert('لا يوجد سؤال رقم ' + (qIndex + 1)); return; }
       console.log('✅ السؤال الأصلي:', originalQ.q);
-      
       const shuffled = shuffleChoices(originalQ);
       console.log('📝 الخيارات بعد الخلط:', shuffled.c);
       console.log('✅ الإجابة الصحيحة:', shuffled.c[shuffled.a]);
-      
-      // ✅ الحل: استخدام set بدلاً من update مع timestamp فريد
       const questionData = {
-        round: round,
-        qIndex: qIndex,
-        q: shuffled.q,
-        choices: shuffled.c,
-        correctIndex: shuffled.a,
-        points: pointsPerRound[round],
-        timestamp: Date.now() + '_' + Math.random().toString(36).substr(2, 9)
+        round: String(round),
+        qIndex: String(qIndex),
+        q: String(shuffled.q),
+        choices: shuffled.c.map(c => String(c)),
+        correctIndex: String(shuffled.a),
+        points: String(pointsPerRound[round]),
+        timestamp: String(Date.now()) + '_' + String(Math.random().toString(36).substr(2, 9))
       };
-      
       console.log('📤 إرسال السؤال لـ Firebase...');
-      
-      // ✅ استخدام set بدلاً من update
       await set(ref(db, 'currentQuestion'), questionData);
-      await update(ref(db, {
-        'gameState/qIndex': qIndex
-      }));
-      
-      // إعادة تعيين حالة اللاعبين
+      await update(ref(db, { 'gameState/qIndex': String(qIndex) }));
       const playersSnap = await get(ref(db, 'players'));
       const players = playersSnap.val() || {};
       for (const [id, p] of Object.entries(players)) {
@@ -304,18 +272,14 @@
           await update(ref(db, 'players/' + id), { answered: false });
         }
       }
-      
       console.log('✅✅✅ تم تحديث السؤال بنجاح!');
-      console.log('السؤال الجديد:', questionData.q);
-      notify(' السؤال ' + (qIndex + 1) + ' من 50');
-      
+      notify('📝 السؤال ' + (qIndex + 1) + ' من 50');
     } catch (error) {
       console.error('❌ خطأ:', error);
       alert('حدث خطأ: ' + error.message);
     }
   };
 
-  // ============ دالة بدء الجولة ============
   window.startRound = async function(n) {
     if (n === 2) {
       const s = await get(ref(db, 'winners'));
@@ -326,10 +290,8 @@
       const w = Object.values(s.val() || {}).filter(x => x.round === 2);
       if (w.length === 0) { alert('يجب إكمال الجولة الثانية أولاً!'); return; }
     }
-    
     const snapshot = await get(ref(db, 'players'));
     const players = snapshot.val() || {};
-    
     for (const [id, p] of Object.entries(players)) {
       if (p.status === 'accepted' || p.status === 'winner') {
         if (n > 1 && p.status !== 'winner') {
@@ -339,23 +301,19 @@
         }
       }
     }
-    
     await update(ref(db, {
-      'gameState/round': n,
-      'gameState/qIndex': -1,
-      'gameState/title': roundTitles[n],
-      'gameState/points': pointsPerRound[n]
+      'gameState/round': String(n),
+      'gameState/qIndex': String(-1),
+      'gameState/title': String(roundTitles[n]),
+      'gameState/points': String(pointsPerRound[n])
     }));
-    
     await remove(ref(db, 'currentQuestion'));
-    
     notify('🎮 بدأت ' + roundTitles[n]);
   };
 
-  // ============ دالة إعادة اللعبة ============
   window.resetGame = async function() {
     if (!confirm('هل تريد إعادة اللعبة بالكامل؟')) return;
-    await set(ref(db, 'gameState'), { round: 0, qIndex: -1 });
+    await set(ref(db, 'gameState'), { round: '0', qIndex: '-1' });
     await set(ref(db, 'players'), {});
     await set(ref(db, 'winners'), {});
     await remove(ref(db, 'currentQuestion'));
@@ -363,18 +321,15 @@
     notify('تم إعادة اللعبة');
   };
 
-  // ============ دالة قبول اللاعب ============
   window.acceptPlayer = function(id, name) {
     update(ref(db, 'players/' + id), { status: 'accepted', score: 0 });
     notify('تم قبول ' + name);
   };
 
-  // ============ دالة رفض اللاعب ============
   window.rejectPlayer = function(id) {
     remove(ref(db, 'players/' + id));
   };
 
-  // ============ دالة حذف لاعب ============
   window.deletePlayer = function(id, name) {
     if (confirm('هل تريد حذف اللاعب "' + name + '"؟')) {
       remove(ref(db, 'players/' + id));
@@ -382,7 +337,6 @@
     }
   };
 
-  // ============ دالة حذف جميع اللاعبين ============
   window.deleteAllPlayers = function() {
     if (confirm('⚠️ هل أنت متأكد من حذف جميع اللاعبين؟')) {
       set(ref(db, 'players'), {});
@@ -390,7 +344,6 @@
     }
   };
 
-  // ============ دالة حذف سجل الفائزين ============
   window.clearWinners = function() {
     if (confirm('⚠️ هل تريد حذف سجل الفائزين؟')) {
       set(ref(db, 'winners'), {});
@@ -398,15 +351,13 @@
     }
   };
 
-  // ============ دالة نسخ الرابط ============
   window.copyPlayerLink = function() {
     const linkInput = document.getElementById('playerLink');
     linkInput.select();
     document.execCommand('copy');
-    notify(' تم نسخ الرابط!');
+    notify('📋 تم نسخ الرابط!');
   };
 
-  // ============ دالة طي القائمة ============
   window.toggleCollapsible = function(id) {
     const content = document.getElementById(id);
     const arrow = document.getElementById(id.replace('List', 'Arrow'));
@@ -414,16 +365,14 @@
     arrow.textContent = content.classList.contains('active') ? '▲' : '▼';
   };
 
-  // ============ دالة إرسال طلب التسجيل ============
   window.sendJoinRequest = function() {
     const name = document.getElementById('playerName').value.trim();
     if (!name) { alert('اكتب اسمك!'); return; }
     myName = name;
     document.getElementById('regStatus').innerHTML = '⏳ في انتظار موافقة المتحكم...';
-    set(ref(db, 'players/' + myId), { name: myName, status: 'pending', score: 0 });
+    set(ref(db, 'players/' + myId), { name: name, status: 'pending', score: 0 });
   };
 
-  // ============ دالة الإجابة على السؤال ============
   window.answerQuestion = function(myIdx, correctIdx, points) {
     if (answeredThisQ) return;
     answeredThisQ = true;
@@ -450,7 +399,6 @@
     }
   };
 
-  // ============ دالة إعلان الفوز ============
   window.declareWinner = function() {
     if (myScore < 3) return;
     push(ref(db, 'winnerRequests'), { id: myId, name: myName, score: myScore, timestamp: Date.now() });
@@ -459,32 +407,27 @@
     document.getElementById('playerMsg').style.color = '#ffd700';
   };
 
-  // ============ تهيئة المتحكم ============
   function initHost() {
     onValue(ref(db, 'players'), (snapshot) => {
       const players = snapshot.val() || {};
       renderHostPlayers(players);
     });
-    
     onValue(ref(db, 'gameState'), (snapshot) => {
       const state = snapshot.val() || {};
       document.getElementById('hostRound').textContent = state.round ? 'الجولة ' + state.round : '-';
-      document.getElementById('hostQNum').textContent = state.qIndex >= 0 ? (state.qIndex + 1) + '/50' : '0/50';
+      document.getElementById('hostQNum').textContent = state.qIndex !== undefined && state.qIndex !== '-1' ? (parseInt(state.qIndex) + 1) + '/50' : '0/50';
     });
-    
-    // ✅ الاستماع لـ currentQuestion
     onValue(ref(db, 'currentQuestion'), (snapshot) => {
       const cq = snapshot.val();
       const cqDiv = document.getElementById('currentQuestion');
-      console.log('📡 استلام سؤال جديد:', cq);
+      console.log(' استلام سؤال جديد:', cq);
       if (cq && cq.q) {
-        cqDiv.innerHTML = '<div class="question-box">السؤال ' + (cq.qIndex + 1) + ': ' + cq.q + '</div>' +
-          '<p style="text-align:center; color:#ffd700; font-size:1.2em;">الإجابة الصحيحة: <strong>' + cq.choices[cq.correctIndex] + '</strong></p>';
+        cqDiv.innerHTML = '<div class="question-box">السؤال ' + (parseInt(cq.qIndex) + 1) + ': ' + cq.q + '</div>' +
+          '<p style="text-align:center; color:#ffd700; font-size:1.2em;">الإجابة الصحيحة: <strong>' + cq.choices[parseInt(cq.correctIndex)] + '</strong></p>';
       } else {
         cqDiv.innerHTML = '';
       }
     });
-    
     onValue(ref(db, 'winners'), (snapshot) => {
       const winners = snapshot.val() || {};
       const arr = Object.values(winners);
@@ -493,7 +436,6 @@
         '<div class="winner-card">🏆 ' + (i+1) + '. ' + w.name + ' - الجولة ' + w.round + ' (' + w.score + ' نقطة)</div>'
       ).join('') : '<p style="opacity:.7; text-align:center;">لا يوجد فائزون بعد</p>';
     });
-    
     onValue(ref(db, 'winnerRequests'), (snapshot) => {
       const requests = snapshot.val();
       if (!requests) return;
@@ -506,21 +448,16 @@
   async function processWinnerRequest(reqId, req) {
     const ps = await get(ref(db, 'players/' + req.id));
     const p = ps.val();
-    if (!p || p.score < 3) {
-      remove(ref(db, 'winnerRequests/' + reqId));
-      return;
-    }
+    if (!p || p.score < 3) { remove(ref(db, 'winnerRequests/' + reqId)); return; }
     const gs = await get(ref(db, 'gameState'));
-    const currentRound = gs.val()?.round || 1;
+    const currentRound = parseInt(gs.val()?.round) || 1;
     const ws = await get(ref(db, 'winners'));
     const currentWinners = Object.values(ws.val() || {}).filter(w => w.round === currentRound);
-    
     if (currentWinners.length >= maxWinners[currentRound]) {
       remove(ref(db, 'winnerRequests/' + reqId));
       update(ref(db, 'players/' + req.id), { status: 'eliminated_round_full' });
       return;
     }
-    
     const newWinnerRef = push(ref(db, 'winners'));
     set(newWinnerRef, { id: req.id, name: req.name, round: currentRound, score: req.score });
     update(ref(db, 'players/' + req.id), { status: 'winner' });
@@ -533,19 +470,10 @@
     let pCount = 0;
     for (const [id, p] of Object.entries(players)) {
       if (p.status === 'pending') {
-        pendingHtml += '<div class="player-item" style="margin:8px 0;">' +
-          '<span>👤 ' + p.name + '</span>' +
-          '<div>' +
-          '<button class="btn btn-small" style="padding:6px 14px; font-size:.9em;" onclick="acceptPlayer(\'' + id + '\',\'' + p.name + '\')">✅</button>' +
-          '<button class="btn btn-red btn-small" style="padding:6px 14px; font-size:.9em;" onclick="rejectPlayer(\'' + id + '\')">❌</button>' +
-          '</div></div>';
+        pendingHtml += '<div class="player-item" style="margin:8px 0;"><span>👤 ' + p.name + '</span><div><button class="btn btn-small" style="padding:6px 14px; font-size:.9em;" onclick="acceptPlayer(\'' + id + '\',\'' + p.name + '\')">✅</button><button class="btn btn-red btn-small" style="padding:6px 14px; font-size:.9em;" onclick="rejectPlayer(\'' + id + '\')">❌</button></div></div>';
       } else if (p.status === 'accepted' || p.status === 'winner') {
         pCount++;
-        registeredHtml += '<div class="player-item">' +
-          '<span>👤 ' + p.name + (p.status==='winner'?' 🏆':'') + '</span>' +
-          '<span class="score-badge">' + (p.score || 0) + '</span>' +
-          '<button class="delete-btn" onclick="deletePlayer(\'' + id + '\',\'' + p.name + '\')" title="حذف">×</button>' +
-          '</div>';
+        registeredHtml += '<div class="player-item"><span>👤 ' + p.name + (p.status==='winner'?' 🏆':'') + '</span><span class="score-badge">' + (p.score || 0) + '</span><button class="delete-btn" onclick="deletePlayer(\'' + id + '\',\'' + p.name + '\')" title="حذف">×</button></div>';
       }
     }
     document.getElementById('pendingList').innerHTML = pendingHtml || '<p style="opacity:.7; text-align:center;">لا توجد طلبات</p>';
@@ -554,7 +482,6 @@
     document.getElementById('playerCountDisplay').textContent = pCount;
   }
 
-  // ============ تهيئة اللاعب ============
   function initPlayer() {
     onValue(ref(db, 'players/' + myId), (snapshot) => {
       const p = snapshot.val();
@@ -570,11 +497,10 @@
         document.getElementById('regStatus').style.color = '#f87171';
       }
     });
-    
     onValue(ref(db, 'gameState'), (snapshot) => {
       const state = snapshot.val() || {};
       document.getElementById('myRound').textContent = state.round ? 'الجولة ' + state.round : '-';
-      if (state.title && state.qIndex === -1) {
+      if (state.title && state.qIndex === '-1') {
         document.getElementById('playerQuestion').textContent = state.title;
         document.getElementById('playerChoices').innerHTML = '';
         document.getElementById('winnerBtn').classList.add('hidden');
@@ -582,13 +508,10 @@
         answeredThisQ = false;
       }
     });
-    
-    // ✅ الاستماع لـ currentQuestion
     onValue(ref(db, 'currentQuestion'), (snapshot) => {
       const cq = snapshot.val();
       console.log('📡 لاعب استلم سؤال:', cq);
       if (!cq || !cq.q) return;
-      
       get(ref(db, 'players/' + myId)).then(ps => {
         const p = ps.val();
         if (p && p.answered) {
@@ -599,7 +522,7 @@
         }
         document.getElementById('playerQuestion').textContent = cq.q;
         document.getElementById('playerChoices').innerHTML = cq.choices.map((c, i) => 
-          '<button class="choice-btn" onclick="answerQuestion(' + i + ', ' + cq.correctIndex + ', ' + cq.points + ')">' + c + '</button>'
+          '<button class="choice-btn" onclick="answerQuestion(' + i + ', ' + parseInt(cq.correctIndex) + ', ' + parseInt(cq.points) + ')">' + c + '</button>'
         ).join('');
         document.getElementById('winnerBtn').classList.add('hidden');
         document.getElementById('playerMsg').textContent = '';
@@ -608,30 +531,25 @@
     });
   }
 
-  // ============ تهيئة المشاهد ============
   function initSpectator() {
     onValue(ref(db, 'gameState'), (snapshot) => {
       const state = snapshot.val() || {};
       document.getElementById('specRound').textContent = state.round ? 'الجولة ' + state.round : '-';
-      document.getElementById('specQNum').textContent = state.qIndex >= 0 ? (state.qIndex + 1) + '/50' : '0/50';
-      if (state.title && state.qIndex === -1) {
+      document.getElementById('specQNum').textContent = state.qIndex !== undefined && state.qIndex !== '-1' ? (parseInt(state.qIndex) + 1) + '/50' : '0/50';
+      if (state.title && state.qIndex === '-1') {
         document.getElementById('specQuestion').textContent = state.title;
         document.getElementById('specChoices').innerHTML = '';
       }
     });
-    
-    // ✅ الاستماع لـ currentQuestion
     onValue(ref(db, 'currentQuestion'), (snapshot) => {
       const cq = snapshot.val();
       console.log('📡 مشاهد استلم سؤال:', cq);
       if (!cq || !cq.q) return;
       document.getElementById('specQuestion').textContent = cq.q;
       document.getElementById('specChoices').innerHTML = cq.choices.map((c, i) => 
-        '<div class="choice-btn" style="cursor:default; ' + (i===cq.correctIndex?'background:linear-gradient(135deg,#28a745,#1e7e34);border-color:#fff;':'') + '">' +
-          c + (i===cq.correctIndex?' ✅':'') + '</div>'
+        '<div class="choice-btn" style="cursor:default; ' + (i===parseInt(cq.correctIndex)?'background:linear-gradient(135deg,#28a745,#1e7e34);border-color:#fff;':'') + '">' + c + (i===parseInt(cq.correctIndex)?' ✅':'') + '</div>'
       ).join('');
     });
-    
     onValue(ref(db, 'players'), (snapshot) => {
       const players = snapshot.val() || {};
       let count = 0;
@@ -639,14 +557,13 @@
       for (const [id, p] of Object.entries(players)) {
         if (p.status === 'accepted' || p.status === 'winner') {
           count++;
-          html += '<div class="player-item"><span>👤 ' + p.name + (p.status==='winner'?' 🏆':'') + '</span><span class="score-badge">' + (p.score || 0) + '</span></div>';
+          html += '<div class="player-item"><span> ' + p.name + (p.status==='winner'?' 🏆':'') + '</span><span class="score-badge">' + (p.score || 0) + '</span></div>';
         }
       }
       document.getElementById('specPlayerCount').textContent = count;
       document.getElementById('specCountDisplay').textContent = count;
       document.getElementById('specScores').innerHTML = html || '<p style="opacity:.7; text-align:center;">لا يوجد لاعبون</p>';
     });
-    
     onValue(ref(db, 'winners'), (snapshot) => {
       const winners = snapshot.val() || {};
       const arr = Object.values(winners);
@@ -656,7 +573,6 @@
     });
   }
 
-  // التحقق من URL parameter
   window.addEventListener('load', () => {
     const urlParams = new URLSearchParams(window.location.search);
     const roleParam = urlParams.get('role');
@@ -669,121 +585,49 @@
 
 <style>
   * { margin:0; padding:0; box-sizing:border-box; font-family:'Segoe UI', Tahoma, sans-serif; }
-  body {
-    min-height:100vh;
-    background: linear-gradient(135deg, #0a3d2e 0%, #065f46 50%, #052e1f 100%);
-    color:#fff; padding:20px;
-  }
+  body { min-height:100vh; background: linear-gradient(135deg, #0a3d2e 0%, #065f46 50%, #052e1f 100%); color:#fff; padding:20px; }
   .container { max-width:1000px; margin:auto; }
-  .logo {
-    text-align:center; padding:20px; margin-bottom:20px;
-    background: rgba(0,0,0,0.4); border-radius:20px;
-    border:3px solid rgba(255,215,0,0.5);
-  }
+  .logo { text-align:center; padding:20px; margin-bottom:20px; background: rgba(0,0,0,0.4); border-radius:20px; border:3px solid rgba(255,215,0,0.5); }
   .logo h1 { font-size:2.5em; color:#ffd700; }
   .logo .slogan { font-size:1.8em; color:#fff; margin-top:10px; font-weight:bold; }
   .logo .flag { font-size:4em; }
   .logo .year { font-size:1.5em; color:#ffd700; margin-top:5px; }
-  .btn {
-    padding:14px 30px; border:none; border-radius:12px; font-size:1.1em; font-weight:bold;
-    cursor:pointer; margin:5px; color:#fff;
-    background: linear-gradient(135deg, #00a651, #006c35);
-    box-shadow:0 4px 15px rgba(0,0,0,0.3);
-  }
+  .btn { padding:14px 30px; border:none; border-radius:12px; font-size:1.1em; font-weight:bold; cursor:pointer; margin:5px; color:#fff; background: linear-gradient(135deg, #00a651, #006c35); box-shadow:0 4px 15px rgba(0,0,0,0.3); }
   .btn:hover { transform:translateY(-2px); }
   .btn-gold { background: linear-gradient(135deg, #ffd700, #daa520); color:#000; }
   .btn-red { background: linear-gradient(135deg, #dc3545, #a71d2a); }
   .btn-blue { background: linear-gradient(135deg, #007bff, #0056b3); }
   .btn-small { padding:8px 16px; font-size:0.9em; }
-  .card {
-    background: rgba(0,0,0,0.5); border-radius:18px; padding:25px;
-    border:2px solid rgba(255,215,0,0.3);
-    margin-bottom:20px;
-  }
+  .card { background: rgba(0,0,0,0.5); border-radius:18px; padding:25px; border:2px solid rgba(255,215,0,0.3); margin-bottom:20px; }
   .card h2 { color:#ffd700; margin-bottom:15px; font-size:1.5em; border-bottom:2px solid #ffd700; padding-bottom:10px; }
-  input[type=text] {
-    width:100%; padding:14px; border-radius:10px; border:2px solid rgba(255,215,0,0.5);
-    background: rgba(255,255,255,0.1); color:#fff; font-size:1.1em; margin:10px 0;
-  }
+  input[type=text] { width:100%; padding:14px; border-radius:10px; border:2px solid rgba(255,215,0,0.5); background: rgba(255,255,255,0.1); color:#fff; font-size:1.1em; margin:10px 0; }
   input[type=text]::placeholder { color:rgba(255,255,255,0.6); }
-  .choice-btn {
-    display:block; width:100%; padding:18px; margin:10px 0;
-    background: linear-gradient(135deg, rgba(255,255,255,0.15), rgba(255,255,255,0.05));
-    border:2px solid rgba(255,215,0,0.4); border-radius:12px;
-    color:#fff; font-size:1.1em; cursor:pointer; text-align:right;
-  }
-  .choice-btn:hover:not(:disabled) {
-    background: linear-gradient(135deg, #00a651, #006c35);
-  }
+  .choice-btn { display:block; width:100%; padding:18px; margin:10px 0; background: linear-gradient(135deg, rgba(255,255,255,0.15), rgba(255,255,255,0.05)); border:2px solid rgba(255,215,0,0.4); border-radius:12px; color:#fff; font-size:1.1em; cursor:pointer; text-align:right; }
+  .choice-btn:hover:not(:disabled) { background: linear-gradient(135deg, #00a651, #006c35); }
   .choice-btn.correct { background: linear-gradient(135deg, #28a745, #1e7e34) !important; border-color:#fff; }
   .choice-btn.wrong { background: linear-gradient(135deg, #dc3545, #a71d2a) !important; border-color:#fff; }
   .player-list { display:grid; grid-template-columns:repeat(auto-fill, minmax(180px, 1fr)); gap:10px; }
-  .player-item {
-    background: rgba(255,255,255,0.1); padding:12px; border-radius:10px;
-    display:flex; justify-content:space-between; align-items:center;
-    border:1px solid rgba(255,255,255,0.2);
-    position: relative;
-  }
-  .player-item .delete-btn {
-    position: absolute; left: 5px; top: 5px;
-    background: #dc3545; color: white; border: none;
-    border-radius: 50%; width: 24px; height: 24px;
-    cursor: pointer;
-  }
+  .player-item { background: rgba(255,255,255,0.1); padding:12px; border-radius:10px; display:flex; justify-content:space-between; align-items:center; border:1px solid rgba(255,255,255,0.2); position: relative; }
+  .player-item .delete-btn { position: absolute; left: 5px; top: 5px; background: #dc3545; color: white; border: none; border-radius: 50%; width: 24px; height: 24px; cursor: pointer; }
   .score-badge { background:#ffd700; color:#000; padding:4px 12px; border-radius:20px; font-weight:bold; }
-  .question-box {
-    background: linear-gradient(135deg, rgba(255,215,0,0.25), rgba(255,215,0,0.05));
-    border:3px solid #ffd700; border-radius:15px; padding:25px; margin:20px 0;
-    font-size:1.4em; text-align:center; font-weight:bold; line-height: 1.6;
-  }
-  .status-bar {
-    display:flex; justify-content:space-around; flex-wrap:wrap; gap:10px;
-    background:rgba(0,0,0,0.6); padding:15px; border-radius:12px; margin-bottom:20px;
-  }
+  .question-box { background: linear-gradient(135deg, rgba(255,215,0,0.25), rgba(255,215,0,0.05)); border:3px solid #ffd700; border-radius:15px; padding:25px; margin:20px 0; font-size:1.4em; text-align:center; font-weight:bold; line-height: 1.6; }
+  .status-bar { display:flex; justify-content:space-around; flex-wrap:wrap; gap:10px; background:rgba(0,0,0,0.6); padding:15px; border-radius:12px; margin-bottom:20px; }
   .status-item { text-align:center; }
   .status-item .label { font-size:.85em; opacity:.8; }
   .status-item .value { font-size:1.6em; font-weight:bold; color:#ffd700; }
-  .winner-card {
-    background: linear-gradient(135deg, #ffd700, #ff8c00);
-    color:#000; padding:15px; border-radius:12px; margin:8px 0;
-    text-align:center; font-size:1.1em; font-weight:bold;
-  }
+  .winner-card { background: linear-gradient(135deg, #ffd700, #ff8c00); color:#000; padding:15px; border-radius:12px; margin:8px 0; text-align:center; font-size:1.1em; font-weight:bold; }
   .hidden { display:none !important; }
   .role-select { text-align:center; padding:40px; }
-  .role-btn {
-    display:block; width:300px; margin:15px auto; padding:25px;
-    background: linear-gradient(135deg, #00a651, #006c35);
-    border-radius:20px; cursor:pointer; font-size:1.3em; font-weight:bold;
-    color:#fff; border:3px solid rgba(255,215,0,0.5);
-  }
+  .role-btn { display:block; width:300px; margin:15px auto; padding:25px; background: linear-gradient(135deg, #00a651, #006c35); border-radius:20px; cursor:pointer; font-size:1.3em; font-weight:bold; color:#fff; border:3px solid rgba(255,215,0,0.5); }
   .role-btn:hover { transform:scale(1.05); border-color:#ffd700; }
-  .notification {
-    position:fixed; top:20px; left:50%; transform:translateX(-50%);
-    background:#ffd700; color:#000; padding:15px 30px; border-radius:10px;
-    font-weight:bold; z-index:1000; animation:slideDown .5s;
-  }
+  .notification { position:fixed; top:20px; left:50%; transform:translateX(-50%); background:#ffd700; color:#000; padding:15px 30px; border-radius:10px; font-weight:bold; z-index:1000; animation:slideDown .5s; }
   @keyframes slideDown { from { top:-100px; } to { top:20px; } }
-  .control-panel {
-    background: rgba(0,0,0,0.4); padding: 15px; border-radius: 10px;
-    margin-bottom: 15px;
-  }
-  .collapsible {
-    background: rgba(255,215,0,0.2);
-    border: 2px solid #ffd700; border-radius: 12px;
-    padding: 15px; cursor: pointer; margin-bottom: 10px;
-  }
-  .collapsible-header {
-    display: flex; justify-content: space-between;
-    align-items: center; font-weight: bold; color: #ffd700;
-  }
+  .control-panel { background: rgba(0,0,0,0.4); padding: 15px; border-radius: 10px; margin-bottom: 15px; }
+  .collapsible { background: rgba(255,215,0,0.2); border: 2px solid #ffd700; border-radius: 12px; padding: 15px; cursor: pointer; margin-bottom: 10px; }
+  .collapsible-header { display: flex; justify-content: space-between; align-items: center; font-weight: bold; color: #ffd700; }
   .collapsible-content { display: none; max-height: 400px; overflow-y: auto; margin-top: 10px; }
   .collapsible-content.active { display: block; }
-  @media(max-width:600px) {
-    .logo h1 { font-size:1.8em; }
-    .logo .slogan { font-size:1.3em; }
-    .question-box { font-size:1.1em; }
-    .role-btn { width:100%; padding:20px; font-size:1.1em; }
-  }
+  @media(max-width:600px) { .logo h1 { font-size:1.8em; } .logo .slogan { font-size:1.3em; } .question-box { font-size:1.1em; } .role-btn { width:100%; padding:20px; font-size:1.1em; } }
 </style>
 </head>
 <body>
@@ -816,37 +660,25 @@
       <div class="status-item"><div class="label">اللاعبون</div><div class="value" id="hostPlayerCount">0</div></div>
       <div class="status-item"><div class="label">الفائزون</div><div class="value" id="hostWinners">0</div></div>
     </div>
-    <div class="card">
-      <h2>📋 طلبات التسجيل</h2>
-      <div id="pendingList"></div>
-    </div>
+    <div class="card"><h2>📋 طلبات التسجيل</h2><div id="pendingList"></div></div>
     <div class="card">
       <h2>🎯 اللاعبون المسجلون</h2>
       <div class="collapsible" onclick="toggleCollapsible('playersList')">
-        <div class="collapsible-header">
-          <span>📂 اضغط لعرض اللاعبين (<span id="playerCountDisplay">0</span>)</span>
-          <span id="playersArrow">▼</span>
-        </div>
+        <div class="collapsible-header"><span> اضغط لعرض اللاعبين (<span id="playerCountDisplay">0</span>)</span><span id="playersArrow">▼</span></div>
       </div>
-      <div id="playersList" class="collapsible-content">
-        <div id="registeredList" class="player-list"></div>
-      </div>
-      <div class="control-panel">
-        <button class="btn btn-red btn-small" onclick="deleteAllPlayers()">🗑️ حذف جميع اللاعبين</button>
-      </div>
+      <div id="playersList" class="collapsible-content"><div id="registeredList" class="player-list"></div></div>
+      <div class="control-panel"><button class="btn btn-red btn-small" onclick="deleteAllPlayers()">🗑️ حذف جميع اللاعبين</button></div>
     </div>
     <div class="card">
       <h2>🏆 سجل الفائزين</h2>
       <div id="winnersLog"></div>
-      <div class="control-panel">
-        <button class="btn btn-red btn-small" onclick="clearWinners()">🗑️ حذف سجل الفائزين</button>
-      </div>
+      <div class="control-panel"><button class="btn btn-red btn-small" onclick="clearWinners()">🗑️ حذف سجل الفائزين</button></div>
     </div>
     <div class="card">
       <h2>🎮 التحكم بالجولة</h2>
       <div id="roundControl">
         <button class="btn btn-gold" onclick="startRound(1)">🟢 بدء الجولة الأولى</button>
-        <button class="btn btn-gold" onclick="startRound(2)"> بدء الجولة الثانية</button>
+        <button class="btn btn-gold" onclick="startRound(2)">🟢 بدء الجولة الثانية</button>
         <button class="btn btn-gold" onclick="startRound(3)">⚡ بدء الجولة الثالثة</button>
         <button class="btn btn-blue" onclick="nextQuestion()">➡️ السؤال التالي</button>
         <button class="btn btn-red" onclick="resetGame()">🔄 إعادة اللعبة</button>
@@ -863,7 +695,7 @@
 
   <div id="playerScreen" class="hidden">
     <div class="logo">
-      <div class="flag">🇸🇦</div>
+      <div class="flag">🇸</div>
       <h1>منطقة اللاعب</h1>
       <div class="slogan">عزّنا بطبعنا</div>
     </div>
@@ -882,7 +714,7 @@
       <div id="playerGameArea" class="card">
         <div class="question-box" id="playerQuestion">في انتظار بدء الجولة...</div>
         <div id="playerChoices"></div>
-        <button class="btn btn-gold hidden" id="winnerBtn" onclick="declareWinner()">🏆 إعلان الفوز بالجولة</button>
+        <button class="btn btn-gold hidden" id="winnerBtn" onclick="declareWinner()"> إعلان الفوز بالجولة</button>
         <div id="playerMsg" style="margin-top:15px; font-size:1.1em; text-align:center;"></div>
       </div>
     </div>
@@ -903,21 +735,13 @@
       <div class="question-box" id="specQuestion">في انتظار بدء اللعبة...</div>
       <div id="specChoices"></div>
     </div>
-    <div class="card">
-      <h2>🏆 سجل الفائزين</h2>
-      <div id="specWinners"></div>
-    </div>
+    <div class="card"><h2>🏆 سجل الفائزين</h2><div id="specWinners"></div></div>
     <div class="card">
       <h2>📊 لوحة النقاط</h2>
       <div class="collapsible" onclick="toggleCollapsible('specPlayersList')">
-        <div class="collapsible-header">
-          <span>📂 عرض اللاعبين (<span id="specCountDisplay">0</span>)</span>
-          <span id="specPlayersArrow">▼</span>
-        </div>
+        <div class="collapsible-header"><span>📂 عرض اللاعبين (<span id="specCountDisplay">0</span>)</span><span id="specPlayersArrow">▼</span></div>
       </div>
-      <div id="specPlayersList" class="collapsible-content">
-        <div id="specScores" class="player-list"></div>
-      </div>
+      <div id="specPlayersList" class="collapsible-content"><div id="specScores" class="player-list"></div></div>
     </div>
   </div>
 </div>
