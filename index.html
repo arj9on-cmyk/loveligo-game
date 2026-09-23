@@ -32,7 +32,7 @@
   let userInteracted = false;
 
   const musicPlaylist = [
-    { id: 'hDuOGrWD2xc', name: '🇸🇦 النشيد الوطني السعودي' },
+    { id: 'hDuOGrWD2xc', name: '🇸 النشيد الوطني السعودي' },
     { id: 'EYJWafsw3RA', name: '🎵 وطني وطني' },
     { id: 'fcMCLPlaCx8', name: '🎵 سلامُ على منْ سارَ في الدربِ رائداً' },
     { id: 'Fw7evTfZg7Q', name: '🎵 بلادي بلادي' }
@@ -41,7 +41,7 @@
   const roundTitles = {
     1: '🟢 الجولة الأولى — اعرف وطنك (نقطة لكل إجابة)',
     2: '🟢 الجولة الثانية — عزّنا بطبعنا (نقطتان لكل إجابة)',
-    3: '⚡ الجولة الثالثة — التحدي الوطني (3 نقاط لكل إجابة)'
+    3: ' الجولة الثالثة — التحدي الوطني (3 نقاط لكل إجابة)'
   };
 
   const maxWinners = { 1: 21, 2: 14, 3: 7 };
@@ -275,7 +275,7 @@
       ytPlayer.playVideo();
       isAudioPlaying = true;
       const btn = document.getElementById('audioPlayBtn');
-      if (btn) btn.textContent = '⏸️';
+      if (btn) btn.textContent = '️';
     }
   }
 
@@ -289,7 +289,7 @@
     } else {
       ytPlayer.playVideo();
       isAudioPlaying = true;
-      document.getElementById('audioPlayBtn').textContent = '⏸️';
+      document.getElementById('audioPlayBtn').textContent = '️';
     }
   };
 
@@ -306,7 +306,7 @@
   window.prevTrack = function() {
     userInteracted = true;
     playPrevTrack();
-    notify('🎵 ' + musicPlaylist[currentTrackIndex].name);
+    notify(' ' + musicPlaylist[currentTrackIndex].name);
   };
 
   window.startAs = function(role) {
@@ -315,7 +315,6 @@
     document.getElementById('roleScreen').classList.add('hidden');
     document.getElementById(role + 'Screen').classList.remove('hidden');
     
-    // إظهار أدوات الموسيقى للمتحكم والمشاهد
     if (role === 'host' || role === 'spectator') {
       document.getElementById('audioControlPanel').classList.remove('hidden');
       setTimeout(tryAutoPlay, 500);
@@ -328,12 +327,12 @@
     }
     if (role === 'player') {
       initPlayer();
-      // محاولة تشغيل الموسيقى تلقائياً للاعب
       setTimeout(tryAutoPlay, 500);
     }
     if (role === 'spectator') initSpectator();
   };
 
+  // ✅ عرض السؤال والإجابة للمتحكم عند الضغط على رقم
   window.selectQuestion = async function(qIndex) {
     try {
       const gameStateSnap = await get(ref(db, 'gameState'));
@@ -439,7 +438,6 @@
     userInteracted = true;
     document.getElementById('regStatus').innerHTML = '⏳ في انتظار موافقة المتحكم...';
     set(ref(db, 'players/' + myId), { name: name, status: 'pending', score: 0 });
-    // محاولة تشغيل الموسيقى بعد التسجيل
     setTimeout(tryAutoPlay, 500);
   };
 
@@ -488,16 +486,26 @@
       const qIdx = state.currentQIndex;
       document.getElementById('hostQNum').textContent = qIdx >= 0 ? (qIdx + 1) + '/50' : '0/50';
       const cqDiv = document.getElementById('currentQuestion');
+      
+      // ✅ عرض السؤال والإجابة الصحيحة باللون الأخضر للمتحكم
       if (qIdx >= 0 && state.round) {
         const bank = [null, Q1, Q2, Q3][state.round];
         const q = bank[qIdx];
         if (q) {
-          const shuffled = shuffleChoices(q);
-          cqDiv.innerHTML = '<div class="question-box" style="border-color: #4ade80;">السؤال ' + (qIdx + 1) + ': ' + shuffled.q + '</div>' +
-            '<p style="text-align:center; color:#4ade80; font-size:1.2em; font-weight:bold;">الإجابة الصحيحة: <strong>' + shuffled.c[shuffled.a] + '</strong></p>';
+          const correctAnswer = q.c[q.a]; // الإجابة الأصلية الصحيحة
+          cqDiv.innerHTML = `
+            <div class="question-box" style="border-color: #4ade80; background: linear-gradient(135deg, rgba(74,222,128,0.2), rgba(74,222,128,0.05));">
+              <div style="font-size: 0.7em; color: #ffd700; margin-bottom: 10px;">📝 السؤال ${qIdx + 1}</div>
+              ${q.q}
+            </div>
+            <div style="text-align:center; padding: 15px; background: linear-gradient(135deg, #28a745, #1e7e34); border-radius: 12px; margin-top: 15px; border: 2px solid #fff;">
+              <div style="font-size: 0.9em; color: #ffd700; margin-bottom: 5px;">✅ الإجابة الصحيحة:</div>
+              <div style="font-size: 1.3em; font-weight: bold; color: #fff;">${correctAnswer}</div>
+            </div>
+          `;
         }
       } else {
-        cqDiv.innerHTML = '<p style="text-align:center; opacity:0.7;">اختر سؤالاً من الشبكة أدناه</p>';
+        cqDiv.innerHTML = '<p style="text-align:center; opacity:0.7; padding: 20px;">👆 اختر سؤالاً من الشبكة أعلاه لعرضه على اللاعبين</p>';
       }
     });
     onValue(ref(db, 'winners'), (snapshot) => {
@@ -505,7 +513,7 @@
       const arr = Object.values(winners);
       document.getElementById('hostWinners').textContent = arr.length;
       document.getElementById('winnersLog').innerHTML = arr.length ? arr.map((w,i) => 
-        '<div class="winner-card"> ' + (i+1) + '. ' + w.name + ' - الجولة ' + w.round + ' (' + w.score + ' نقطة)</div>'
+        '<div class="winner-card">🏆 ' + (i+1) + '. ' + w.name + ' - الجولة ' + w.round + ' (' + w.score + ' نقطة)</div>'
       ).join('') : '<p style="opacity:.7; text-align:center;">لا يوجد فائزون بعد</p>';
     });
     onValue(ref(db, 'winnerRequests'), (snapshot) => {
@@ -534,7 +542,7 @@
     set(newWinnerRef, { id: req.id, name: req.name, round: currentRound, score: req.score });
     update(ref(db, 'players/' + req.id), { status: 'winner' });
     remove(ref(db, 'winnerRequests/' + reqId));
-    notify(' مبروك! ' + req.name + ' فاز في الجولة ' + currentRound);
+    notify('🎉 مبروك! ' + req.name + ' فاز في الجولة ' + currentRound);
   }
 
   function renderHostPlayers(players) {
@@ -542,7 +550,7 @@
     let pCount = 0;
     for (const [id, p] of Object.entries(players)) {
       if (p.status === 'pending') {
-        pendingHtml += '<div class="player-item" style="margin:8px 0;"><span>👤 ' + p.name + '</span><div><button class="btn btn-small" style="padding:6px 14px; font-size:.9em;" onclick="acceptPlayer(\'' + id + '\',\'' + p.name + '\')">✅</button><button class="btn btn-red btn-small" style="padding:6px 14px; font-size:.9em;" onclick="rejectPlayer(\'' + id + '\')">❌</button></div></div>';
+        pendingHtml += '<div class="player-item" style="margin:8px 0;"><span> ' + p.name + '</span><div><button class="btn btn-small" style="padding:6px 14px; font-size:.9em;" onclick="acceptPlayer(\'' + id + '\',\'' + p.name + '\')">✅</button><button class="btn btn-red btn-small" style="padding:6px 14px; font-size:.9em;" onclick="rejectPlayer(\'' + id + '\')">❌</button></div></div>';
       } else if (p.status === 'accepted' || p.status === 'winner') {
         pCount++;
         registeredHtml += '<div class="player-item"><span>👤 ' + p.name + (p.status==='winner'?' 🏆':'') + '</span><span class="score-badge">' + (p.score || 0) + '</span><button class="delete-btn" onclick="deletePlayer(\'' + id + '\',\'' + p.name + '\')" title="حذف">×</button></div>';
@@ -628,7 +636,7 @@
       for (const [id, p] of Object.entries(players)) {
         if (p.status === 'accepted' || p.status === 'winner') {
           count++;
-          html += '<div class="player-item"><span>👤 ' + p.name + (p.status==='winner'?' 🏆':'') + '</span><span class="score-badge">' + (p.score || 0) + '</span></div>';
+          html += '<div class="player-item"><span>👤 ' + p.name + (p.status==='winner'?' ':'') + '</span><span class="score-badge">' + (p.score || 0) + '</span></div>';
         }
       }
       document.getElementById('specPlayerCount').textContent = count;
@@ -780,10 +788,7 @@
     transition: all 0.3s;
     box-shadow: 0 4px 15px rgba(0,0,0,0.3);
   }
-  .role-btn:hover { 
-    transform:scale(1.05); 
-    box-shadow: 0 6px 25px rgba(255,215,0,0.5);
-  }
+  .role-btn:hover { transform:scale(1.05); box-shadow: 0 6px 25px rgba(255,215,0,0.5); }
   
   .notification { 
     position:fixed; top:20px; left:50%; transform:translateX(-50%); 
@@ -792,23 +797,17 @@
   }
   @keyframes slideDown { from { top:-100px; } to { top:20px; } }
   
-  .control-panel { 
-    background: rgba(0,0,0,0.3); padding: 12px; border-radius: 10px; 
-    margin-top: 15px;
-  }
+  .control-panel { background: rgba(0,0,0,0.3); padding: 12px; border-radius: 10px; margin-top: 15px; }
   .collapsible { 
     background: rgba(255,215,0,0.15); 
     border: 2px solid #ffd700; border-radius: 12px; 
     padding: 12px; cursor: pointer; margin-bottom: 10px; 
   }
-  .collapsible-header { 
-    display: flex; justify-content: space-between; 
-    align-items: center; font-weight: bold; color: #ffd700; 
-  }
+  .collapsible-header { display: flex; justify-content: space-between; align-items: center; font-weight: bold; color: #ffd700; }
   .collapsible-content { display: none; max-height: 400px; overflow-y: auto; margin-top: 10px; }
   .collapsible-content.active { display: block; }
   
-  /* أدوات التحكم بالموسيقى - صغيرة وموضوعة فوق السؤال */
+  /* أدوات التحكم بالموسيقى */
   .audio-controls {
     position: relative;
     background: linear-gradient(135deg, rgba(0,0,0,0.85), rgba(20,20,20,0.9)); 
@@ -845,20 +844,28 @@
     cursor: pointer;
     transition: all 0.2s;
   }
-  .audio-controls button:hover {
-    transform: scale(1.15);
-    background: #fff;
+  .audio-controls button:hover { transform: scale(1.15); background: #fff; }
+  .audio-controls input[type=range] { width: 80px; accent-color: #ffd700; }
+  .audio-controls .volume-icon { color: #ffd700; font-size: 1em; }
+  
+  /* صندوق رابط اللاعب */
+  .player-link-box {
+    background: linear-gradient(135deg, rgba(0,123,255,0.2), rgba(0,86,179,0.2));
+    border: 2px solid #007bff;
+    border-radius: 12px;
+    padding: 15px;
+    margin-top: 15px;
   }
-  .audio-controls input[type=range] { 
-    width: 80px; 
-    accent-color: #ffd700;
-  }
-  .audio-controls .volume-icon {
+  .player-link-box input {
+    background: rgba(0,0,0,0.4);
+    border: 2px solid #ffd700;
     color: #ffd700;
-    font-size: 1em;
+    font-size: 0.95em;
+    padding: 12px;
+    border-radius: 8px;
+    margin: 10px 0;
   }
   
-  /* تذييل الحقوق */
   .footer-credit {
     text-align: center;
     padding: 15px;
@@ -867,10 +874,7 @@
     margin-top: 20px;
     border-top: 2px solid rgba(255,215,0,0.3);
   }
-  .footer-credit strong {
-    color: #fff;
-    font-size: 1.1em;
-  }
+  .footer-credit strong { color: #fff; font-size: 1.1em; }
   
   @media(max-width:600px) { 
     .logo h1 { font-size:1.6em; } 
@@ -878,20 +882,13 @@
     .question-box { font-size:1.05em; padding: 15px; } 
     .role-btn { width:100%; padding:18px; font-size:1.05em; }
     .q-btn { padding: 10px; font-size: 0.9em; }
-    .audio-controls { 
-      padding: 8px 12px;
-    }
-    .audio-controls button {
-      width: 28px;
-      height: 28px;
-      font-size: 0.9em;
-    }
+    .audio-controls { padding: 8px 12px; }
+    .audio-controls button { width: 28px; height: 28px; font-size: 0.9em; }
   }
 </style>
 </head>
 <body>
 
-<!-- مشغل YouTube المخفي -->
 <div id="yt-player" style="position:fixed; width:1px; height:1px; opacity:0; pointer-events:none; z-index:-1;"></div>
 
 <div class="container">
@@ -908,15 +905,13 @@
       <button class="role-btn" onclick="startAs('player')">🎮 لاعب</button>
       <button class="role-btn" onclick="startAs('spectator')">👁️ مشاهد</button>
     </div>
-    <div class="footer-credit">
-      تصميم وتطوير: <strong>أوتريد</strong> 🇸🇦
-    </div>
+    <div class="footer-credit">تصميم وتطوير: <strong>أوتريد</strong> 🇸🇦</div>
   </div>
 
   <div id="hostScreen" class="hidden">
     <div class="logo">
       <div class="flag">🇸🇦</div>
-      <h1>لوحة المتحكم</h1>
+      <h1> اليوم الوطني السعودي🇸🇦 96</h1>
       <div class="slogan">عزّنا بطبعنا</div>
     </div>
     <div class="status-bar">
@@ -938,14 +933,13 @@
     </div>
     
     <div class="card">
-      <h2> سجل الفائزين</h2>
+      <h2>🏆 سجل الفائزين</h2>
       <div id="winnersLog"></div>
       <div class="control-panel"><button class="btn btn-red btn-small" onclick="clearWinners()">🗑️ حذف سجل الفائزين</button></div>
     </div>
     
     <div class="card">
       <h2>🎮 التحكم بالجولة</h2>
-      <!-- أزرار الجولات في صفين × 2 -->
       <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px;">
         <button class="btn btn-gold" onclick="startRound(1)">🟢 بدء الجولة الأولى</button>
         <button class="btn btn-gold" onclick="startRound(2)">🟢 بدء الجولة الثانية</button>
@@ -953,29 +947,30 @@
         <button class="btn btn-red" onclick="resetGame()">🔄 إعادة اللعبة</button>
       </div>
       
-      <h3 style="color:#ffd700; margin-bottom:12px; text-align:center;">🎯 اختر السؤال لعرضه على اللاعبين:</h3>
-      <!-- شبكة الأسئلة: 7 أعمدة × 8 صفوف = 56 (آخر 6 معطلة) -->
+      <h3 style="color:#ffd700; margin-bottom:12px; text-align:center;"> اختر السؤال لعرضه على اللاعبين:</h3>
       <div id="questionGrid" style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; margin-bottom: 20px;"></div>
       
+      <!-- ✅ عرض السؤال والإجابة الصحيحة للمتحكم -->
       <div id="currentQuestion" style="margin-top:20px;"></div>
     </div>
     
+    <!-- ✅ صندوق رابط اللاعبين واضح -->
     <div class="card">
       <h2>🔗 رابط اللاعبين</h2>
-      <p style="margin-bottom:10px;">شارك هذا الرابط مع اللاعبين:</p>
-      <input type="text" id="playerLink" readonly style="direction: ltr; text-align: center; font-size: 0.9em;">
-      <button class="btn btn-blue btn-small" onclick="copyPlayerLink()"> نسخ الرابط</button>
+      <div class="player-link-box">
+        <p style="margin-bottom:10px; color:#ffd700; font-weight:bold;">📱 شارك هذا الرابط مع اللاعبين:</p>
+        <input type="text" id="playerLink" readonly style="width:100%; direction: ltr; text-align: center;">
+        <button class="btn btn-blue" onclick="copyPlayerLink()" style="width:100%; margin-top:10px;"> نسخ الرابط</button>
+      </div>
     </div>
     
-    <div class="footer-credit">
-      تصميم وتطوير: <strong>أوتريد</strong> 🇸🇦
-    </div>
+    <div class="footer-credit">تصميم وتطوير: <strong>أوتريد</strong> 🇸🇦</div>
   </div>
 
   <div id="playerScreen" class="hidden">
     <div class="logo">
       <div class="flag">🇸🇦</div>
-      <h1>منطقة اللاعب</h1>
+      <h1> اليوم الوطني السعودي🇸🇦 96</h1>
       <div class="slogan">عزّنا بطبعنا</div>
     </div>
     <div id="registerBox" class="card">
@@ -991,32 +986,28 @@
         <div class="status-item"><div class="label">نقاطك</div><div class="value" id="myScore">0</div></div>
       </div>
       <div id="playerGameArea" class="card">
-        <!-- أدوات الموسيقى المصغرة فوق السؤال -->
         <div class="audio-controls">
           <div class="track-name" id="trackName"> النشيد الوطني السعودي</div>
           <div class="controls-row">
-            <button onclick="prevTrack()" title="السابقة">⏮️</button>
+            <button onclick="prevTrack()" title="السابقة">️</button>
             <button onclick="toggleAudio()" id="audioPlayBtn" title="تشغيل/إيقاف">▶️</button>
             <button onclick="nextTrack()" title="التالية">️</button>
             <span class="volume-icon">🔊</span>
             <input type="range" min="0" max="100" value="50" oninput="setAudioVolume(this.value)" title="مستوى الصوت">
           </div>
         </div>
-        
         <div class="question-box" id="playerQuestion">في انتظار بدء الجولة...</div>
         <div id="playerChoices"></div>
         <button class="btn btn-gold hidden" id="winnerBtn" onclick="declareWinner()">🏆 إعلان الفوز بالجولة</button>
         <div id="playerMsg" style="margin-top:15px; font-size:1.1em; text-align:center;"></div>
       </div>
     </div>
-    <div class="footer-credit">
-      تصميم وتطوير: <strong>أوتريد</strong> 🇸🇦
-    </div>
+    <div class="footer-credit">تصميم وتطوير: <strong>أوتريد</strong> 🇦</div>
   </div>
 
   <div id="spectatorScreen" class="hidden">
     <div class="logo">
-      <div class="flag">🇦</div>
+      <div class="flag">🇸</div>
       <h1>شاشة المشاهدين</h1>
       <div class="slogan">عزّنا بطبعنا</div>
     </div>
@@ -1025,10 +1016,8 @@
       <div class="status-item"><div class="label">السؤال</div><div class="value" id="specQNum">0/50</div></div>
       <div class="status-item"><div class="label">اللاعبون</div><div class="value" id="specPlayerCount">0</div></div>
     </div>
-    
-    <!-- أدوات الموسيقى للمشاهد -->
     <div class="audio-controls">
-      <div class="track-name" id="trackName">🎵 النشيد الوطني السعودي</div>
+      <div class="track-name" id="trackName"> النشيد الوطني السعودي</div>
       <div class="controls-row">
         <button onclick="prevTrack()" title="السابقة">⏮️</button>
         <button onclick="toggleAudio()" id="audioPlayBtn" title="تشغيل/إيقاف">▶️</button>
@@ -1037,7 +1026,6 @@
         <input type="range" min="0" max="100" value="50" oninput="setAudioVolume(this.value)" title="مستوى الصوت">
       </div>
     </div>
-    
     <div class="card">
       <div class="question-box" id="specQuestion">في انتظار بدء اللعبة...</div>
       <div id="specChoices"></div>
@@ -1050,17 +1038,13 @@
       </div>
       <div id="specPlayersList" class="collapsible-content"><div id="specScores" class="player-list"></div></div>
     </div>
-    <div class="footer-credit">
-      تصميم وتطوير: <strong>أوتريد</strong> 🇸
-    </div>
+    <div class="footer-credit">تصميم وتطوير: <strong>أوتريد</strong> 🇸🇦</div>
   </div>
 </div>
 
-<!-- YouTube IFrame API -->
 <script src="https://www.youtube.com/iframe_api"></script>
 
 <script>
-  // إنشاء شبكة الأسئلة (7 أعمدة × 8 صفوف)
   function renderQuestionGrid() {
     const grid = document.getElementById('questionGrid');
     if (!grid) return;
