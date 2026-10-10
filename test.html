@@ -3,106 +3,63 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>اختبار Supabase</title>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<title>اختبار بسيط</title>
 <style>
   body { font-family: Arial; background: #1a1a2e; color: #fff; padding: 20px; text-align: center; }
   .btn { padding: 15px 30px; background: #3ECF8E; color: #fff; border: none; border-radius: 10px; font-size: 16px; cursor: pointer; margin: 10px; }
-  .log { background: #000; padding: 15px; border-radius: 10px; margin: 20px 0; text-align: right; font-family: monospace; min-height: 200px; color: #0f0; }
-  .error { color: #f55; }
-  .success { color: #3ECF8E; }
+  .log { background: #000; padding: 15px; border-radius: 10px; margin: 20px 0; text-align: right; font-family: monospace; min-height: 200px; color: #0f0; font-size: 14px; }
 </style>
 </head>
 <body>
-<h1>🧪 اختبار الاتصال بـ Supabase</h1>
-<p>هذا الاختبار سيتحقق من أن Supabase يعمل بشكل صحيح</p>
+<h1> اختبار JavaScript</h1>
+<p>اضغط الأزرار بالترتيب</p>
 
-<button class="btn" onclick="testConnection()">🔗 اختبار الاتصال</button>
-<button class="btn" onclick="testInsert()">📝 اختبار إضافة رسالة</button>
-<button class="btn" onclick="testRead()"> اختبار قراءة الرسائل</button>
+<button class="btn" onclick="alert('JavaScript يعمل! ✅')">1️ اضغط هنا أولاً</button>
+<br>
+<button class="btn" onclick="testSupabase()">2️⃣ اختبار Supabase</button>
 
-<div id="log" class="log">جاهز للاختبار...</div>
+<div id="log" class="log">جاهز...</div>
 
 <script>
-const SUPABASE_URL = 'https://hyjdtaebojymujjjcylb.supabase.co';
-const SUPABASE_KEY = 'sb_publishable_qpAsyVJDbwhfMyzuLBS06g_hqGz2ilN';
+// التقاط كل الأخطاء
+window.onerror = function(msg, url, line) {
+  document.getElementById('log').innerHTML += `<div style="color:red">❌ خطأ: ${msg}<br>السطر: ${line}</div>`;
+  return true;
+};
 
-let supabase;
-const logDiv = document.getElementById('log');
+document.getElementById('log').innerHTML += '<div>✅ JavaScript يعمل</div>';
 
-function log(msg, type = '') {
-  const time = new Date().toLocaleTimeString();
-  logDiv.innerHTML += `<div class="${type}">[${time}] ${msg}</div>`;
-  logDiv.scrollTop = logDiv.scrollHeight;
-  console.log(msg);
-}
-
-// اختبار 1: هل تم تحميل المكتبة؟
-if (typeof window.supabase === 'undefined') {
-  log('❌ مكتبة Supabase لم تُحمّل!', 'error');
-} else {
-  log('✅ مكتبة Supabase محمّلة', 'success');
-  supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-  log('✅ تم إنشاء Supabase Client', 'success');
-}
-
-async function testConnection() {
-  log('🔄 جاري اختبار الاتصال...');
+async function testSupabase() {
+  const log = document.getElementById('log');
+  log.innerHTML += '<div>🔄 بدء اختبار Supabase...</div>';
+  
   try {
+    // هل المكتبة موجودة؟
+    if (typeof window.supabase === 'undefined') {
+      log.innerHTML += '<div style="color:red">❌ مكتبة Supabase غير محمّلة!</div>';
+      return;
+    }
+    log.innerHTML += '<div style="color:#3ECF8E">✅ المكتبة محمّلة</div>';
+    
+    // إنشاء العميل
+    const supabase = window.supabase.createClient(
+      'https://hyjdtaebojymujjjcylb.supabase.co',
+      'sb_publishable_qpAsyVJDbwhfMyzuLBS06g_hqGz2ilN'
+    );
+    log.innerHTML += '<div style="color:#3ECF8E">✅ تم إنشاء العميل</div>';
+    
+    // اختبار الاتصال
+    log.innerHTML += '<div>🔄 جاري الاتصال...</div>';
     const { data, error } = await supabase.from('messages').select('id').limit(1);
+    
     if (error) {
-      log('❌ خطأ: ' + error.message, 'error');
-      log('الكود: ' + error.code, 'error');
+      log.innerHTML += `<div style="color:red">❌ خطأ: ${error.message}</div>`;
+      log.innerHTML += `<div style="color:orange">الكود: ${error.code}</div>`;
     } else {
-      log('✅ الاتصال ناجح! عدد النتائج: ' + (data?.length || 0), 'success');
+      log.innerHTML += '<div style="color:#3ECF8E">✅ الاتصال ناجح!</div>';
     }
   } catch (e) {
-    log('❌ استثناء: ' + e.message, 'error');
-  }
-}
-
-async function testInsert() {
-  log('🔄 جاري إضافة رسالة اختبار...');
-  try {
-    const { data, error } = await supabase.from('messages').insert([{
-      room: 'test123',
-      type: 'test',
-      user_name: 'اختبار',
-      content: 'رسالة اختبار من ' + new Date().toLocaleTimeString()
-    }]);
-    if (error) {
-      log('❌ خطأ في الإضافة: ' + error.message, 'error');
-      log('الكود: ' + error.code, 'error');
-    } else {
-      log('✅ تم إضافة الرسالة بنجاح!', 'success');
-      log('البيانات: ' + JSON.stringify(data), 'success');
-    }
-  } catch (e) {
-    log('❌ استثناء: ' + e.message, 'error');
-  }
-}
-
-async function testRead() {
-  log('🔄 جاري قراءة الرسائل...');
-  try {
-    const { data, error } = await supabase
-      .from('messages')
-      .select('*')
-      .eq('room', 'test123')
-      .order('created_at', { ascending: false })
-      .limit(5);
-    if (error) {
-      log('❌ خطأ في القراءة: ' + error.message, 'error');
-    } else {
-      log('✅ تم القراءة! عدد الرسائل: ' + (data?.length || 0), 'success');
-      if (data && data.length > 0) {
-        data.forEach(m => {
-          log(`  - ${m.user_name}: ${m.content}`, 'success');
-        });
-      }
-    }
-  } catch (e) {
-    log('❌ استثناء: ' + e.message, 'error');
+    log.innerHTML += `<div style="color:red">❌ استثناء: ${e.message}</div>`;
   }
 }
 </script>
