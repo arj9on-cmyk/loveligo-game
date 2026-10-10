@@ -43,7 +43,6 @@
   .btn-danger { background: linear-gradient(135deg, #eb3349, #f45c43); }
   .btn-warning { background: linear-gradient(135deg, #f093fb, #f5576c); }
   .btn-secondary { background: linear-gradient(135deg, #4a4e69, #22223b); }
-  .btn-gold { background: linear-gradient(135deg, #FFD700, #FFA500); color: #000; }
   .video-container {
     position: relative; width: 100%; padding-top: 56.25%;
     background: #000; border-radius: 15px; overflow: hidden;
@@ -130,15 +129,15 @@
   <div id="roomCard" class="card hidden">
     <div id="roomStatus" class="status connected">✅ متصل بالغرفة</div>
     <div style="display:flex; justify-content:space-between; align-items:center; margin:10px 0; flex-wrap:wrap; gap:10px;">
-      <div><strong> الغرفة:</strong> <span id="currentRoom"></span> <span id="ownerBadge" class="owner-badge hidden">👑 المالك</span></div>
-      <button class="btn btn-danger" onclick="leaveRoom()"> خروج</button>
+      <div><strong>🏠 الغرفة:</strong> <span id="currentRoom"></span> <span id="ownerBadge" class="owner-badge hidden">👑 المالك</span></div>
+      <button class="btn btn-danger" onclick="leaveRoom()">🚪 خروج</button>
     </div>
 
-    <h3 style="margin:15px 0 10px;">🎙️ الغرفة الصوتية</h3>
+    <h3 style="margin:15px 0 10px;">️ الغرفة الصوتية</h3>
     <div class="voice-room" id="voiceRoom"></div>
     <div class="controls">
-      <button class="btn" id="micBtn" onclick="toggleMic()"> تفعيل المايك</button>
-      <button class="btn btn-secondary" onclick="toggleSpeaker()"> السماعة</button>
+      <button class="btn" id="micBtn" onclick="toggleMic()">🎤 تفعيل المايك</button>
+      <button class="btn btn-secondary" onclick="toggleSpeaker()">🔊 السماعة</button>
     </div>
 
     <h3 style="margin:15px 0 10px;">🎬 المشاهدة المشتركة <span id="ownerOnlyLabel" class="owner-badge hidden">للمالك فقط</span></h3>
@@ -152,7 +151,7 @@
       </div>
     </div>
     <div id="videoViewer" class="hidden">
-      <p style="text-align:center; color:#3ECF8E;"> المالك يتحكم بالفيديو...</p>
+      <p style="text-align:center; color:#3ECF8E;">👑 المالك يتحكم بالفيديو...</p>
     </div>
     <div class="video-container" id="videoContainer"></div>
 
@@ -160,22 +159,19 @@
     <div class="chat-box" id="chatBox"></div>
     <div style="display:flex; gap:5px;">
       <input type="text" id="chatMsg" class="input" placeholder="اكتب رسالة..." onkeypress="if(event.key==='Enter')sendChat()">
-      <button class="btn" onclick="sendChat()">📤</button>
+      <button class="btn" onclick="sendChat()"></button>
     </div>
   </div>
 
-  <div class="footer">صُنع بحب  من بغداد إلى الموصل</div>
+  <div class="footer">صُنع بحب 💕 من بغداد إلى الموصل</div>
 </div>
 
 <script>
-// ====== الإعدادات ======
 const SUPABASE_URL = 'https://hyjdtaebojymujjjcylb.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_qpAsyVJDbwhfMyzuLBS06g_hqGz2ilN';
 
-// إنشاء Supabase client
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-// ====== المتغيرات ======
 let currentRoom = null;
 let currentUserId = null;
 let currentUserName = '';
@@ -188,10 +184,9 @@ let isMicOn = false;
 let isSpeakerOn = true;
 let videoElement = null;
 let hlsPlayer = null;
-let usersInRoom = new Map(); // userId -> {name, mic}
-let remoteAudios = new Map(); // userId -> Audio element
+let usersInRoom = new Map();
+let remoteAudios = new Map();
 
-// ====== Debug ======
 function debug(msg) {
   const log = document.getElementById('debugLog');
   if (log) {
@@ -202,7 +197,6 @@ function debug(msg) {
   console.log('[DEBUG]', msg);
 }
 
-// ====== الدخول للغرفة ======
 async function joinRoom() {
   const roomCode = document.getElementById('roomCode').value.trim().toLowerCase();
   const userName = document.getElementById('userName').value.trim();
@@ -221,7 +215,6 @@ async function joinRoom() {
     currentUserName = userName;
     currentRoom = roomCode;
     
-    // 1. إنشاء channel والاشتراك أولاً (مهم جداً!)
     debug('📡 إنشاء channel...');
     channel = sb.channel('room-' + currentRoom, {
       config: {
@@ -230,16 +223,13 @@ async function joinRoom() {
       }
     });
     
-    // الاستماع للرسائل الجديدة
     channel.on('postgres_changes', 
       { event: 'INSERT', schema: 'public', table: 'messages' },
       payload => {
         const msg = payload.new;
         debug('📨 رسالة: ' + msg.type + ' من ' + msg.user_name);
         
-        // تجاهل الرسائل من غرفة أخرى
         if (msg.room !== currentRoom) return;
-        // تجاهل الرسائل القديمة
         if (msg.id <= lastMessageId) return;
         lastMessageId = msg.id;
         
@@ -247,7 +237,6 @@ async function joinRoom() {
       }
     );
     
-    // الاشتراك والانتظار حتى يصبح جاهزاً
     await new Promise((resolve, reject) => {
       channel.subscribe((status) => {
         debug('📡 حالة الاشتراك: ' + status);
@@ -261,7 +250,6 @@ async function joinRoom() {
     
     debug('✅ الاشتراك جاهز!');
     
-    // 2. التحقق من وجود مالك للغرفة
     const { data: existingJoins } = await sb
       .from('messages')
       .select('user_name, created_at')
@@ -270,19 +258,17 @@ async function joinRoom() {
       .order('created_at', { ascending: true })
       .limit(1);
     
-    // إذا لا يوجد أحد، أنا المالك
     isOwner = !existingJoins || existingJoins.length === 0;
     debug('👑 أنا المالك: ' + isOwner);
     
-    // 3. إرسال رسالة الانضمام
+    // ✅ تم إزالة عمود extra
     const { data: insertData, error: insertError } = await sb
       .from('messages')
       .insert([{
         room: roomCode,
         type: 'join',
         user_name: userName,
-        content: currentUserId,
-        extra: JSON.stringify({ isOwner: isOwner })
+        content: currentUserId
       }])
       .select('id')
       .single();
@@ -299,10 +285,8 @@ async function joinRoom() {
       debug('✅ تم الانضمام، ID: ' + insertData.id);
     }
     
-    // 4. بدء المايك
     await initWebRTC();
     
-    // 5. إظهار الغرفة
     document.getElementById('loginCard').classList.add('hidden');
     document.getElementById('roomCard').classList.remove('hidden');
     document.getElementById('currentRoom').textContent = roomCode;
@@ -314,6 +298,7 @@ async function joinRoom() {
     }
     
     updateOwnerUI();
+    updateVoiceRoom();
     addChatMsg('🎉 دخلت الغرفة! شارك الرمز: ' + roomCode, 'sys');
     if (isOwner) {
       addChatMsg('👑 أنت مالك الغرفة! يمكنك التحكم بالفيديو وطرد المستخدمين', 'sys');
@@ -338,7 +323,6 @@ function leaveRoom() {
   location.reload();
 }
 
-// ====== معالجة الرسائل ======
 function handleMessage(msg) {
   debug('📨 معالجة: ' + msg.type);
   
@@ -362,7 +346,7 @@ function handleMessage(msg) {
       break;
     case 'load':
       loadVideoFromUrl(msg.content);
-      addChatMsg('📺 ' + msg.user_name + ' حمّل فيديو', 'sys');
+      addChatMsg(' ' + msg.user_name + ' حمّل فيديو', 'sys');
       break;
     case 'sync':
       syncToTime(parseFloat(msg.content));
@@ -383,7 +367,6 @@ function handleJoin(msg) {
   
   if (userId !== currentUserId) {
     addChatMsg('👋 ' + msg.user_name + ' انضم للغرفة', 'sys');
-    // إذا كنت أملك المايك مفعل، اتصل به
     if (isMicOn) {
       connectToPeer(userId);
     }
@@ -414,11 +397,10 @@ function handleKick(msg) {
       leaveRoom();
     }, 1000);
   } else {
-    addChatMsg(' ' + msg.user_name + ' طرد ' + targetName, 'sys');
+    addChatMsg('🚫 ' + msg.user_name + ' طرد ' + targetName, 'sys');
   }
 }
 
-// ====== WebRTC ======
 async function initWebRTC() {
   try {
     localStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
@@ -439,20 +421,18 @@ async function toggleMic() {
   localStream.getAudioTracks().forEach(t => t.enabled = isMicOn);
   
   const btn = document.getElementById('micBtn');
-  btn.textContent = isMicOn ? ' المايك مفعل' : '🔇 المايك مغلق';
+  btn.textContent = isMicOn ? '🎤 المايك مفعل' : '🔇 المايك مغلق';
   btn.className = isMicOn ? 'btn btn-danger' : 'btn';
   
-  debug('🎤 المايك: ' + (isMicOn ? 'مفعل' : 'مغلق'));
+  debug(' المايك: ' + (isMicOn ? 'مفعل' : 'مغلق'));
   
   if (isMicOn) {
-    // الاتصال بكل المستخدمين في الغرفة
     usersInRoom.forEach((user, userId) => {
       if (userId !== currentUserId) {
         connectToPeer(userId);
       }
     });
   } else {
-    // قطع الاتصالات
     Object.values(peerConnections).forEach(pc => pc.close());
     peerConnections = {};
   }
@@ -481,14 +461,12 @@ function connectToPeer(remoteUserId) {
     ]
   });
   
-  // إضافة الصوت المحلي
   if (localStream) {
     localStream.getTracks().forEach(track => {
       pc.addTrack(track, localStream);
     });
   }
   
-  // استقبال الصوت البعيد
   pc.ontrack = event => {
     debug('🎧 استلام صوت من ' + remoteUserId);
     let audio = remoteAudios.get(remoteUserId);
@@ -502,7 +480,6 @@ function connectToPeer(remoteUserId) {
     audio.srcObject = event.streams[0];
   };
   
-  // ICE candidates
   pc.onicecandidate = event => {
     if (event.candidate) {
       sendSignal(remoteUserId, 'candidate', { candidate: event.candidate });
@@ -511,7 +488,6 @@ function connectToPeer(remoteUserId) {
   
   peerConnections[remoteUserId] = pc;
   
-  // إنشاء offer
   pc.createOffer().then(offer => {
     pc.setLocalDescription(offer);
     sendSignal(remoteUserId, 'offer', { sdp: offer });
@@ -535,7 +511,7 @@ function sendSignal(toUserId, type, data) {
     content: JSON.stringify(signal)
   }]).then(({ error }) => {
     if (error) debug('❌ خطأ في إرسال signal: ' + error.message);
-    else debug(' signal ' + type + ' إلى ' + toUserId);
+    else debug('📤 signal ' + type + ' إلى ' + toUserId);
   });
 }
 
@@ -544,7 +520,7 @@ function handleSignal(msg) {
     const signal = JSON.parse(msg.content);
     if (signal.to !== currentUserId) return;
     
-    debug(' signal: ' + signal.type + ' من ' + signal.from);
+    debug('📥 signal: ' + signal.type + ' من ' + signal.from);
     
     if (signal.type === 'offer') {
       handleOffer(signal);
@@ -560,7 +536,7 @@ function handleSignal(msg) {
 
 async function handleOffer(signal) {
   if (peerConnections[signal.from]) {
-    debug('️ تجاهل offer - اتصال موجود');
+    debug('⚠️ تجاهل offer - اتصال موجود');
     return;
   }
   
@@ -622,12 +598,11 @@ async function handleCandidate(signal) {
     try {
       await pc.addIceCandidate(new RTCIceCandidate(signal.candidate));
     } catch (e) {
-      debug('❌ خطأ في إضافة candidate: ' + e.message);
+      debug(' خطأ في إضافة candidate: ' + e.message);
     }
   }
 }
 
-// ====== الفيديو ======
 function loadVideo() {
   if (!isOwner) {
     alert('⚠️ فقط المالك يمكنه تحميل الفيديو');
@@ -718,7 +693,6 @@ function syncToTime(time) {
   }
 }
 
-// ====== الدردشة ======
 function sendChat() {
   const input = document.getElementById('chatMsg');
   const text = input.value.trim();
@@ -751,7 +725,6 @@ function addChatMsg(text, type, userName = '') {
   chatBox.scrollTop = chatBox.scrollHeight;
 }
 
-// ====== طرد مستخدم ======
 function kickUser(userName) {
   if (!isOwner) {
     alert('⚠️ فقط المالك يمكنه طرد المستخدمين');
@@ -766,11 +739,10 @@ function kickUser(userName) {
     sb.from('messages').insert([{
       room: currentRoom, type: 'kick', user_name: currentUserName, content: userName
     }]);
-    addChatMsg('🚫 تم طرد ' + userName, 'sys');
+    addChatMsg(' تم طرد ' + userName, 'sys');
   }
 }
 
-// ====== تحديث واجهة المستخدمين ======
 function updateVoiceRoom() {
   const voiceRoom = document.getElementById('voiceRoom');
   voiceRoom.innerHTML = '';
@@ -790,14 +762,13 @@ function updateVoiceRoom() {
     }
     
     div.innerHTML = `
-      <div class="avatar">${user.mic ? '' : '🔇'}</div>
+      <div class="avatar">${user.mic ? '🎤' : '🔇'}</div>
       <div class="name">${user.name}${ownerIcon}</div>
       ${kickBtn}
     `;
     voiceRoom.appendChild(div);
   });
   
-  // إضافة نفسي إذا لم أكن في القائمة
   if (!usersInRoom.has(currentUserId)) {
     const div = document.createElement('div');
     div.className = 'voice-user' + (isOwner ? ' owner' : '');
@@ -813,17 +784,11 @@ function updateOwnerUI() {
   const ownerOnlyLabel = document.getElementById('ownerOnlyLabel');
   const videoControls = document.getElementById('videoControls');
   const videoViewer = document.getElementById('videoViewer');
-  const loadBtn = document.getElementById('loadBtn');
-  const playBtn = document.getElementById('playBtn');
-  const pauseBtn = document.getElementById('pauseBtn');
   
   if (isOwner) {
     ownerOnlyLabel.classList.add('hidden');
     videoControls.style.display = 'block';
     videoViewer.classList.add('hidden');
-    if (loadBtn) loadBtn.disabled = false;
-    if (playBtn) playBtn.disabled = false;
-    if (pauseBtn) pauseBtn.disabled = false;
   } else {
     ownerOnlyLabel.classList.remove('hidden');
     videoControls.style.display = 'none';
@@ -831,7 +796,6 @@ function updateOwnerUI() {
   }
 }
 
-// تنظيف عند الخروج
 window.addEventListener('beforeunload', () => {
   if (currentRoom && currentUserName) {
     sb.from('messages').insert([{
