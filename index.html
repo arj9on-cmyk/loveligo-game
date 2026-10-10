@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>🎬 معاً - غرفة المشاهدة</title>
+<title> معاً - غرفة المشاهدة</title>
 <script src="https://unpkg.com/@supabase/supabase-js@2.39.3/dist/umd/supabase.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
 <style>
@@ -111,6 +111,12 @@
     background: #FFD700; color: #000; padding: 2px 8px;
     border-radius: 10px; font-size: 10px; font-weight: bold;
   }
+  .video-notice {
+    text-align: center; padding: 15px;
+    background: rgba(62,207,142,0.2);
+    border-radius: 10px; margin: 10px 0;
+    color: #3ECF8E;
+  }
 </style>
 </head>
 <body>
@@ -129,18 +135,18 @@
   <div id="roomCard" class="card hidden">
     <div id="roomStatus" class="status connected">✅ متصل بالغرفة</div>
     <div style="display:flex; justify-content:space-between; align-items:center; margin:10px 0; flex-wrap:wrap; gap:10px;">
-      <div><strong>🏠 الغرفة:</strong> <span id="currentRoom"></span> <span id="ownerBadge" class="owner-badge hidden">👑 المالك</span></div>
+      <div><strong>🏠 الغرفة:</strong> <span id="currentRoom"></span> <span id="ownerBadge" class="owner-badge hidden"> المالك</span></div>
       <button class="btn btn-danger" onclick="leaveRoom()">🚪 خروج</button>
     </div>
 
-    <h3 style="margin:15px 0 10px;">️ الغرفة الصوتية</h3>
+    <h3 style="margin:15px 0 10px;">🎙️ الغرفة الصوتية</h3>
     <div class="voice-room" id="voiceRoom"></div>
     <div class="controls">
       <button class="btn" id="micBtn" onclick="toggleMic()">🎤 تفعيل المايك</button>
       <button class="btn btn-secondary" onclick="toggleSpeaker()">🔊 السماعة</button>
     </div>
 
-    <h3 style="margin:15px 0 10px;">🎬 المشاهدة المشتركة <span id="ownerOnlyLabel" class="owner-badge hidden">للمالك فقط</span></h3>
+    <h3 style="margin:15px 0 10px;"> المشاهدة المشتركة <span id="ownerOnlyLabel" class="owner-badge hidden">للمالك فقط</span></h3>
     <div id="videoControls">
       <input type="text" id="videoUrl" class="input" placeholder="YouTube / MP4 / M3U8">
       <div class="controls">
@@ -151,7 +157,7 @@
       </div>
     </div>
     <div id="videoViewer" class="hidden">
-      <p style="text-align:center; color:#3ECF8E;">👑 المالك يتحكم بالفيديو...</p>
+      <div class="video-notice">👑 المالك يتحكم بالفيديو...</div>
     </div>
     <div class="video-container" id="videoContainer"></div>
 
@@ -159,7 +165,7 @@
     <div class="chat-box" id="chatBox"></div>
     <div style="display:flex; gap:5px;">
       <input type="text" id="chatMsg" class="input" placeholder="اكتب رسالة..." onkeypress="if(event.key==='Enter')sendChat()">
-      <button class="btn" onclick="sendChat()"></button>
+      <button class="btn" onclick="sendChat()">📤</button>
     </div>
   </div>
 
@@ -186,6 +192,7 @@ let videoElement = null;
 let hlsPlayer = null;
 let usersInRoom = new Map();
 let remoteAudios = new Map();
+let myJoinMessageId = null; // لتتبع رسالة الانضمام الخاصة بي
 
 function debug(msg) {
   const log = document.getElementById('debugLog');
@@ -227,10 +234,13 @@ async function joinRoom() {
       { event: 'INSERT', schema: 'public', table: 'messages' },
       payload => {
         const msg = payload.new;
-        debug('📨 رسالة: ' + msg.type + ' من ' + msg.user_name);
+        debug('📨 رسالة: ' + msg.type + ' من ' + msg.user_name + ' (ID: ' + msg.id + ')');
         
         if (msg.room !== currentRoom) return;
-        if (msg.id <= lastMessageId) return;
+        if (msg.id <= lastMessageId) {
+          debug('⚠️ تجاهل رسالة قديمة: ' + msg.id + ' <= ' + lastMessageId);
+          return;
+        }
         lastMessageId = msg.id;
         
         handleMessage(msg);
@@ -250,18 +260,21 @@ async function joinRoom() {
     
     debug('✅ الاشتراك جاهز!');
     
-    const { data: existingJoins } = await sb
+    // التحقق من وجود مالك حالي (من انضم ولم يخرج)
+    const { data: activeJoins } = await sb
       .from('messages')
-      .select('user_name, created_at')
+      .select('id, user_name, created_at')
       .eq('room', roomCode)
       .eq('type', 'join')
-      .order('created_at', { ascending: true })
-      .limit(1);
+      .order('created_at', { ascending: true });
     
-    isOwner = !existingJoins || existingJoins.length === 0;
+    debug('📊 عدد رسائل الانضمام: ' + (activeJoins?.length || 0));
+    
+    // المالك هو أول من انضم ولا يزال في الغرفة
+    isOwner = !activeJoins || activeJoins.length === 0;
     debug('👑 أنا المالك: ' + isOwner);
     
-    // ✅ تم إزالة عمود extra
+    // إرسال رسالة الانضمام
     const { data: insertData, error: insertError } = await sb
       .from('messages')
       .insert([{
@@ -281,7 +294,8 @@ async function joinRoom() {
     }
     
     if (insertData) {
-      lastMessageId = insertData.id;
+      myJoinMessageId = insertData.id;
+      lastMessageId = Math.max(lastMessageId, insertData.id);
       debug('✅ تم الانضمام، ID: ' + insertData.id);
     }
     
@@ -299,7 +313,7 @@ async function joinRoom() {
     
     updateOwnerUI();
     updateVoiceRoom();
-    addChatMsg('🎉 دخلت الغرفة! شارك الرمز: ' + roomCode, 'sys');
+    addChatMsg(' دخلت الغرفة! شارك الرمز: ' + roomCode, 'sys');
     if (isOwner) {
       addChatMsg('👑 أنت مالك الغرفة! يمكنك التحكم بالفيديو وطرد المستخدمين', 'sys');
     }
@@ -311,7 +325,31 @@ async function joinRoom() {
   }
 }
 
-function leaveRoom() {
+async function leaveRoom() {
+  debug('🚪 الخروج من الغرفة...');
+  
+  // حذف رسالة الانضمام الخاصة بي (لإفساح المجال لمالك جديد)
+  if (myJoinMessageId) {
+    debug('🗑️ حذف رسالة الانضمام: ' + myJoinMessageId);
+    const { error } = await sb
+      .from('messages')
+      .delete()
+      .eq('id', myJoinMessageId);
+    
+    if (error) {
+      debug('⚠️ فشل حذف رسالة الانضمام: ' + error.message);
+    } else {
+      debug('✅ تم حذف رسالة الانضمام');
+    }
+  }
+  
+  // إرسال رسالة مغادرة
+  if (currentRoom && currentUserName) {
+    await sb.from('messages').insert([{
+      room: currentRoom, type: 'leave', user_name: currentUserName, content: currentUserId
+    }]);
+  }
+  
   if (channel) {
     sb.removeChannel(channel);
   }
@@ -345,8 +383,9 @@ function handleMessage(msg) {
       addChatMsg('⏸️ ' + msg.user_name + ' أوقف الفيديو', 'sys');
       break;
     case 'load':
+      debug(' تحميل فيديو: ' + msg.content);
       loadVideoFromUrl(msg.content);
-      addChatMsg(' ' + msg.user_name + ' حمّل فيديو', 'sys');
+      addChatMsg('📺 ' + msg.user_name + ' حمّل فيديو', 'sys');
       break;
     case 'sync':
       syncToTime(parseFloat(msg.content));
@@ -385,7 +424,7 @@ function handleLeave(msg) {
     remoteAudios.delete(userId);
   }
   updateVoiceRoom();
-  addChatMsg('👋 ' + msg.user_name + ' غادر الغرفة', 'sys');
+  addChatMsg(' ' + msg.user_name + ' غادر الغرفة', 'sys');
 }
 
 function handleKick(msg) {
@@ -407,7 +446,7 @@ async function initWebRTC() {
     localStream.getAudioTracks().forEach(t => t.enabled = false);
     debug('✅ المايك جاهز');
   } catch (error) {
-    debug('⚠️ خطأ المايك: ' + error.message);
+    debug('️ خطأ المايك: ' + error.message);
   }
 }
 
@@ -424,7 +463,7 @@ async function toggleMic() {
   btn.textContent = isMicOn ? '🎤 المايك مفعل' : '🔇 المايك مغلق';
   btn.className = isMicOn ? 'btn btn-danger' : 'btn';
   
-  debug(' المايك: ' + (isMicOn ? 'مفعل' : 'مغلق'));
+  debug('🎤 المايك: ' + (isMicOn ? 'مفعل' : 'مغلق'));
   
   if (isMicOn) {
     usersInRoom.forEach((user, userId) => {
@@ -504,6 +543,8 @@ function sendSignal(toUserId, type, data) {
     ...data
   };
   
+  debug(' إرسال signal ' + type + ' إلى ' + toUserId);
+  
   sb.from('messages').insert([{
     room: currentRoom,
     type: 'signal',
@@ -511,7 +552,6 @@ function sendSignal(toUserId, type, data) {
     content: JSON.stringify(signal)
   }]).then(({ error }) => {
     if (error) debug('❌ خطأ في إرسال signal: ' + error.message);
-    else debug('📤 signal ' + type + ' إلى ' + toUserId);
   });
 }
 
@@ -520,7 +560,7 @@ function handleSignal(msg) {
     const signal = JSON.parse(msg.content);
     if (signal.to !== currentUserId) return;
     
-    debug('📥 signal: ' + signal.type + ' من ' + signal.from);
+    debug(' signal: ' + signal.type + ' من ' + signal.from);
     
     if (signal.type === 'offer') {
       handleOffer(signal);
@@ -549,7 +589,7 @@ async function handleOffer(signal) {
   }
   
   pc.ontrack = event => {
-    debug(' استلام صوت من ' + signal.from);
+    debug('🎧 استلام صوت من ' + signal.from);
     let audio = remoteAudios.get(signal.from);
     if (!audio) {
       audio = new Audio();
@@ -598,7 +638,7 @@ async function handleCandidate(signal) {
     try {
       await pc.addIceCandidate(new RTCIceCandidate(signal.candidate));
     } catch (e) {
-      debug(' خطأ في إضافة candidate: ' + e.message);
+      debug('❌ خطأ في إضافة candidate: ' + e.message);
     }
   }
 }
@@ -610,43 +650,65 @@ function loadVideo() {
   }
   
   const url = document.getElementById('videoUrl').value.trim();
-  if (!url) { alert('⚠️ أدخل رابط الفيديو'); return; }
+  if (!url) { alert('️ أدخل رابط الفيديو'); return; }
   
+  debug('📺 تحميل فيديو: ' + url);
   loadVideoFromUrl(url);
   
   sb.from('messages').insert([{
     room: currentRoom, type: 'load', user_name: currentUserName, content: url
-  }]);
+  }]).then(({ error }) => {
+    if (error) debug('❌ خطأ في إرسال load: ' + error.message);
+    else debug('✅ تم إرسال رسالة load');
+  });
 }
 
 function loadVideoFromUrl(url) {
   const container = document.getElementById('videoContainer');
   container.innerHTML = '';
   if (hlsPlayer) { hlsPlayer.destroy(); hlsPlayer = null; }
+  videoElement = null;
+  
+  debug(' تحميل الفيديو: ' + url);
   
   if (url.includes('youtube.com') || url.includes('youtu.be')) {
     const videoId = extractYouTubeId(url);
     if (videoId) {
-      container.innerHTML = `<iframe src="https://www.youtube.com/embed/${videoId}?enablejsapi=1" allow="autoplay; encrypted-media" allowfullscreen></iframe>`;
+      const iframe = document.createElement('iframe');
+      iframe.src = `https://www.youtube.com/embed/${videoId}?enablejsapi=1&autoplay=1`;
+      iframe.allow = 'autoplay; encrypted-media; accelerometer; gyroscope; picture-in-picture';
+      iframe.allowFullscreen = true;
+      iframe.style.cssText = 'position:absolute;top:0;left:0;width:100%;height:100%;border:none;';
+      container.appendChild(iframe);
+      debug('✅ تم تحميل YouTube');
+    } else {
+      debug('❌ لم يتم استخراج YouTube ID');
     }
   } else if (url.includes('.m3u8')) {
     videoElement = document.createElement('video');
     videoElement.controls = true;
+    videoElement.autoplay = true;
     videoElement.style.cssText = 'position:absolute;top:0;left:0;width:100%;height:100%;';
     container.appendChild(videoElement);
     if (Hls.isSupported()) {
       hlsPlayer = new Hls();
       hlsPlayer.loadSource(url);
       hlsPlayer.attachMedia(videoElement);
+      hlsPlayer.on(Hls.Events.MANIFEST_PARSED, () => {
+        videoElement.play().catch(e => debug('⚠️ autoplay failed: ' + e.message));
+      });
     } else if (videoElement.canPlayType('application/vnd.apple.mpegurl')) {
       videoElement.src = url;
     }
+    debug('✅ تم تحميل M3U8');
   } else {
     videoElement = document.createElement('video');
     videoElement.controls = true;
+    videoElement.autoplay = true;
     videoElement.style.cssText = 'position:absolute;top:0;left:0;width:100%;height:100%;';
     videoElement.src = url;
     container.appendChild(videoElement);
+    debug('✅ تم تحميل MP4');
   }
 }
 
@@ -679,13 +741,20 @@ function sendPause() {
 }
 
 function syncVideo() {
-  if (!videoElement) return;
+  if (!videoElement) {
+    alert('⚠️ لا يوجد فيديو للمزامنة');
+    return;
+  }
   sb.from('messages').insert([{
     room: currentRoom, type: 'sync', user_name: currentUserName, content: videoElement.currentTime.toString()
   }]);
 }
 
-function playVideo() { if (videoElement) videoElement.play(); }
+function playVideo() { 
+  if (videoElement) {
+    videoElement.play().catch(e => debug('️ play failed: ' + e.message));
+  }
+}
 function pauseVideo() { if (videoElement) videoElement.pause(); }
 function syncToTime(time) {
   if (videoElement && Math.abs(videoElement.currentTime - time) > 2) {
@@ -704,7 +773,7 @@ function sendChat() {
     if (error) {
       debug('❌ خطأ في إرسال الرسالة: ' + error.message);
     } else if (data && data[0]) {
-      lastMessageId = data[0].id;
+      lastMessageId = Math.max(lastMessageId, data[0].id);
     }
   });
   
@@ -731,7 +800,7 @@ function kickUser(userName) {
     return;
   }
   if (userName === currentUserName) {
-    alert('⚠️ لا يمكنك طرد نفسك!');
+    alert('️ لا يمكنك طرد نفسك!');
     return;
   }
   
@@ -739,7 +808,7 @@ function kickUser(userName) {
     sb.from('messages').insert([{
       room: currentRoom, type: 'kick', user_name: currentUserName, content: userName
     }]);
-    addChatMsg(' تم طرد ' + userName, 'sys');
+    addChatMsg('🚫 تم طرد ' + userName, 'sys');
   }
 }
 
@@ -753,7 +822,7 @@ function updateVoiceRoom() {
     
     let kickBtn = '';
     if (isOwner && userId !== currentUserId) {
-      kickBtn = `<button class="kick-btn" onclick="kickUser('${user.name}')">🚫 طرد</button>`;
+      kickBtn = `<button class="kick-btn" onclick="kickUser('${user.name}')"> طرد</button>`;
     }
     
     let ownerIcon = '';
@@ -762,7 +831,7 @@ function updateVoiceRoom() {
     }
     
     div.innerHTML = `
-      <div class="avatar">${user.mic ? '🎤' : '🔇'}</div>
+      <div class="avatar">${user.mic ? '🎤' : ''}</div>
       <div class="name">${user.name}${ownerIcon}</div>
       ${kickBtn}
     `;
@@ -774,7 +843,7 @@ function updateVoiceRoom() {
     div.className = 'voice-user' + (isOwner ? ' owner' : '');
     div.innerHTML = `
       <div class="avatar">${isMicOn ? '🎤' : '🔇'}</div>
-      <div class="name">${currentUserName}${isOwner ? ' 👑' : ''}</div>
+      <div class="name">${currentUserName}${isOwner ? ' ' : ''}</div>
     `;
     voiceRoom.appendChild(div);
   }
@@ -797,7 +866,8 @@ function updateOwnerUI() {
 }
 
 window.addEventListener('beforeunload', () => {
-  if (currentRoom && currentUserName) {
+  if (currentRoom && currentUserName && myJoinMessageId) {
+    sb.from('messages').delete().eq('id', myJoinMessageId);
     sb.from('messages').insert([{
       room: currentRoom, type: 'leave', user_name: currentUserName, content: currentUserId
     }]);
