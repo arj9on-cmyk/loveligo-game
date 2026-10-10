@@ -1,0 +1,878 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title> معاً - غرفة المشاهدة</title>
+<script src="https://unpkg.com/@supabase/supabase-js@2.39.3/dist/umd/supabase.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, 'Segoe UI', Tahoma, Arial, sans-serif;
+    background: linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%);
+    color: #fff; min-height: 100vh; padding: 10px;
+  }
+  .container { max-width: 1000px; margin: 0 auto; }
+  h1 {
+    text-align: center; font-size: 1.8em; margin: 15px 0;
+    background: linear-gradient(90deg, #3ECF8E, #00B4D8, #f093fb);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .card {
+    background: rgba(255,255,255,0.08);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 20px; padding: 20px; margin: 15px 0;
+  }
+  .input {
+    width: 100%; padding: 14px; border-radius: 12px;
+    border: 2px solid rgba(62,207,142,0.3);
+    background: rgba(0,0,0,0.4); color: #fff;
+    font-size: 15px; margin: 8px 0;
+  }
+  .input:focus { outline: none; border-color: #3ECF8E; }
+  .btn {
+    padding: 12px 20px; border: none; border-radius: 12px;
+    background: linear-gradient(135deg, #3ECF8E, #00B4D8);
+    color: #fff; font-size: 15px; font-weight: bold;
+    cursor: pointer; margin: 5px; transition: all 0.3s;
+  }
+  .btn:active { transform: scale(0.95); }
+  .btn-danger { background: linear-gradient(135deg, #eb3349, #f45c43); }
+  .btn-warning { background: linear-gradient(135deg, #f093fb, #f5576c); }
+  .btn-secondary { background: linear-gradient(135deg, #4a4e69, #22223b); }
+  .video-container {
+    position: relative; width: 100%; padding-top: 56.25%;
+    background: #000; border-radius: 15px; overflow: hidden;
+    margin: 15px 0;
+  }
+  .video-container video, .video-container iframe {
+    position: absolute; top: 0; left: 0;
+    width: 100%; height: 100%; border: none;
+  }
+  .voice-room {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+    gap: 10px; margin: 15px 0;
+  }
+  .voice-user {
+    background: rgba(62,207,142,0.2);
+    border: 2px solid rgba(62,207,142,0.5);
+    border-radius: 15px; padding: 10px;
+    text-align: center; position: relative;
+  }
+  .voice-user.owner {
+    border-color: #FFD700;
+    background: rgba(255,215,0,0.2);
+  }
+  .voice-user .avatar {
+    width: 50px; height: 50px; border-radius: 50%;
+    background: linear-gradient(135deg, #3ECF8E, #00B4D8);
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 8px; font-size: 24px;
+  }
+  .voice-user .name { font-size: 12px; margin-bottom: 5px; }
+  .voice-user .kick-btn {
+    background: #eb3349; color: #fff; border: none;
+    border-radius: 5px; padding: 3px 8px; font-size: 10px;
+    cursor: pointer; margin-top: 5px;
+  }
+  .chat-box {
+    height: 250px; overflow-y: auto; padding: 10px;
+    background: rgba(0,0,0,0.3); border-radius: 12px;
+    margin: 10px 0;
+  }
+  .msg {
+    padding: 8px 12px; margin: 5px 0; border-radius: 12px;
+    max-width: 80%; word-wrap: break-word;
+  }
+  .msg.me { background: linear-gradient(135deg, #3ECF8E, #00B4D8); margin-right: auto; }
+  .msg.other { background: rgba(255,255,255,0.15); margin-left: auto; text-align: left; }
+  .msg.sys { background: rgba(62,207,142,0.2); color: #3ECF8E; text-align: center; margin: 10px auto; }
+  .msg.kick { background: rgba(235,51,73,0.3); color: #eb3349; text-align: center; }
+  .status {
+    text-align: center; padding: 10px; border-radius: 10px;
+    margin: 10px 0; font-size: 14px;
+  }
+  .status.connected { background: rgba(62,207,142,0.2); color: #3ECF8E; }
+  .status.error { background: rgba(235,51,73,0.2); color: #eb3349; }
+  .status.owner { background: rgba(255,215,0,0.2); color: #FFD700; }
+  .controls { display: flex; flex-wrap: wrap; gap: 8px; margin: 10px 0; }
+  .controls .btn { flex: 1; min-width: 100px; }
+  .hidden { display: none !important; }
+  .footer { text-align: center; padding: 20px; color: #3ECF8E; font-size: 12px; }
+  .debug {
+    background: rgba(0,0,0,0.5); padding: 10px; border-radius: 10px;
+    font-family: monospace; font-size: 11px; max-height: 150px;
+    overflow-y: auto; margin-top: 10px; color: #ffc107;
+  }
+  .owner-badge {
+    background: #FFD700; color: #000; padding: 2px 8px;
+    border-radius: 10px; font-size: 10px; font-weight: bold;
+  }
+  .video-notice {
+    text-align: center; padding: 15px;
+    background: rgba(62,207,142,0.2);
+    border-radius: 10px; margin: 10px 0;
+    color: #3ECF8E;
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>💕 معاً - غرفة المشاهدة</h1>
+
+  <div id="loginCard" class="card">
+    <h3>🚪 الدخول للغرفة</h3>
+    <input type="text" id="roomCode" class="input" placeholder="رمز الغرفة (مثل: love123)">
+    <input type="text" id="userName" class="input" placeholder="اسمك" value="أنا">
+    <button class="btn" onclick="joinRoom()" style="width:100%;">🎉 دخول الغرفة</button>
+    <div id="loginStatus" class="status" style="margin-top:10px;"></div>
+    <div id="debugLog" class="debug"></div>
+  </div>
+
+  <div id="roomCard" class="card hidden">
+    <div id="roomStatus" class="status connected">✅ متصل بالغرفة</div>
+    <div style="display:flex; justify-content:space-between; align-items:center; margin:10px 0; flex-wrap:wrap; gap:10px;">
+      <div><strong>🏠 الغرفة:</strong> <span id="currentRoom"></span> <span id="ownerBadge" class="owner-badge hidden"> المالك</span></div>
+      <button class="btn btn-danger" onclick="leaveRoom()">🚪 خروج</button>
+    </div>
+
+    <h3 style="margin:15px 0 10px;">🎙️ الغرفة الصوتية</h3>
+    <div class="voice-room" id="voiceRoom"></div>
+    <div class="controls">
+      <button class="btn" id="micBtn" onclick="toggleMic()">🎤 تفعيل المايك</button>
+      <button class="btn btn-secondary" onclick="toggleSpeaker()">🔊 السماعة</button>
+    </div>
+
+    <h3 style="margin:15px 0 10px;"> المشاهدة المشتركة <span id="ownerOnlyLabel" class="owner-badge hidden">للمالك فقط</span></h3>
+    <div id="videoControls">
+      <input type="text" id="videoUrl" class="input" placeholder="YouTube / MP4 / M3U8">
+      <div class="controls">
+        <button class="btn" id="loadBtn" onclick="loadVideo()"> تحميل</button>
+        <button class="btn" id="playBtn" onclick="sendPlay()">▶️ تشغيل للجميع</button>
+        <button class="btn btn-warning" id="pauseBtn" onclick="sendPause()">⏸️ إيقاف</button>
+        <button class="btn btn-secondary" onclick="syncVideo()">🔄 مزامنة</button>
+      </div>
+    </div>
+    <div id="videoViewer" class="hidden">
+      <div class="video-notice">👑 المالك يتحكم بالفيديو...</div>
+    </div>
+    <div class="video-container" id="videoContainer"></div>
+
+    <h3 style="margin:15px 0 10px;">💬 الدردشة</h3>
+    <div class="chat-box" id="chatBox"></div>
+    <div style="display:flex; gap:5px;">
+      <input type="text" id="chatMsg" class="input" placeholder="اكتب رسالة..." onkeypress="if(event.key==='Enter')sendChat()">
+      <button class="btn" onclick="sendChat()">📤</button>
+    </div>
+  </div>
+
+  <div class="footer">صُنع بحب 💕 من بغداد إلى الموصل</div>
+</div>
+
+<script>
+const SUPABASE_URL = 'https://hyjdtaebojymujjjcylb.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_qpAsyVJDbwhfMyzuLBS06g_hqGz2ilN';
+
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+let currentRoom = null;
+let currentUserId = null;
+let currentUserName = '';
+let isOwner = false;
+let lastMessageId = 0;
+let channel = null;
+let localStream = null;
+let peerConnections = {};
+let isMicOn = false;
+let isSpeakerOn = true;
+let videoElement = null;
+let hlsPlayer = null;
+let usersInRoom = new Map();
+let remoteAudios = new Map();
+let myJoinMessageId = null; // لتتبع رسالة الانضمام الخاصة بي
+
+function debug(msg) {
+  const log = document.getElementById('debugLog');
+  if (log) {
+    const time = new Date().toLocaleTimeString('ar-IQ');
+    log.innerHTML += `[${time}] ${msg}<br>`;
+    log.scrollTop = log.scrollHeight;
+  }
+  console.log('[DEBUG]', msg);
+}
+
+async function joinRoom() {
+  const roomCode = document.getElementById('roomCode').value.trim().toLowerCase();
+  const userName = document.getElementById('userName').value.trim();
+  
+  debug('🔄 محاولة الدخول...');
+  
+  if (!roomCode || !userName) {
+    alert('⚠️ أدخل رمز الغرفة واسمك');
+    return;
+  }
+  
+  try {
+    document.getElementById('loginStatus').textContent = '🔄 جاري الاتصال...';
+    
+    currentUserId = 'user_' + Math.random().toString(36).substr(2, 9);
+    currentUserName = userName;
+    currentRoom = roomCode;
+    
+    debug('📡 إنشاء channel...');
+    channel = sb.channel('room-' + currentRoom, {
+      config: {
+        broadcast: { self: true },
+        presence: { key: currentUserId }
+      }
+    });
+    
+    channel.on('postgres_changes', 
+      { event: 'INSERT', schema: 'public', table: 'messages' },
+      payload => {
+        const msg = payload.new;
+        debug('📨 رسالة: ' + msg.type + ' من ' + msg.user_name + ' (ID: ' + msg.id + ')');
+        
+        if (msg.room !== currentRoom) return;
+        if (msg.id <= lastMessageId) {
+          debug('⚠️ تجاهل رسالة قديمة: ' + msg.id + ' <= ' + lastMessageId);
+          return;
+        }
+        lastMessageId = msg.id;
+        
+        handleMessage(msg);
+      }
+    );
+    
+    await new Promise((resolve, reject) => {
+      channel.subscribe((status) => {
+        debug('📡 حالة الاشتراك: ' + status);
+        if (status === 'SUBSCRIBED') {
+          resolve();
+        } else if (status === 'CHANNEL_ERROR') {
+          reject(new Error('فشل الاشتراك'));
+        }
+      });
+    });
+    
+    debug('✅ الاشتراك جاهز!');
+    
+    // التحقق من وجود مالك حالي (من انضم ولم يخرج)
+    const { data: activeJoins } = await sb
+      .from('messages')
+      .select('id, user_name, created_at')
+      .eq('room', roomCode)
+      .eq('type', 'join')
+      .order('created_at', { ascending: true });
+    
+    debug('📊 عدد رسائل الانضمام: ' + (activeJoins?.length || 0));
+    
+    // المالك هو أول من انضم ولا يزال في الغرفة
+    isOwner = !activeJoins || activeJoins.length === 0;
+    debug('👑 أنا المالك: ' + isOwner);
+    
+    // إرسال رسالة الانضمام
+    const { data: insertData, error: insertError } = await sb
+      .from('messages')
+      .insert([{
+        room: roomCode,
+        type: 'join',
+        user_name: userName,
+        content: currentUserId
+      }])
+      .select('id')
+      .single();
+    
+    if (insertError) {
+      debug('❌ خطأ في الانضمام: ' + insertError.message);
+      document.getElementById('loginStatus').textContent = '❌ خطأ: ' + insertError.message;
+      document.getElementById('loginStatus').className = 'status error';
+      return;
+    }
+    
+    if (insertData) {
+      myJoinMessageId = insertData.id;
+      lastMessageId = Math.max(lastMessageId, insertData.id);
+      debug('✅ تم الانضمام، ID: ' + insertData.id);
+    }
+    
+    await initWebRTC();
+    
+    document.getElementById('loginCard').classList.add('hidden');
+    document.getElementById('roomCard').classList.remove('hidden');
+    document.getElementById('currentRoom').textContent = roomCode;
+    
+    if (isOwner) {
+      document.getElementById('ownerBadge').classList.remove('hidden');
+      document.getElementById('roomStatus').classList.add('owner');
+      document.getElementById('roomStatus').textContent = '👑 متصل كمالك الغرفة';
+    }
+    
+    updateOwnerUI();
+    updateVoiceRoom();
+    addChatMsg(' دخلت الغرفة! شارك الرمز: ' + roomCode, 'sys');
+    if (isOwner) {
+      addChatMsg('👑 أنت مالك الغرفة! يمكنك التحكم بالفيديو وطرد المستخدمين', 'sys');
+    }
+    
+  } catch (error) {
+    debug('❌ خطأ: ' + error.message);
+    document.getElementById('loginStatus').textContent = '❌ خطأ: ' + error.message;
+    document.getElementById('loginStatus').className = 'status error';
+  }
+}
+
+async function leaveRoom() {
+  debug('🚪 الخروج من الغرفة...');
+  
+  // حذف رسالة الانضمام الخاصة بي (لإفساح المجال لمالك جديد)
+  if (myJoinMessageId) {
+    debug('🗑️ حذف رسالة الانضمام: ' + myJoinMessageId);
+    const { error } = await sb
+      .from('messages')
+      .delete()
+      .eq('id', myJoinMessageId);
+    
+    if (error) {
+      debug('⚠️ فشل حذف رسالة الانضمام: ' + error.message);
+    } else {
+      debug('✅ تم حذف رسالة الانضمام');
+    }
+  }
+  
+  // إرسال رسالة مغادرة
+  if (currentRoom && currentUserName) {
+    await sb.from('messages').insert([{
+      room: currentRoom, type: 'leave', user_name: currentUserName, content: currentUserId
+    }]);
+  }
+  
+  if (channel) {
+    sb.removeChannel(channel);
+  }
+  if (localStream) {
+    localStream.getTracks().forEach(t => t.stop());
+  }
+  Object.values(peerConnections).forEach(pc => pc.close());
+  remoteAudios.forEach(audio => audio.remove());
+  location.reload();
+}
+
+function handleMessage(msg) {
+  debug('📨 معالجة: ' + msg.type);
+  
+  switch (msg.type) {
+    case 'join':
+      handleJoin(msg);
+      break;
+    case 'leave':
+      handleLeave(msg);
+      break;
+    case 'chat':
+      addChatMsg(msg.content, 'other', msg.user_name);
+      break;
+    case 'play':
+      playVideo();
+      addChatMsg('▶️ ' + msg.user_name + ' شغّل الفيديو', 'sys');
+      break;
+    case 'pause':
+      pauseVideo();
+      addChatMsg('⏸️ ' + msg.user_name + ' أوقف الفيديو', 'sys');
+      break;
+    case 'load':
+      debug(' تحميل فيديو: ' + msg.content);
+      loadVideoFromUrl(msg.content);
+      addChatMsg('📺 ' + msg.user_name + ' حمّل فيديو', 'sys');
+      break;
+    case 'sync':
+      syncToTime(parseFloat(msg.content));
+      break;
+    case 'kick':
+      handleKick(msg);
+      break;
+    case 'signal':
+      handleSignal(msg);
+      break;
+  }
+}
+
+function handleJoin(msg) {
+  const userId = msg.content;
+  usersInRoom.set(userId, { name: msg.user_name, mic: false });
+  updateVoiceRoom();
+  
+  if (userId !== currentUserId) {
+    addChatMsg('👋 ' + msg.user_name + ' انضم للغرفة', 'sys');
+    if (isMicOn) {
+      connectToPeer(userId);
+    }
+  }
+}
+
+function handleLeave(msg) {
+  const userId = msg.content;
+  usersInRoom.delete(userId);
+  if (peerConnections[userId]) {
+    peerConnections[userId].close();
+    delete peerConnections[userId];
+  }
+  if (remoteAudios.has(userId)) {
+    remoteAudios.get(userId).remove();
+    remoteAudios.delete(userId);
+  }
+  updateVoiceRoom();
+  addChatMsg(' ' + msg.user_name + ' غادر الغرفة', 'sys');
+}
+
+function handleKick(msg) {
+  const targetName = msg.content;
+  if (targetName === currentUserName) {
+    addChatMsg('🚫 تم طردك من الغرفة بواسطة المالك!', 'kick');
+    setTimeout(() => {
+      alert('🚫 تم طردك من الغرفة بواسطة المالك!');
+      leaveRoom();
+    }, 1000);
+  } else {
+    addChatMsg('🚫 ' + msg.user_name + ' طرد ' + targetName, 'sys');
+  }
+}
+
+async function initWebRTC() {
+  try {
+    localStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
+    localStream.getAudioTracks().forEach(t => t.enabled = false);
+    debug('✅ المايك جاهز');
+  } catch (error) {
+    debug('️ خطأ المايك: ' + error.message);
+  }
+}
+
+async function toggleMic() {
+  if (!localStream) {
+    alert('⚠️ المايك غير متاح');
+    return;
+  }
+  
+  isMicOn = !isMicOn;
+  localStream.getAudioTracks().forEach(t => t.enabled = isMicOn);
+  
+  const btn = document.getElementById('micBtn');
+  btn.textContent = isMicOn ? '🎤 المايك مفعل' : '🔇 المايك مغلق';
+  btn.className = isMicOn ? 'btn btn-danger' : 'btn';
+  
+  debug('🎤 المايك: ' + (isMicOn ? 'مفعل' : 'مغلق'));
+  
+  if (isMicOn) {
+    usersInRoom.forEach((user, userId) => {
+      if (userId !== currentUserId) {
+        connectToPeer(userId);
+      }
+    });
+  } else {
+    Object.values(peerConnections).forEach(pc => pc.close());
+    peerConnections = {};
+  }
+}
+
+function toggleSpeaker() {
+  isSpeakerOn = !isSpeakerOn;
+  remoteAudios.forEach(audio => {
+    audio.muted = !isSpeakerOn;
+  });
+  alert(isSpeakerOn ? '🔊 السماعة مفعلة' : '🔇 السماعة مكتومة');
+}
+
+function connectToPeer(remoteUserId) {
+  if (peerConnections[remoteUserId]) {
+    debug('⚠️ اتصال موجود مسبقاً مع ' + remoteUserId);
+    return;
+  }
+  
+  debug('🔗 الاتصال بـ ' + remoteUserId);
+  
+  const pc = new RTCPeerConnection({
+    iceServers: [
+      { urls: 'stun:stun.l.google.com:19302' },
+      { urls: 'stun:stun1.l.google.com:19302' }
+    ]
+  });
+  
+  if (localStream) {
+    localStream.getTracks().forEach(track => {
+      pc.addTrack(track, localStream);
+    });
+  }
+  
+  pc.ontrack = event => {
+    debug('🎧 استلام صوت من ' + remoteUserId);
+    let audio = remoteAudios.get(remoteUserId);
+    if (!audio) {
+      audio = new Audio();
+      audio.autoplay = true;
+      audio.muted = !isSpeakerOn;
+      document.body.appendChild(audio);
+      remoteAudios.set(remoteUserId, audio);
+    }
+    audio.srcObject = event.streams[0];
+  };
+  
+  pc.onicecandidate = event => {
+    if (event.candidate) {
+      sendSignal(remoteUserId, 'candidate', { candidate: event.candidate });
+    }
+  };
+  
+  peerConnections[remoteUserId] = pc;
+  
+  pc.createOffer().then(offer => {
+    pc.setLocalDescription(offer);
+    sendSignal(remoteUserId, 'offer', { sdp: offer });
+  }).catch(err => {
+    debug('❌ خطأ في إنشاء offer: ' + err.message);
+  });
+}
+
+function sendSignal(toUserId, type, data) {
+  const signal = {
+    type: type,
+    from: currentUserId,
+    to: toUserId,
+    ...data
+  };
+  
+  debug(' إرسال signal ' + type + ' إلى ' + toUserId);
+  
+  sb.from('messages').insert([{
+    room: currentRoom,
+    type: 'signal',
+    user_name: currentUserName,
+    content: JSON.stringify(signal)
+  }]).then(({ error }) => {
+    if (error) debug('❌ خطأ في إرسال signal: ' + error.message);
+  });
+}
+
+function handleSignal(msg) {
+  try {
+    const signal = JSON.parse(msg.content);
+    if (signal.to !== currentUserId) return;
+    
+    debug(' signal: ' + signal.type + ' من ' + signal.from);
+    
+    if (signal.type === 'offer') {
+      handleOffer(signal);
+    } else if (signal.type === 'answer') {
+      handleAnswer(signal);
+    } else if (signal.type === 'candidate') {
+      handleCandidate(signal);
+    }
+  } catch (e) {
+    debug('❌ خطأ في parsing signal: ' + e.message);
+  }
+}
+
+async function handleOffer(signal) {
+  if (peerConnections[signal.from]) {
+    debug('⚠️ تجاهل offer - اتصال موجود');
+    return;
+  }
+  
+  const pc = new RTCPeerConnection({
+    iceServers: [{ urls: 'stun:stun.l.google.com:19302' }]
+  });
+  
+  if (localStream) {
+    localStream.getTracks().forEach(track => pc.addTrack(track, localStream));
+  }
+  
+  pc.ontrack = event => {
+    debug('🎧 استلام صوت من ' + signal.from);
+    let audio = remoteAudios.get(signal.from);
+    if (!audio) {
+      audio = new Audio();
+      audio.autoplay = true;
+      audio.muted = !isSpeakerOn;
+      document.body.appendChild(audio);
+      remoteAudios.set(signal.from, audio);
+    }
+    audio.srcObject = event.streams[0];
+  };
+  
+  pc.onicecandidate = event => {
+    if (event.candidate) {
+      sendSignal(signal.from, 'candidate', { candidate: event.candidate });
+    }
+  };
+  
+  peerConnections[signal.from] = pc;
+  
+  try {
+    await pc.setRemoteDescription(new RTCSessionDescription(signal.sdp));
+    const answer = await pc.createAnswer();
+    await pc.setLocalDescription(answer);
+    sendSignal(signal.from, 'answer', { sdp: answer });
+    debug('✅ تم الرد على offer من ' + signal.from);
+  } catch (e) {
+    debug('❌ خطأ في handleOffer: ' + e.message);
+  }
+}
+
+async function handleAnswer(signal) {
+  const pc = peerConnections[signal.from];
+  if (pc) {
+    try {
+      await pc.setRemoteDescription(new RTCSessionDescription(signal.sdp));
+      debug('✅ تم استلام answer من ' + signal.from);
+    } catch (e) {
+      debug('❌ خطأ في handleAnswer: ' + e.message);
+    }
+  }
+}
+
+async function handleCandidate(signal) {
+  const pc = peerConnections[signal.from];
+  if (pc) {
+    try {
+      await pc.addIceCandidate(new RTCIceCandidate(signal.candidate));
+    } catch (e) {
+      debug('❌ خطأ في إضافة candidate: ' + e.message);
+    }
+  }
+}
+
+function loadVideo() {
+  if (!isOwner) {
+    alert('⚠️ فقط المالك يمكنه تحميل الفيديو');
+    return;
+  }
+  
+  const url = document.getElementById('videoUrl').value.trim();
+  if (!url) { alert('️ أدخل رابط الفيديو'); return; }
+  
+  debug('📺 تحميل فيديو: ' + url);
+  loadVideoFromUrl(url);
+  
+  sb.from('messages').insert([{
+    room: currentRoom, type: 'load', user_name: currentUserName, content: url
+  }]).then(({ error }) => {
+    if (error) debug('❌ خطأ في إرسال load: ' + error.message);
+    else debug('✅ تم إرسال رسالة load');
+  });
+}
+
+function loadVideoFromUrl(url) {
+  const container = document.getElementById('videoContainer');
+  container.innerHTML = '';
+  if (hlsPlayer) { hlsPlayer.destroy(); hlsPlayer = null; }
+  videoElement = null;
+  
+  debug(' تحميل الفيديو: ' + url);
+  
+  if (url.includes('youtube.com') || url.includes('youtu.be')) {
+    const videoId = extractYouTubeId(url);
+    if (videoId) {
+      const iframe = document.createElement('iframe');
+      iframe.src = `https://www.youtube.com/embed/${videoId}?enablejsapi=1&autoplay=1`;
+      iframe.allow = 'autoplay; encrypted-media; accelerometer; gyroscope; picture-in-picture';
+      iframe.allowFullscreen = true;
+      iframe.style.cssText = 'position:absolute;top:0;left:0;width:100%;height:100%;border:none;';
+      container.appendChild(iframe);
+      debug('✅ تم تحميل YouTube');
+    } else {
+      debug('❌ لم يتم استخراج YouTube ID');
+    }
+  } else if (url.includes('.m3u8')) {
+    videoElement = document.createElement('video');
+    videoElement.controls = true;
+    videoElement.autoplay = true;
+    videoElement.style.cssText = 'position:absolute;top:0;left:0;width:100%;height:100%;';
+    container.appendChild(videoElement);
+    if (Hls.isSupported()) {
+      hlsPlayer = new Hls();
+      hlsPlayer.loadSource(url);
+      hlsPlayer.attachMedia(videoElement);
+      hlsPlayer.on(Hls.Events.MANIFEST_PARSED, () => {
+        videoElement.play().catch(e => debug('⚠️ autoplay failed: ' + e.message));
+      });
+    } else if (videoElement.canPlayType('application/vnd.apple.mpegurl')) {
+      videoElement.src = url;
+    }
+    debug('✅ تم تحميل M3U8');
+  } else {
+    videoElement = document.createElement('video');
+    videoElement.controls = true;
+    videoElement.autoplay = true;
+    videoElement.style.cssText = 'position:absolute;top:0;left:0;width:100%;height:100%;';
+    videoElement.src = url;
+    container.appendChild(videoElement);
+    debug('✅ تم تحميل MP4');
+  }
+}
+
+function extractYouTubeId(url) {
+  const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+  const match = url.match(regExp);
+  return (match && match[2].length === 11) ? match[2] : null;
+}
+
+function sendPlay() {
+  if (!isOwner) {
+    alert('⚠️ فقط المالك يمكنه تشغيل الفيديو');
+    return;
+  }
+  playVideo();
+  sb.from('messages').insert([{
+    room: currentRoom, type: 'play', user_name: currentUserName, content: 'play'
+  }]);
+}
+
+function sendPause() {
+  if (!isOwner) {
+    alert('⚠️ فقط المالك يمكنه إيقاف الفيديو');
+    return;
+  }
+  pauseVideo();
+  sb.from('messages').insert([{
+    room: currentRoom, type: 'pause', user_name: currentUserName, content: 'pause'
+  }]);
+}
+
+function syncVideo() {
+  if (!videoElement) {
+    alert('⚠️ لا يوجد فيديو للمزامنة');
+    return;
+  }
+  sb.from('messages').insert([{
+    room: currentRoom, type: 'sync', user_name: currentUserName, content: videoElement.currentTime.toString()
+  }]);
+}
+
+function playVideo() { 
+  if (videoElement) {
+    videoElement.play().catch(e => debug('️ play failed: ' + e.message));
+  }
+}
+function pauseVideo() { if (videoElement) videoElement.pause(); }
+function syncToTime(time) {
+  if (videoElement && Math.abs(videoElement.currentTime - time) > 2) {
+    videoElement.currentTime = time;
+  }
+}
+
+function sendChat() {
+  const input = document.getElementById('chatMsg');
+  const text = input.value.trim();
+  if (!text) return;
+  
+  sb.from('messages').insert([{
+    room: currentRoom, type: 'chat', user_name: currentUserName, content: text
+  }]).then(({ data, error }) => {
+    if (error) {
+      debug('❌ خطأ في إرسال الرسالة: ' + error.message);
+    } else if (data && data[0]) {
+      lastMessageId = Math.max(lastMessageId, data[0].id);
+    }
+  });
+  
+  addChatMsg(text, 'me');
+  input.value = '';
+}
+
+function addChatMsg(text, type, userName = '') {
+  const chatBox = document.getElementById('chatBox');
+  const div = document.createElement('div');
+  div.className = 'msg ' + type;
+  if (type === 'other' && userName) {
+    div.innerHTML = `<strong>${userName}:</strong> ${text}`;
+  } else {
+    div.textContent = text;
+  }
+  chatBox.appendChild(div);
+  chatBox.scrollTop = chatBox.scrollHeight;
+}
+
+function kickUser(userName) {
+  if (!isOwner) {
+    alert('⚠️ فقط المالك يمكنه طرد المستخدمين');
+    return;
+  }
+  if (userName === currentUserName) {
+    alert('️ لا يمكنك طرد نفسك!');
+    return;
+  }
+  
+  if (confirm('🚫 هل تريد طرد ' + userName + ' من الغرفة؟')) {
+    sb.from('messages').insert([{
+      room: currentRoom, type: 'kick', user_name: currentUserName, content: userName
+    }]);
+    addChatMsg('🚫 تم طرد ' + userName, 'sys');
+  }
+}
+
+function updateVoiceRoom() {
+  const voiceRoom = document.getElementById('voiceRoom');
+  voiceRoom.innerHTML = '';
+  
+  usersInRoom.forEach((user, userId) => {
+    const div = document.createElement('div');
+    div.className = 'voice-user' + (userId === currentUserId && isOwner ? ' owner' : '');
+    
+    let kickBtn = '';
+    if (isOwner && userId !== currentUserId) {
+      kickBtn = `<button class="kick-btn" onclick="kickUser('${user.name}')"> طرد</button>`;
+    }
+    
+    let ownerIcon = '';
+    if (userId === currentUserId && isOwner) {
+      ownerIcon = ' 👑';
+    }
+    
+    div.innerHTML = `
+      <div class="avatar">${user.mic ? '🎤' : ''}</div>
+      <div class="name">${user.name}${ownerIcon}</div>
+      ${kickBtn}
+    `;
+    voiceRoom.appendChild(div);
+  });
+  
+  if (!usersInRoom.has(currentUserId)) {
+    const div = document.createElement('div');
+    div.className = 'voice-user' + (isOwner ? ' owner' : '');
+    div.innerHTML = `
+      <div class="avatar">${isMicOn ? '🎤' : '🔇'}</div>
+      <div class="name">${currentUserName}${isOwner ? ' ' : ''}</div>
+    `;
+    voiceRoom.appendChild(div);
+  }
+}
+
+function updateOwnerUI() {
+  const ownerOnlyLabel = document.getElementById('ownerOnlyLabel');
+  const videoControls = document.getElementById('videoControls');
+  const videoViewer = document.getElementById('videoViewer');
+  
+  if (isOwner) {
+    ownerOnlyLabel.classList.add('hidden');
+    videoControls.style.display = 'block';
+    videoViewer.classList.add('hidden');
+  } else {
+    ownerOnlyLabel.classList.remove('hidden');
+    videoControls.style.display = 'none';
+    videoViewer.classList.remove('hidden');
+  }
+}
+
+window.addEventListener('beforeunload', () => {
+  if (currentRoom && currentUserName && myJoinMessageId) {
+    sb.from('messages').delete().eq('id', myJoinMessageId);
+    sb.from('messages').insert([{
+      room: currentRoom, type: 'leave', user_name: currentUserName, content: currentUserId
+    }]);
+  }
+});
+</script>
+</body>
+</html>
