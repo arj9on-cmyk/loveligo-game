@@ -1,0 +1,311 @@
+/* style.css */
+@import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700;900&display=swap');
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Tajawal', sans-serif;
+}
+
+body {
+    background: #0a0a0c;
+    color: #ffffff;
+    min-height: 100vh;
+    background-image: 
+        radial-gradient(circle at 10% 20%, rgba(230, 30, 30, 0.15) 0%, transparent 40%),
+        radial-gradient(circle at 90% 80%, rgba(230, 30, 30, 0.1) 0%, transparent 40%);
+    background-attachment: fixed;
+}
+
+/* الهيدر */
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 40px;
+    background: rgba(10, 10, 12, 0.8);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid rgba(230, 30, 30, 0.3);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+.logo {
+    font-size: 28px;
+    font-weight: 900;
+    color: #e61e1e;
+    text-shadow: 0 0 15px rgba(230, 30, 30, 0.6);
+    letter-spacing: 2px;
+}
+
+.logo span {
+    color: #ffffff;
+}
+
+.subtitle {
+    color: #a0a0a0;
+    font-size: 14px;
+}
+
+/* شريط التبويبات (Categories) */
+.tabs {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    padding: 30px 20px;
+    flex-wrap: wrap;
+}
+
+.tab-btn {
+    background: #16161a;
+    color: #a0a0a0;
+    border: 1px solid #2a2a30;
+    padding: 10px 25px;
+    border-radius: 50px;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 16px;
+    transition: all 0.3s ease;
+}
+
+.tab-btn:hover, .tab-btn.active {
+    background: #e61e1e;
+    color: #fff;
+    border-color: #e61e1e;
+    box-shadow: 0 0 20px rgba(230, 30, 30, 0.4);
+    transform: translateY(-2px);
+}
+
+/* شبكة الملفات */
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 25px;
+}
+
+/* كرت الملف */
+.card {
+    background: rgba(22, 22, 26, 0.7);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 20px;
+    padding: 25px;
+    display: flex;
+    flex-direction: column;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    border-color: rgba(230, 30, 30, 0.5);
+    box-shadow: 0 10px 30px rgba(230, 30, 30, 0.1);
+}
+
+.card-icon {
+    font-size: 40px;
+    margin-bottom: 15px;
+}
+
+.card-title {
+    font-size: 20px;
+    font-weight: 700;
+    margin-bottom: 10px;
+    color: #fff;
+}
+
+.card-desc {
+    font-size: 14px;
+    color: #a0a0a0;
+    line-height: 1.6;
+    margin-bottom: 20px;
+    flex-grow: 1;
+}
+
+.card-badge {
+    position: absolute;
+    top: 15px;
+    left: 15px;
+    background: #e61e1e;
+    color: #fff;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: bold;
+}
+
+.btn-download {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    background: #e61e1e;
+    color: #fff;
+    text-decoration: none;
+    padding: 12px;
+    border-radius: 12px;
+    font-weight: bold;
+    font-size: 16px;
+    transition: background 0.3s ease;
+    border: none;
+    cursor: pointer;
+}
+
+.btn-download:hover {
+    background: #ff3333;
+}
+
+/* لوحة التحكم (Admin) */
+.admin-container {
+    max-width: 800px;
+    margin: 40px auto;
+    background: rgba(22, 22, 26, 0.9);
+    padding: 40px;
+    border-radius: 20px;
+    border: 1px solid rgba(230, 30, 30, 0.2);
+}
+
+.admin-title {
+    text-align: center;
+    color: #e61e1e;
+    margin-bottom: 30px;
+    font-size: 28px;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    color: #a0a0a0;
+    font-size: 14px;
+}
+
+.form-group input, .form-group textarea, .form-group select {
+    width: 100%;
+    padding: 12px 15px;
+    background: #0a0a0c;
+    border: 1px solid #2a2a30;
+    border-radius: 10px;
+    color: #fff;
+    font-size: 16px;
+    font-family: inherit;
+}
+
+.form-group input:focus, .form-group textarea:focus, .form-group select:focus {
+    outline: none;
+    border-color: #e61e1e;
+}
+
+.btn-save {
+    width: 100%;
+    padding: 15px;
+    background: #e61e1e;
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    font-size: 18px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.btn-save:hover {
+    background: #ff3333;
+}
+
+/* قائمة الملفات في لوحة التحكم */
+.admin-list {
+    margin-top: 40px;
+}
+
+.admin-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #0a0a0c;
+    padding: 15px 20px;
+    border-radius: 10px;
+    margin-bottom: 10px;
+    border: 1px solid #2a2a30;
+}
+
+.admin-item-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.admin-item-title {
+    font-weight: bold;
+    color: #fff;
+}
+
+.admin-item-type {
+    font-size: 12px;
+    color: #a0a0a0;
+}
+
+.btn-delete {
+    background: #333;
+    color: #e61e1e;
+    border: 1px solid #e61e1e;
+    padding: 8px 15px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: 0.3s;
+}
+
+.btn-delete:hover {
+    background: #e61e1e;
+    color: #fff;
+}
+
+/* شاشة تسجيل الدخول للأدمن */
+.login-box {
+    max-width: 400px;
+    margin: 150px auto;
+    background: rgba(22, 22, 26, 0.9);
+    padding: 40px;
+    border-radius: 20px;
+    text-align: center;
+    border: 1px solid rgba(230, 30, 30, 0.2);
+}
+
+.login-box h2 {
+    color: #e61e1e;
+    margin-bottom: 20px;
+}
+
+.error-msg {
+    color: #e61e1e;
+    margin-top: 10px;
+    display: none;
+}
+
+.hidden { display: none !important; }
+
+/* حالة فارغة */
+.empty-state {
+    text-align: center;
+    padding: 50px;
+    color: #a0a0a0;
+    grid-column: 1 / -1;
+}
+
+.empty-state i {
+    font-size: 50px;
+    color: #2a2a30;
+    margin-bottom: 20px;
+}

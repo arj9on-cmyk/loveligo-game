@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Red1 | متجر التطبيقات</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- أيقونات -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+
+    <header>
+        <div class="logo">RED<span>1</span> 🔴</div>
+        <div class="subtitle">أفضل التطبيقات والألعاب</div>
+    </header>
+
+    <div class="tabs">
+        <button class="tab-btn active" onclick="filterCards('all', this)">الكل</button>
+        <button class="tab-btn" onclick="filterCards('apk', this)">تطبيقات APK</button>
+        <button class="tab-btn" onclick="filterCards('zip', this)">ملفات ZIP</button>
+        <button class="tab-btn" onclick="filterCards('sh', this)">سكربتات SH</button>
+    </div>
+
+    <div class="container">
+        <div class="grid" id="cards-container">
+            <!-- سيتم تحميل الكروت هنا -->
+            <div class="empty-state" id="loading">
+                <i class="fas fa-spinner fa-spin"></i>
+                <p>جاري تحميل الملفات...</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ⚠️ إعدادات JSONBin
+        const BIN_ID = "6accf410ac6210605a2adcf9"; // نفس Bin الخاص بك
+        const API_KEY = "$2a$10$6ueSPs.Rth52Seli997/TOuqpEjszXEf1Du6g.bTwyWQhYC/afy/u";
+
+        async function fetchData() {
+            try {
+                const res = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}/latest`, {
+                    headers: { "X-Master-Key": API_KEY }
+                });
+                const data = await res.json();
+                
+                // نبحث عن القسم الخاص بالموقع (سنضيفه لاحقاً)
+                const files = data.record.site_files || [];
+                renderCards(files);
+            } catch (e) {
+                document.getElementById('cards-container').innerHTML = `<div class="empty-state"><p>خطأ في الاتصال بالسيرفر</p></div>`;
+            }
+        }
+
+        function renderCards(files) {
+            const container = document.getElementById('cards-container');
+            if (files.length === 0) {
+                container.innerHTML = `<div class="empty-state"><p>لا توجد ملفات مضافة حالياً.</p></div>`;
+                return;
+            }
+            
+            container.innerHTML = files.map(file => `
+                <div class="card" data-type="${file.type}">
+                    <span class="card-badge">${file.type.toUpperCase()}</span>
+                    <div class="card-icon">
+                        <i class="fas ${file.type === 'apk' ? 'fa-android' : file.type === 'zip' ? 'fa-file-archive' : 'fa-terminal'}"></i>
+                    </div>
+                    <div class="card-title">${file.name}</div>
+                    <div class="card-desc">${file.desc}</div>
+                    <a href="${file.url}" target="_blank" class="btn-download">
+                        <i class="fas fa-download"></i> تحميل الآن
+                    </a>
+                </div>
+            `).join('');
+        }
+
+        function filterCards(type, btn) {
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            
+            const cards = document.querySelectorAll('.card');
+            cards.forEach(card => {
+                if (type === 'all' || card.dataset.type === type) {
+                    card.style.display = 'flex';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        }
+
+        // تشغيل
+        fetchData();
+    </script>
+</body>
+</html>
