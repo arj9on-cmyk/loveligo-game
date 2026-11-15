@@ -1,342 +1,1126 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="theme-color" content="#090b12">
-  <meta name="description" content="ريد وان RED1 GAMES — اكتشف ألعاب المتصفح، وابحث عنها، والعب مباشرة من هاتفك أو حاسوبك.">
-  <meta property="og:type" content="website">
-  <meta property="og:title" content="ريد وان 🔴 RED1 GAMES">
-  <meta property="og:description" content="عالمك للألعاب يبدأ من هنا. اكتشف ألعابًا ممتعة والعب مباشرة.">
-  <title>ريد وان 🔴 RED1 GAMES | مكتبة الألعاب</title>
-  <style>
-    :root {
-      --bg: #090b12; --panel: #111522; --panel2: #171c2b; --line: #282e40;
-      --text: #f5f7fb; --muted: #a8b0c3; --red: #ff3348; --red2: #c8102e;
-      --glow: rgba(255,51,72,.22); --radius: 20px;
-    }
-    * { box-sizing: border-box; }
-    html { scroll-behavior: smooth; }
-    body {
-      margin: 0; background: radial-gradient(ellipse at 85% 0%, rgba(255,51,72,.12), transparent 34%),
-      radial-gradient(ellipse at 0% 35%, rgba(74,90,180,.10), transparent 30%), var(--bg);
-      color: var(--text); font-family: Tahoma, Arial, sans-serif; line-height: 1.7;
-    }
-    a { color: inherit; text-decoration: none; }
-    button, input, select { font: inherit; }
-    button, a, input, select { -webkit-tap-highlight-color: transparent; }
-    .container { width: min(1160px, calc(100% - 32px)); margin-inline: auto; }
-    .topbar {
-      position: sticky; top: 0; z-index: 20; backdrop-filter: blur(16px);
-      background: rgba(9,11,18,.84); border-bottom: 1px solid rgba(255,255,255,.07);
-    }
-    .nav { min-height: 76px; display: flex; align-items: center; justify-content: space-between; gap: 20px; }
-    .brand { display: inline-flex; align-items: center; gap: 11px; min-width: 0; }
-    .brand-mark {
-      width: 45px; height: 45px; display: grid; place-items: center; border-radius: 14px;
-      background: linear-gradient(145deg, #ff5263, #bf102a); box-shadow: 0 8px 28px var(--glow);
-      font-size: 22px; flex-shrink: 0;
-    }
-    .brand-name { display: flex; flex-direction: column; line-height: 1.2; }
-    .brand-name strong { font-size: 18px; letter-spacing: -.4px; }
-    .brand-name small { color: var(--muted); font-size: 11px; letter-spacing: 2px; direction: ltr; text-align: right; }
-    .navlinks { display: flex; gap: 24px; align-items: center; color: var(--muted); font-size: 14px; }
-    .navlinks a:hover { color: white; }
-    .nav-cta, .primary-btn {
-      border: 0; border-radius: 12px; padding: 11px 17px; color: white; cursor: pointer;
-      background: linear-gradient(135deg, var(--red), var(--red2)); font-weight: 700;
-      box-shadow: 0 8px 24px var(--glow); transition: transform .2s, filter .2s;
-    }
-    .nav-cta:hover, .primary-btn:hover { transform: translateY(-2px); filter: brightness(1.08); }
-    .hero { padding: 76px 0 52px; }
-    .hero-grid { display: grid; grid-template-columns: 1.2fr .8fr; align-items: center; gap: 45px; }
-    .eyebrow {
-      display: inline-flex; align-items: center; gap: 8px; border: 1px solid rgba(255,51,72,.3);
-      color: #ff8995; background: rgba(255,51,72,.08); border-radius: 99px; padding: 6px 12px;
-      font-size: 12px; margin-bottom: 18px;
-    }
-    .pulse { width: 7px; height: 7px; border-radius: 50%; background: var(--red); box-shadow: 0 0 12px var(--red); }
-    h1 { margin: 0; font-size: clamp(34px, 5.2vw, 60px); line-height: 1.25; letter-spacing: -1.4px; }
-    h1 span { color: var(--red); }
-    .hero p { color: var(--muted); max-width: 620px; font-size: 17px; margin: 20px 0 26px; }
-    .hero-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
-    .secondary-btn {
-      border: 1px solid var(--line); border-radius: 12px; padding: 10px 17px; color: var(--text);
-      background: rgba(255,255,255,.03); display: inline-flex; align-items: center; justify-content: center;
-    }
-    .secondary-btn:hover { background: var(--panel2); }
-    .hero-art {
-      position: relative; min-height: 300px; border: 1px solid rgba(255,255,255,.09); border-radius: 30px;
-      background: linear-gradient(145deg, rgba(255,51,72,.13), rgba(20,25,42,.86) 55%, rgba(65,74,130,.13));
-      display: grid; place-items: center; overflow: hidden;
-    }
-    .hero-art:before, .hero-art:after { content: ""; position: absolute; border: 1px solid rgba(255,255,255,.08); border-radius: 50%; }
-    .hero-art:before { width: 280px; height: 280px; }
-    .hero-art:after { width: 220px; height: 220px; }
-    .orb { position: relative; z-index: 1; width: 138px; height: 138px; border-radius: 36px; transform: rotate(-8deg);
-      display: grid; place-items: center; background: linear-gradient(145deg, #ff5263, #bd1029);
-      box-shadow: 0 20px 70px rgba(255,51,72,.35); font-size: 70px; }
-    .float-label { position: absolute; z-index: 2; border: 1px solid rgba(255,255,255,.1); background: rgba(13,16,27,.86);
-      padding: 9px 13px; border-radius: 12px; font-size: 12px; color: #e7eaf2; }
-    .label-one { top: 24px; right: 22px; } .label-two { bottom: 28px; left: 22px; }
-    .stats { display: grid; grid-template-columns: repeat(3,1fr); gap: 12px; margin-top: 38px; max-width: 540px; }
-    .stat { border-inline-start: 2px solid var(--red); padding-inline-start: 13px; }
-    .stat strong { display: block; font-size: 20px; } .stat span { color: var(--muted); font-size: 12px; }
-    .section { padding: 34px 0 52px; }
-    .section-head { display: flex; align-items: end; justify-content: space-between; gap: 18px; margin-bottom: 22px; }
-    .section-head h2 { margin: 0; font-size: clamp(23px, 3vw, 31px); }
-    .section-head p { color: var(--muted); margin: 5px 0 0; font-size: 14px; }
-    .search-row { display: flex; gap: 10px; width: min(520px, 100%); }
-    .search-wrap { position: relative; flex: 1; }
-    .search-wrap span { position: absolute; right: 14px; top: 50%; transform: translateY(-50%); color: var(--muted); }
-    .search-wrap input {
-      width: 100%; min-width: 0; background: var(--panel); color: var(--text); border: 1px solid var(--line);
-      border-radius: 13px; padding: 12px 42px 12px 14px; outline: none;
-    }
-    .search-wrap input:focus { border-color: rgba(255,51,72,.7); box-shadow: 0 0 0 3px rgba(255,51,72,.08); }
-    .filters { display: flex; flex-wrap: wrap; gap: 8px; margin: 20px 0 23px; }
-    .filter {
-      border: 1px solid var(--line); border-radius: 99px; padding: 8px 14px; background: transparent;
-      color: var(--muted); cursor: pointer; font-size: 13px;
-    }
-    .filter.active, .filter:hover { background: rgba(255,51,72,.12); border-color: rgba(255,51,72,.45); color: white; }
-    .games-grid { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 18px; }
-    .game-card {
-      background: linear-gradient(155deg, rgba(24,29,45,.96), rgba(15,18,29,.96)); border: 1px solid var(--line);
-      border-radius: var(--radius); overflow: hidden; transition: transform .22s, border-color .22s, box-shadow .22s;
-    }
-    .game-card:hover { transform: translateY(-5px); border-color: rgba(255,51,72,.45); box-shadow: 0 18px 42px rgba(0,0,0,.2); }
-    .game-cover { min-height: 160px; display: grid; place-items: center; position: relative; overflow: hidden; background: #171c2c; }
-    .game-cover:before { content: ""; position: absolute; width: 190px; height: 190px; border-radius: 50%; border: 1px solid rgba(255,255,255,.1); }
-    .game-cover.xo { background: radial-gradient(circle at 50% 50%, rgba(80,119,255,.22), transparent 65%), #151a2a; }
-    .game-cover.memory { background: radial-gradient(circle at 50% 50%, rgba(255,51,72,.2), transparent 65%), #1c1728; }
-    .game-icon { position: relative; z-index: 1; font-size: 62px; filter: drop-shadow(0 8px 20px rgba(0,0,0,.3)); }
-    .game-tag { position: absolute; top: 12px; right: 12px; border: 1px solid rgba(255,255,255,.12); background: rgba(9,11,18,.65); border-radius: 99px; padding: 4px 9px; font-size: 11px; color: #d9deeb; }
-    .game-info { padding: 18px; }
-    .game-info h3 { margin: 0 0 6px; font-size: 18px; }
-    .game-info p { margin: 0; color: var(--muted); font-size: 13px; min-height: 44px; }
-    .game-actions { display: flex; gap: 9px; margin-top: 17px; }
-    .game-actions a { flex: 1; text-align: center; }
-    .game-actions .primary-btn { padding: 9px 12px; font-size: 13px; }
-    .game-actions .secondary-btn { padding: 8px 10px; font-size: 13px; }
-    .empty { display: none; text-align: center; padding: 38px 16px; color: var(--muted); border: 1px dashed var(--line); border-radius: var(--radius); }
-    .feature-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 15px; }
-    .feature { padding: 20px; background: rgba(17,21,34,.78); border: 1px solid var(--line); border-radius: 17px; }
-    .feature-icon { width: 42px; height: 42px; border-radius: 12px; display: grid; place-items: center; background: rgba(255,51,72,.12); color: #ff7180; font-size: 20px; }
-    .feature h3 { font-size: 16px; margin: 13px 0 5px; } .feature p { font-size: 13px; color: var(--muted); margin: 0; }
-    .callout { display: flex; align-items: center; justify-content: space-between; gap: 22px; padding: 25px; border: 1px solid rgba(255,51,72,.23);
-      border-radius: 22px; background: linear-gradient(110deg, rgba(255,51,72,.1), rgba(17,21,34,.9)); }
-    .callout h2 { margin: 0 0 5px; font-size: 22px; } .callout p { margin: 0; color: var(--muted); font-size: 14px; }
-    footer { border-top: 1px solid rgba(255,255,255,.07); margin-top: 20px; padding: 27px 0; color: var(--muted); font-size: 12px; }
-    .footer-inner { display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap; }
-    .toast { position: fixed; bottom: 20px; left: 20px; background: #202638; border: 1px solid var(--line); padding: 11px 15px; border-radius: 12px; z-index: 50; display: none; box-shadow: 0 10px 30px #0005; }
-    @media (max-width: 850px) {
-      .hero-grid { grid-template-columns: 1fr; gap: 28px; } .hero { padding-top: 48px; }
-      .hero-art { min-height: 250px; } .games-grid { grid-template-columns: repeat(2,minmax(0,1fr)); }
-      .navlinks { gap: 13px; } .navlinks a:nth-child(3) { display: none; }
-    }
-    @media (max-width: 560px) {
-      .container { width: min(100% - 24px, 1160px); }
-      .nav { min-height: 67px; gap: 8px; } .brand-mark { width: 39px; height: 39px; border-radius: 12px; }
-      .brand-name strong { font-size: 15px; } .brand-name small { font-size: 9px; letter-spacing: 1.5px; }
-      .navlinks { display: none; } .nav-cta { padding: 9px 12px; font-size: 12px; }
-      .hero { padding: 40px 0 28px; } .hero p { font-size: 15px; } .hero-art { min-height: 220px; }
-      .orb { width: 108px; height: 108px; border-radius: 28px; font-size: 56px; }
-      .stats { gap: 8px; } .stat strong { font-size: 17px; } .stat span { font-size: 11px; }
-      .section { padding: 25px 0 35px; } .section-head { align-items: stretch; flex-direction: column; }
-      .search-row { width: 100%; } .games-grid { grid-template-columns: 1fr; }
-      .game-cover { min-height: 145px; } .feature-grid { grid-template-columns: 1fr; }
-      .callout { align-items: stretch; flex-direction: column; padding: 20px; }
-      .callout .primary-btn { width: 100%; } .game-info p { min-height: auto; }
-    }
-    @media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; transition: none !important; } }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Red1 — ريد وان | ألعاب</title>
+<meta name="description" content="ريد وان Red1 — عالم الألعاب الاحترافي. قناة تيليجرام @tf22n">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&family=Orbitron:wght@500;700;900&display=swap" rel="stylesheet">
+<style>
+/* ============ VARIABLES ============ */
+:root{
+  --red:#ff1f3d;
+  --red-2:#c4001a;
+  --red-glow:rgba(255,31,61,.55);
+  --bg:#07070b;
+  --bg-2:#0d0d14;
+  --surface:rgba(255,255,255,.045);
+  --surface-2:rgba(255,255,255,.08);
+  --stroke:rgba(255,255,255,.10);
+  --text:#f2f2f7;
+  --muted:#9a9aae;
+  --shadow:0 20px 60px rgba(0,0,0,.6);
+  --radius:22px;
+  --ease:cubic-bezier(.16,1,.3,1);
+}
+html[data-theme="light"]{
+  --red:#e60026;
+  --red-2:#a3001b;
+  --red-glow:rgba(230,0,38,.35);
+  --bg:#f4f5f9;
+  --bg-2:#ffffff;
+  --surface:rgba(10,10,20,.04);
+  --surface-2:rgba(10,10,20,.07);
+  --stroke:rgba(10,10,25,.10);
+  --text:#0e0e16;
+  --muted:#5b5b70;
+  --shadow:0 20px 60px rgba(20,20,50,.12);
+}
+
+/* ============ RESET ============ */
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  font-family:'Cairo',system-ui,sans-serif;
+  background:var(--bg);
+  color:var(--text);
+  overflow-x:hidden;
+  transition:background .5s var(--ease),color .5s var(--ease);
+}
+img,svg{display:block;max-width:100%}
+a{color:inherit;text-decoration:none}
+button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit}
+::selection{background:var(--red);color:#fff}
+
+/* ============ BACKGROUND FX ============ */
+.bg-fx{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden}
+.bg-fx::before{
+  content:'';position:absolute;inset:-30%;
+  background:
+    radial-gradient(circle at 20% 25%, var(--red-glow) 0%, transparent 45%),
+    radial-gradient(circle at 80% 75%, rgba(120,0,255,.28) 0%, transparent 48%);
+  filter:blur(90px);opacity:.55;
+  animation:drift 22s ease-in-out infinite alternate;
+}
+html[data-theme="light"] .bg-fx::before{opacity:.30}
+@keyframes drift{
+  0%{transform:translate3d(-4%,-3%,0) scale(1)}
+  100%{transform:translate3d(5%,4%,0) scale(1.15)}
+}
+.grid-fx{
+  position:fixed;inset:0;z-index:0;pointer-events:none;
+  background-image:
+    linear-gradient(var(--stroke) 1px, transparent 1px),
+    linear-gradient(90deg, var(--stroke) 1px, transparent 1px);
+  background-size:64px 64px;
+  mask-image:radial-gradient(circle at 50% 40%, #000 0%, transparent 78%);
+  -webkit-mask-image:radial-gradient(circle at 50% 40%, #000 0%, transparent 78%);
+  opacity:.5;
+}
+
+/* ============ HEADER ============ */
+header{
+  position:fixed;top:0;left:0;right:0;z-index:100;
+  display:flex;align-items:center;justify-content:space-between;
+  gap:16px;padding:16px clamp(16px,4vw,48px);
+  backdrop-filter:blur(22px);-webkit-backdrop-filter:blur(22px);
+  background:linear-gradient(to bottom, color-mix(in srgb, var(--bg) 82%, transparent), transparent);
+  border-bottom:1px solid transparent;
+  transition:border-color .4s,background .4s,padding .4s;
+}
+header.scrolled{
+  border-bottom-color:var(--stroke);
+  background:color-mix(in srgb, var(--bg) 88%, transparent);
+  padding-top:10px;padding-bottom:10px;
+}
+
+/* Logo */
+.brand{display:flex;align-items:center;gap:12px;flex-shrink:0}
+.brand-logo{width:46px;height:46px;filter:drop-shadow(0 0 14px var(--red-glow))}
+.brand-logo .ring{transform-origin:50% 50%;animation:spin 14s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.brand-text{display:flex;flex-direction:column;line-height:1}
+.brand-name{
+  font-family:'Orbitron',sans-serif;font-weight:900;font-size:1.28rem;
+  letter-spacing:.06em;
+  background:linear-gradient(100deg,var(--text) 15%,var(--red) 55%,var(--red-2) 95%);
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+}
+.brand-sub{font-size:.62rem;color:var(--muted);letter-spacing:.32em;margin-top:5px;font-weight:600}
+
+/* Nav */
+nav{display:flex;gap:4px;align-items:center}
+nav a{
+  position:relative;padding:10px 14px;font-size:.9rem;font-weight:600;
+  color:var(--muted);border-radius:11px;transition:color .3s,background .3s;
+}
+nav a:hover{color:var(--text);background:var(--surface)}
+nav a::after{
+  content:'';position:absolute;bottom:5px;left:50%;transform:translateX(-50%);
+  width:0;height:2px;border-radius:2px;background:var(--red);
+  transition:width .35s var(--ease);
+}
+nav a:hover::after{width:18px}
+
+/* Controls */
+.controls{display:flex;align-items:center;gap:9px;flex-shrink:0}
+.ctrl-btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:7px;
+  height:42px;padding:0 14px;border-radius:13px;
+  background:var(--surface);border:1px solid var(--stroke);
+  font-size:.82rem;font-weight:700;color:var(--text);
+  transition:transform .25s var(--ease),border-color .3s,background .3s,box-shadow .3s;
+}
+.ctrl-btn:hover{
+  transform:translateY(-2px);border-color:var(--red);
+  box-shadow:0 8px 24px -8px var(--red-glow);
+}
+.ctrl-btn svg{width:17px;height:17px}
+.ctrl-btn .label{white-space:nowrap}
+@media(max-width:640px){.ctrl-btn .label{display:none}.ctrl-btn{padding:0 11px}}
+
+/* Telegram CTA */
+.cta{
+  height:42px;padding:0 20px;border-radius:13px;display:inline-flex;align-items:center;gap:8px;
+  font-weight:800;font-size:.86rem;color:#fff;
+  background:linear-gradient(135deg,var(--red),var(--red-2));
+  box-shadow:0 10px 30px -8px var(--red-glow);
+  transition:transform .25s var(--ease),box-shadow .3s;
+}
+.cta:hover{transform:translateY(-2px) scale(1.02);box-shadow:0 16px 40px -8px var(--red-glow)}
+.cta svg{width:18px;height:18px}
+@media(max-width:880px){.cta{display:none}}
+
+/* Mobile menu */
+.burger{display:none;width:42px;height:42px;border-radius:13px;border:1px solid var(--stroke);background:var(--surface);align-items:center;justify-content:center}
+.burger span{display:block;width:18px;height:2px;background:var(--text);border-radius:2px;position:relative;transition:.3s}
+.burger span::before,.burger span::after{content:'';position:absolute;left:0;width:18px;height:2px;background:var(--text);border-radius:2px;transition:.3s}
+.burger span::before{top:-6px}.burger span::after{top:6px}
+@media(max-width:880px){
+  nav{display:none}
+  .burger{display:flex}
+  header.open nav{
+    display:flex;flex-direction:column;position:absolute;top:100%;left:0;right:0;
+    padding:12px;background:color-mix(in srgb, var(--bg) 96%, transparent);
+    border-bottom:1px solid var(--stroke);
+  }
+  header.open nav a{width:100%;text-align:center}
+}
+
+/* ============ 3D HERO ============ */
+.hero{
+  position:relative;z-index:1;
+  min-height:100vh;display:grid;place-items:center;
+  padding:120px 20px 70px;overflow:hidden;
+}
+#scene{
+  position:absolute;inset:0;width:100%;height:100%;
+  cursor:grab;touch-action:none;
+}
+#scene:active{cursor:grabbing}
+.hero-content{
+  position:relative;z-index:3;text-align:center;pointer-events:none;
+  display:flex;flex-direction:column;align-items:center;gap:22px;
+  transition:opacity .6s var(--ease),transform .6s var(--ease);
+}
+.hero-content > *{pointer-events:auto}
+
+.hero-badge{
+  display:inline-flex;align-items:center;gap:9px;
+  padding:8px 18px;border-radius:100px;
+  background:var(--surface);border:1px solid var(--stroke);
+  font-size:.76rem;font-weight:700;color:var(--muted);letter-spacing:.05em;
+  backdrop-filter:blur(12px);
+}
+.dot{width:7px;height:7px;border-radius:50%;background:var(--red);box-shadow:0 0 0 0 var(--red-glow);animation:pulse 2s infinite}
+@keyframes pulse{
+  0%{box-shadow:0 0 0 0 var(--red-glow)}
+  70%{box-shadow:0 0 0 12px transparent}
+  100%{box-shadow:0 0 0 0 transparent}
+}
+
+.hero-title{
+  font-family:'Orbitron',sans-serif;font-weight:900;
+  font-size:clamp(2.6rem,9vw,7.5rem);line-height:.92;letter-spacing:-.02em;
+  display:flex;align-items:center;gap:.12em;flex-wrap:wrap;justify-content:center;
+}
+.hero-title .t-red{
+  background:linear-gradient(135deg,#fff 0%,var(--red) 45%,var(--red-2) 100%);
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+  filter:drop-shadow(0 0 42px var(--red-glow));
+}
+html[data-theme="light"] .hero-title .t-red{
+  background:linear-gradient(135deg,var(--red) 0%,var(--red-2) 100%);
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+  filter:drop-shadow(0 6px 24px var(--red-glow));
+}
+.hero-title .orb{
+  width:.62em;height:.62em;border-radius:50%;flex-shrink:0;
+  background:radial-gradient(circle at 34% 30%, #ff7089, var(--red) 42%, #6d0012 100%);
+  box-shadow:0 0 40px var(--red-glow), inset -8px -10px 22px rgba(0,0,0,.55);
+  animation:orbPulse 3.4s ease-in-out infinite;
+}
+@keyframes orbPulse{
+  0%,100%{transform:scale(1);box-shadow:0 0 40px var(--red-glow), inset -8px -10px 22px rgba(0,0,0,.55)}
+  50%{transform:scale(1.08);box-shadow:0 0 70px var(--red-glow), inset -8px -10px 22px rgba(0,0,0,.55)}
+}
+
+.hero-tag{
+  max-width:560px;font-size:clamp(.92rem,2.2vw,1.1rem);
+  color:var(--muted);line-height:1.85;font-weight:400;
+}
+.hero-tag b{color:var(--text);font-weight:700}
+
+.hero-actions{display:flex;gap:13px;flex-wrap:wrap;justify-content:center;margin-top:6px}
+.btn{
+  display:inline-flex;align-items:center;gap:10px;
+  height:54px;padding:0 30px;border-radius:15px;
+  font-weight:800;font-size:.95rem;letter-spacing:.01em;
+  transition:transform .28s var(--ease),box-shadow .3s,background .3s,border-color .3s;
+}
+.btn svg{width:19px;height:19px}
+.btn-primary{
+  color:#fff;background:linear-gradient(135deg,var(--red),var(--red-2));
+  box-shadow:0 16px 44px -12px var(--red-glow);
+}
+.btn-primary:hover{transform:translateY(-3px) scale(1.02);box-shadow:0 22px 56px -12px var(--red-glow)}
+.btn-ghost{
+  color:var(--text);background:var(--surface);border:1px solid var(--stroke);
+  backdrop-filter:blur(12px);
+}
+.btn-ghost:hover{transform:translateY(-3px);border-color:var(--red);background:var(--surface-2)}
+
+.scroll-hint{
+  position:absolute;bottom:26px;left:50%;transform:translateX(-50%);
+  z-index:4;display:flex;flex-direction:column;align-items:center;gap:8px;
+  font-size:.68rem;letter-spacing:.28em;color:var(--muted);font-weight:700;
+  animation:floatY 2.6s ease-in-out infinite;
+}
+@keyframes floatY{0%,100%{transform:translateX(-50%) translateY(0)}50%{transform:translateX(-50%) translateY(8px)}}
+.scroll-hint .line{width:1px;height:34px;background:linear-gradient(var(--red),transparent)}
+
+/* ============ SECTIONS ============ */
+section{position:relative;z-index:1;padding:clamp(70px,10vw,130px) clamp(18px,5vw,64px)}
+.wrap{max-width:1240px;margin:0 auto}
+.sec-head{text-align:center;margin-bottom:clamp(38px,6vw,68px)}
+.sec-kicker{
+  display:inline-block;font-size:.74rem;font-weight:800;letter-spacing:.3em;
+  color:var(--red);text-transform:uppercase;margin-bottom:14px;
+}
+.sec-title{
+  font-family:'Orbitron',sans-serif;font-weight:900;
+  font-size:clamp(1.7rem,4.4vw,3rem);letter-spacing:-.01em;line-height:1.2;
+}
+.sec-desc{max-width:600px;margin:16px auto 0;color:var(--muted);font-size:.96rem;line-height:1.8}
+
+/* Cards grid */
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(272px,1fr));gap:20px}
+.card{
+  position:relative;padding:30px 26px;border-radius:var(--radius);
+  background:var(--surface);border:1px solid var(--stroke);
+  overflow:hidden;
+  transition:transform .45s var(--ease),border-color .4s,box-shadow .4s,background .4s;
+}
+.card::before{
+  content:'';position:absolute;inset:0;border-radius:inherit;pointer-events:none;
+  background:radial-gradient(420px circle at var(--mx,50%) var(--my,0%), var(--red-glow), transparent 62%);
+  opacity:0;transition:opacity .4s;
+}
+.card:hover{
+  transform:translateY(-7px);border-color:color-mix(in srgb, var(--red) 55%, transparent);
+  box-shadow:0 26px 64px -20px var(--red-glow);background:var(--surface-2);
+}
+.card:hover::before{opacity:.42}
+.card-ico{
+  width:56px;height:56px;border-radius:17px;display:grid;place-items:center;
+  margin-bottom:20px;
+  background:linear-gradient(140deg, color-mix(in srgb,var(--red) 22%, transparent), transparent);
+  border:1px solid color-mix(in srgb,var(--red) 34%, transparent);
+  color:var(--red);
+  transition:transform .45s var(--ease);
+}
+.card:hover .card-ico{transform:rotate(-8deg) scale(1.08)}
+.card-ico svg{width:26px;height:26px}
+.card h3{font-size:1.12rem;font-weight:800;margin-bottom:10px;letter-spacing:-.01em}
+.card p{font-size:.9rem;color:var(--muted);line-height:1.8}
+
+/* Games showcase */
+.games{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:18px}
+.game{
+  position:relative;aspect-ratio:4/5;border-radius:var(--radius);overflow:hidden;
+  border:1px solid var(--stroke);background:var(--bg-2);
+  transition:transform .5s var(--ease),box-shadow .5s,border-color .4s;
+  display:block;
+}
+.game:hover{transform:translateY(-8px) scale(1.015);box-shadow:0 30px 70px -22px var(--red-glow);border-color:color-mix(in srgb,var(--red) 50%,transparent)}
+.game-art{position:absolute;inset:0;transition:transform .7s var(--ease)}
+.game:hover .game-art{transform:scale(1.09)}
+.game-art::after{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(to top, rgba(4,4,10,.96) 6%, rgba(4,4,10,.55) 42%, transparent 78%);
+}
+.game-body{position:absolute;left:0;right:0;bottom:0;padding:22px;z-index:2}
+.game-tag{
+  display:inline-block;padding:5px 12px;border-radius:100px;margin-bottom:11px;
+  font-size:.66rem;font-weight:800;letter-spacing:.14em;text-transform:uppercase;
+  background:color-mix(in srgb,var(--red) 24%, transparent);
+  border:1px solid color-mix(in srgb,var(--red) 46%, transparent);
+  color:#ffd7dd;backdrop-filter:blur(8px);
+}
+.game h3{color:#fff;font-size:1.15rem;font-weight:800;letter-spacing:-.01em}
+.game p{color:rgba(255,255,255,.62);font-size:.82rem;margin-top:6px}
+/* generated art fills */
+.art-1{background:linear-gradient(150deg,#2a0010,#7a0020 42%,#ff1f3d 78%,#ff8a9c)}
+.art-2{background:linear-gradient(150deg,#0a0a1e,#2b0d63 45%,#6b21ff 76%,#c4a2ff)}
+.art-3{background:linear-gradient(150deg,#001a14,#00553f 46%,#00d68f 78%,#a6ffe0)}
+.art-4{background:linear-gradient(150deg,#1a1200,#6b4a00 46%,#ffb703 76%,#ffe9a8)}
+
+/* Telegram banner */
+.tg-banner{
+  position:relative;overflow:hidden;border-radius:30px;
+  padding:clamp(36px,6vw,64px);text-align:center;
+  border:1px solid color-mix(in srgb,var(--red) 34%, transparent);
+  background:
+    radial-gradient(900px circle at 50% -20%, color-mix(in srgb,var(--red) 30%, transparent), transparent 62%),
+    var(--surface);
+}
+.tg-banner::before{
+  content:'';position:absolute;inset:0;
+  background-image:linear-gradient(var(--stroke) 1px,transparent 1px),linear-gradient(90deg,var(--stroke) 1px,transparent 1px);
+  background-size:44px 44px;
+  mask-image:radial-gradient(circle at 50% 50%, #000, transparent 72%);
+  -webkit-mask-image:radial-gradient(circle at 50% 50%, #000, transparent 72%);
+  opacity:.5;pointer-events:none;
+}
+.tg-ico{
+  width:74px;height:74px;margin:0 auto 22px;border-radius:24px;display:grid;place-items:center;
+  background:linear-gradient(135deg,var(--red),var(--red-2));
+  box-shadow:0 18px 46px -12px var(--red-glow);
+}
+.tg-ico svg{width:36px;height:36px;color:#fff}
+.tg-banner h2{font-family:'Orbitron',sans-serif;font-weight:900;font-size:clamp(1.5rem,4vw,2.4rem);margin-bottom:12px}
+.tg-banner p{color:var(--muted);max-width:480px;margin:0 auto 26px;line-height:1.8;font-size:.95rem}
+.handle{
+  display:inline-flex;align-items:center;gap:9px;margin-top:18px;
+  font-family:'Orbitron',sans-serif;font-weight:700;font-size:1rem;
+  color:var(--red);letter-spacing:.03em;direction:ltr;
+}
+
+/* Footer */
+footer{
+  position:relative;z-index:1;border-top:1px solid var(--stroke);
+  padding:44px clamp(18px,5vw,64px) 34px;
+}
+.foot-inner{
+  max-width:1240px;margin:0 auto;
+  display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:22px;
+}
+.foot-brand{display:flex;align-items:center;gap:11px}
+.foot-brand .brand-logo{width:36px;height:36px}
+.foot-note{font-size:.8rem;color:var(--muted)}
+.foot-links{display:flex;gap:20px;font-size:.85rem;color:var(--muted)}
+.foot-links a:hover{color:var(--red)}
+
+/* Reveal on scroll */
+.reveal{opacity:0;transform:translateY(34px);transition:opacity .9s var(--ease),transform .9s var(--ease)}
+.reveal.in{opacity:1;transform:none}
+
+/* RTL/LTR tweaks */
+html[dir="ltr"] body{font-family:'Cairo',system-ui,sans-serif}
+html[dir="ltr"] .hero-title{direction:ltr}
+
+@media (prefers-reduced-motion: reduce){
+  *{animation-duration:.001ms !important;transition-duration:.001ms !important}
+}
+</style>
 </head>
 <body>
-  <header class="topbar">
-    <div class="container nav">
-      <a class="brand" href="#home" aria-label="ريد وان للألعاب - الصفحة الرئيسية">
-        <span class="brand-mark" aria-hidden="true">🔴</span>
-        <span class="brand-name"><strong>ريد وان</strong><small>RED1 GAMES</small></span>
+
+<div class="bg-fx"></div>
+<div class="grid-fx"></div>
+
+<!-- ===== HEADER ===== -->
+<header id="header">
+  <a href="#" class="brand" aria-label="Red1">
+    <svg class="brand-logo" viewBox="0 0 100 100" aria-hidden="true">
+      <defs>
+        <linearGradient id="lg1" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stop-color="#ff5c72"/>
+          <stop offset="55%" stop-color="#ff1f3d"/>
+          <stop offset="100%" stop-color="#8a0014"/>
+        </linearGradient>
+        <linearGradient id="lg2" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#ffffff" stop-opacity=".95"/>
+          <stop offset="100%" stop-color="#ffffff" stop-opacity=".35"/>
+        </linearGradient>
+      </defs>
+      <circle cx="50" cy="50" r="46" fill="none" stroke="url(#lg1)" stroke-width="2.5" stroke-dasharray="18 8" class="ring"/>
+      <circle cx="50" cy="50" r="38" fill="none" stroke="currentColor" stroke-opacity=".18" stroke-width="1" style="color:var(--red)"/>
+      <circle cx="50" cy="50" r="30" fill="url(#lg1)"/>
+      <circle cx="50" cy="50" r="30" fill="none" stroke="url(#lg2)" stroke-width="1.2" stroke-opacity=".5"/>
+      <path d="M50 34 L54.6 45.4 L66.5 46.2 L57.3 53.9 L60.2 65.6 L50 59 L39.8 65.6 L42.7 53.9 L33.5 46.2 L45.4 45.4 Z"
+            fill="#fff" fill-opacity=".96"/>
+    </svg>
+    <span class="brand-text">
+      <span class="brand-name">RED1</span>
+      <span class="brand-sub">GAMING</span>
+    </span>
+  </a>
+
+  <nav id="nav">
+    <a href="#home" data-i18n="nav.home">الرئيسية</a>
+    <a href="#features" data-i18n="nav.features">المميزات</a>
+    <a href="#games" data-i18n="nav.games">الألعاب</a>
+    <a href="#community" data-i18n="nav.community">المجتمع</a>
+    <a href="#contact" data-i18n="nav.contact">تواصل</a>
+  </nav>
+
+  <div class="controls">
+    <button class="ctrl-btn" id="langBtn" aria-label="Switch language">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+      </svg>
+      <span class="label" id="langLabel">EN</span>
+    </button>
+
+    <button class="ctrl-btn" id="themeBtn" aria-label="Toggle theme">
+      <svg id="themeIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+      </svg>
+      <span class="label" id="themeLabel">فاتح</span>
+    </button>
+
+    <a class="cta" href="https://t.me/tf22n" target="_blank" rel="noopener">
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.259-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg>
+      <span data-i18n="cta.telegram">تيليجرام</span>
+    </a>
+
+    <button class="burger" id="burger" aria-label="Menu"><span></span></button>
+  </div>
+</header>
+
+<!-- ===== 3D HERO ===== -->
+<section class="hero" id="home">
+  <canvas id="scene" aria-hidden="true"></canvas>
+
+  <div class="hero-content">
+    <div class="hero-badge">
+      <span class="dot"></span>
+      <span data-i18n="hero.badge">عالم الألعاب الاحترافي</span>
+    </div>
+
+    <h1 class="hero-title">
+      <span class="t-red">RED</span>
+      <span class="orb"></span>
+      <span class="t-red">1</span>
+    </h1>
+
+    <p class="hero-tag" data-i18n-html="hero.tag">
+      <b>ريد وان</b> — حيث تبدأ الأسطورة. ألعاب مختارة بعناية، مجتمع محترف، وتجربة لا تُنسى.
+    </p>
+
+    <div class="hero-actions">
+      <a class="btn btn-primary" href="https://t.me/tf22n" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.259-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg>
+        <span data-i18n="hero.cta1">انضم للقناة</span>
       </a>
-      <nav class="navlinks" aria-label="التنقل الرئيسي">
-        <a href="#home">الرئيسية</a><a href="#games">جميع الألعاب</a><a href="#features">مميزات المنصة</a>
-      </nav>
-      <a class="nav-cta" href="#games">اكتشف الألعاب ←</a>
+      <a class="btn btn-ghost" href="#games">
+        <span data-i18n="hero.cta2">استكشف الألعاب</span>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+      </a>
     </div>
-  </header>
+  </div>
 
-  <main>
-    <section class="hero" id="home">
-      <div class="container hero-grid">
-        <div>
-          <div class="eyebrow"><span class="pulse"></span> بوابتك إلى عالم اللعب</div>
-          <h1>عالمك للألعاب<br><span>يبدأ من هنا.</span></h1>
-          <p>اكتشف ألعابًا ممتعة، واختبر ذكاءك، وتحدَّ أصدقاءك. كل ألعابك المفضلة في مكان واحد، بتجربة سهلة وسريعة من هاتفك أو حاسوبك.</p>
-          <div class="hero-actions">
-            <a class="primary-btn" href="#games">استكشف الألعاب <span aria-hidden="true">←</span></a>
-            <a class="secondary-btn" href="#about">اكتشف المنصة</a>
-          </div>
-          <div class="stats" aria-label="مميزات المنصة">
-            <div class="stat"><strong>🎮 ألعاب</strong><span>في مكان واحد</span></div>
-            <div class="stat"><strong>⚡ سريع</strong><span>وصول مباشر</span></div>
-            <div class="stat"><strong>📱 متجاوب</strong><span>لكل الشاشات</span></div>
-          </div>
-        </div>
-        <div class="hero-art" aria-label="تصميم ريد وان للألعاب">
-          <span class="float-label label-one">جاهز للتحدي؟</span>
-          <div class="orb" aria-hidden="true">🔴</div>
-          <span class="float-label label-two">RED1 · PLAY YOUR WAY</span>
-        </div>
-      </div>
-    </section>
+  <div class="scroll-hint"><span data-i18n="hero.scroll">اسحب للدوران</span><span class="line"></span></div>
+</section>
 
-    <section class="section" id="games">
-      <div class="container">
-        <div class="section-head">
-          <div><h2>مكتبة الألعاب</h2><p>اختر لعبتك وابدأ المتعة مباشرة.</p></div>
-          <div class="search-row">
-            <label class="search-wrap"><span aria-hidden="true">⌕</span><input id="gameSearch" type="search" placeholder="ابحث عن لعبة..." aria-label="ابحث عن لعبة"></label>
-            <button class="primary-btn" id="searchButton" type="button">بحث</button>
-          </div>
-        </div>
-        <div class="filters" role="group" aria-label="تصفية الألعاب">
-          <button class="filter active" data-category="الكل" type="button">جميع الألعاب</button>
-          <button class="filter" data-category="ذكاء" type="button">ألعاب الذكاء</button>
-          <button class="filter" data-category="ذاكرة" type="button">ألعاب الذاكرة</button>
-          <button class="filter" data-category="جماعية" type="button">ألعاب جماعية</button>
-          <button class="filter" data-category="تحدي" type="button">ألعاب التحدي</button>
-        </div>
-        <div class="games-grid" id="gamesGrid">
-          <!-- غيّر مسارات الألعاب أدناه إذا كانت ملفاتك في مجلد مختلف. -->
-          <article class="game-card" data-name="xo اكس او تيك تاك تو لعبة الذكاء" data-category="ذكاء" data-keywords="xo tic tac toe اكس او تحدي صديق">
-            <div class="game-cover xo"><span class="game-tag">لعبة كلاسيكية</span><span class="game-icon" aria-hidden="true">❎ ⭕</span></div>
-            <div class="game-info"><h3>لعبة XO</h3><p>تحدَّ صديقك في لعبة الذكاء الكلاسيكية، وخطّط لحركاتك حتى تحقق الفوز.</p>
-              <div class="game-actions"><a class="primary-btn" href="xo.html">العب الآن ←</a><button class="secondary-btn share-btn" type="button" data-title="لعبة XO" data-url="xo.html">مشاركة</button></div>
-            </div>
-          </article>
-          <article class="game-card" data-name="لعبة الذاكرة تطابق البطاقات" data-category="ذاكرة" data-keywords="memory cards تركيز تذكر مطابقة">
-            <div class="game-cover memory"><span class="game-tag">اختبر تركيزك</span><span class="game-icon" aria-hidden="true">🧠</span></div>
-            <div class="game-info"><h3>لعبة الذاكرة</h3><p>درّب ذاكرتك وتركيزك من خلال العثور على البطاقات المتطابقة.</p>
-              <div class="game-actions"><a class="primary-btn" href="memory.html">العب الآن ←</a><button class="secondary-btn share-btn" type="button" data-title="لعبة الذاكرة" data-url="memory.html">مشاركة</button></div>
-            </div>
-          </article>
-          <article class="game-card" data-name="أضف لعبتك الجديدة" data-category="تحدي" data-keywords="لعبة جديدة العاب تحدي">
-            <div class="game-cover"><span class="game-tag">قريبًا</span><span class="game-icon" aria-hidden="true">✨</span></div>
-            <div class="game-info"><h3>ألعاب جديدة قريبًا</h3><p>يمكنك إضافة ألعاب أخرى إلى المكتبة عند تجهيز ملفاتها وروابط تشغيلها.</p>
-              <div class="game-actions"><a class="secondary-btn" href="#about">اعرف المزيد</a></div>
-            </div>
-          </article>
-        </div>
-        <div class="empty" id="emptyState">لم نعثر على ألعاب تطابق بحثك، جرّب كلمة أخرى.</div>
-      </div>
-    </section>
-
-    <section class="section" id="features">
-      <div class="container">
-        <div class="section-head"><div><h2>لماذا ريد وان؟</h2><p>تجربة بسيطة، منظمة، ومصممة لتكبر مع ألعابك.</p></div></div>
-        <div class="feature-grid">
-          <article class="feature"><div class="feature-icon">⌕</div><h3>بحث سريع</h3><p>اعثر على اللعبة التي تريدها باستخدام الاسم أو الكلمات المفتاحية.</p></article>
-          <article class="feature"><div class="feature-icon">↗</div><h3>روابط مباشرة</h3><p>لكل لعبة رابط مستقل يمكنك فتحه أو مشاركته مع أصدقائك.</p></article>
-          <article class="feature"><div class="feature-icon">▣</div><h3>مناسب لكل جهاز</h3><p>واجهة متجاوبة مع الهاتف والكمبيوتر واللوحي.</p></article>
-        </div>
-      </div>
-    </section>
-
-    <section class="section" id="about">
-      <div class="container">
-        <div class="callout">
-          <div><h2>لديك لعبة تريد إضافتها؟</h2><p>أضف ملف اللعبة إلى المشروع، ثم سجّل اسمها ووصفها ورابطها في مكتبة الألعاب.</p></div>
-          <a class="primary-btn" href="#games">تصفّح المكتبة ←</a>
-        </div>
-      </div>
-    </section>
-  </main>
-
-  <footer>
-    <div class="container footer-inner">
-      <a class="brand" href="#home"><span class="brand-mark" style="width:34px;height:34px;font-size:16px;border-radius:10px">🔴</span><span class="brand-name"><strong style="font-size:14px">ريد وان</strong><small>RED1 GAMES</small></span></a>
-      <span>جميع الحقوق محفوظة © <span id="year"></span> ريد وان RED1 GAMES</span>
-      <a href="#home">العودة إلى الأعلى ↑</a>
+<!-- ===== FEATURES ===== -->
+<section id="features">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <span class="sec-kicker" data-i18n="features.kicker">لماذا ريد وان</span>
+      <h2 class="sec-title" data-i18n="features.title">تجربة مصممة للاعبين</h2>
+      <p class="sec-desc" data-i18n="features.desc">كل تفصيل هنا مدروس — من الأداء إلى المجتمع.</p>
     </div>
-  </footer>
-  <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
-  <script>
-    (() => {
-      const searchInput = document.getElementById('gameSearch');
-      const searchButton = document.getElementById('searchButton');
-      const cards = [...document.querySelectorAll('.game-card')];
-      const filters = [...document.querySelectorAll('.filter')];
-      const emptyState = document.getElementById('emptyState');
-      const toast = document.getElementById('toast');
-      let activeCategory = 'الكل';
-      let toastTimer;
+    <div class="grid">
+      <article class="card reveal">
+        <div class="card-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m13 2-3 7h7l-3 7"/><path d="M13 16v6"/><path d="M9 22h8"/></svg></div>
+        <h3 data-i18n="f1.t">أداء فائق</h3>
+        <p data-i18n="f1.d">سرعة استجابة عالية وتجربة سلسة على كل الأجهزة.</p>
+      </article>
+      <article class="card reveal">
+        <div class="card-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
+        <h3 data-i18n="f2.t">أمان وثقة</h3>
+        <p data-i18n="f2.d">بيئة نظيفة، مجتمع محترم، وقواعد واضحة للجميع.</p>
+      </article>
+      <article class="card reveal">
+        <div class="card-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
+        <h3 data-i18n="f3.t">مجتمع حقيقي</h3>
+        <p data-i18n="f3.d">لاعبون متحمسون وخبراء يشاركونك الشغف نفسه.</p>
+      </article>
+      <article class="card reveal">
+        <div class="card-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div>
+        <h3 data-i18n="f4.t">محتوى حصري</h3>
+        <p data-i18n="f4.d">تحديثات وألعاب مختارة تُنشر أولاً على القناة.</p>
+      </article>
+      <article class="card reveal">
+        <div class="card-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg></div>
+        <h3 data-i18n="f5.t">دعم على مدار الساعة</h3>
+        <p data-i18n="f5.d">فريق يرد عليك بسرعة، في أي وقت تحتاج المساعدة.</p>
+      </article>
+      <article class="card reveal">
+        <div class="card-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 15 8.5 22 9.3l-5 4.9 1.2 6.9L12 17.8 5.8 21.1 7 14.2 2 9.3l7-.8L12 2z"/></svg></div>
+        <h3 data-i18n="f6.t">جودة احترافية</h3>
+        <p data-i18n="f6.d">تصميم وتجربة بمستوى عالمي، بلا تنازلات.</p>
+      </article>
+    </div>
+  </div>
+</section>
 
-      document.getElementById('year').textContent = new Date().getFullYear();
+<!-- ===== GAMES ===== -->
+<section id="games">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <span class="sec-kicker" data-i18n="games.kicker">مكتبتنا</span>
+      <h2 class="sec-title" data-i18n="games.title">ألعاب مختارة</h2>
+      <p class="sec-desc" data-i18n="games.desc">عناوين نُلعبها ونحبها — كل واحدة منها تستحق وقتك.</p>
+    </div>
 
-      function normalize(value) {
-        return value.toLocaleLowerCase('ar')
-          .replace(/[أإآ]/g, 'ا')
-          .replace(/ى/g, 'ي')
-          .replace(/[ًٌٍَُِّْـ]/g, '')
-          .trim();
-      }
+    <div class="games">
+      <a class="game reveal" href="https://t.me/tf22n" target="_blank" rel="noopener">
+        <div class="game-art art-1"></div>
+        <div class="game-body">
+          <span class="game-tag">Action</span>
+          <h3 data-i18n="g1.t">معركة الظلال</h3>
+          <p data-i18n="g1.d">أكشن سريع بإيقاع لا يهدأ.</p>
+        </div>
+      </a>
+      <a class="game reveal" href="https://t.me/tf22n" target="_blank" rel="noopener">
+        <div class="game-art art-2"></div>
+        <div class="game-body">
+          <span class="game-tag">RPG</span>
+          <h3 data-i18n="g2.t">أسطورة النيون</h3>
+          <p data-i18n="g2.d">عالم مفتوح بعمق سردي نادر.</p>
+        </div>
+      </a>
+      <a class="game reveal" href="https://t.me/tf22n" target="_blank" rel="noopener">
+        <div class="game-art art-3"></div>
+        <div class="game-body">
+          <span class="game-tag">Strategy</span>
+          <h3 data-i18n="g3.t">إمبراطورية خضراء</h3>
+          <p data-i18n="g3.d">ابنِ، خطّط، وانتصر بذكاء.</p>
+        </div>
+      </a>
+      <a class="game reveal" href="https://t.me/tf22n" target="_blank" rel="noopener">
+        <div class="game-art art-4"></div>
+        <div class="game-body">
+          <span class="game-tag">Racing</span>
+          <h3 data-i18n="g4.t">سرعة الذهب</h3>
+          <p data-i18n="g4.d">سباقات بأدرينالين عالٍ ومركبات أسطورية.</p>
+        </div>
+      </a>
+    </div>
+  </div>
+</section>
 
-      function renderGames() {
-        const query = normalize(searchInput.value);
-        let visible = 0;
-        cards.forEach(card => {
-          const haystack = normalize([
-            card.dataset.name || '', card.dataset.category || '', card.dataset.keywords || '',
-            card.querySelector('h3')?.textContent || '', card.querySelector('p')?.textContent || ''
-          ].join(' '));
-          const categoryMatch = activeCategory === 'الكل' || card.dataset.category === activeCategory;
-          const searchMatch = !query || haystack.includes(query);
-          const show = categoryMatch && searchMatch;
-          card.hidden = !show;
-          if (show) visible++;
-        });
-        emptyState.style.display = visible ? 'none' : 'block';
-      }
+<!-- ===== COMMUNITY / TELEGRAM ===== -->
+<section id="community">
+  <div class="wrap">
+    <div class="tg-banner reveal" id="contact">
+      <div class="tg-ico">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.259-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg>
+      </div>
+      <h2 data-i18n="tg.title">انضم إلى مجتمع ريد وان</h2>
+      <p data-i18n="tg.desc">كل جديد، كل تحديث، وكل لعبة — تصل أولاً إلى قناتنا على تيليجرام.</p>
+      <a class="btn btn-primary" href="https://t.me/tf22n" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.259-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg>
+        <span data-i18n="tg.btn">@tf22n</span>
+      </a>
+      <div class="handle">@tf22n</div>
+    </div>
+  </div>
+</section>
 
-      searchInput.addEventListener('input', renderGames);
-      searchButton.addEventListener('click', renderGames);
-      searchInput.addEventListener('keydown', event => {
-        if (event.key === 'Enter') renderGames();
-      });
-      filters.forEach(button => button.addEventListener('click', () => {
-        activeCategory = button.dataset.category;
-        filters.forEach(filter => filter.classList.toggle('active', filter === button));
-        renderGames();
-      }));
+<!-- ===== FOOTER ===== -->
+<footer>
+  <div class="foot-inner">
+    <div class="foot-brand">
+      <svg class="brand-logo" viewBox="0 0 100 100" aria-hidden="true">
+        <circle cx="50" cy="50" r="46" fill="none" stroke="url(#lg1)" stroke-width="2.5" stroke-dasharray="18 8" class="ring"/>
+        <circle cx="50" cy="50" r="30" fill="url(#lg1)"/>
+        <path d="M50 34 L54.6 45.4 L66.5 46.2 L57.3 53.9 L60.2 65.6 L50 59 L39.8 65.6 L42.7 53.9 L33.5 46.2 L45.4 45.4 Z" fill="#fff" fill-opacity=".96"/>
+      </svg>
+      <div>
+        <div class="brand-name" style="font-size:1rem">RED1</div>
+        <div class="brand-sub" style="font-size:.55rem">GAMING</div>
+      </div>
+    </div>
+    <div class="foot-links">
+      <a href="#games" data-i18n="nav.games">الألعاب</a>
+      <a href="#community" data-i18n="nav.community">المجتمع</a>
+      <a href="https://t.me/tf22n" target="_blank" rel="noopener">Telegram</a>
+    </div>
+    <div class="foot-note">© <span id="year"></span> Red1 — <span data-i18n="foot.rights">جميع الحقوق محفوظة</span></div>
+  </div>
+</footer>
 
-      function showToast(message) {
-        toast.textContent = message;
-        toast.style.display = 'block';
-        clearTimeout(toastTimer);
-        toastTimer = setTimeout(() => { toast.style.display = 'none'; }, 2600);
-      }
+<script>
+/* =========================================================
+   1) TRANSLATIONS
+   ========================================================= */
+const I18N = {
+  ar: {
+    "nav.home":"الرئيسية","nav.features":"المميزات","nav.games":"الألعاب","nav.community":"المجتمع","nav.contact":"تواصل",
+    "cta.telegram":"تيليجرام",
+    "hero.badge":"عالم الألعاب الاحترافي",
+    "hero.tag":"<b>ريد وان</b> — حيث تبدأ الأسطورة. ألعاب مختارة بعناية، مجتمع محترف، وتجربة لا تُنسى.",
+    "hero.cta1":"انضم للقناة","hero.cta2":"استكشف الألعاب","hero.scroll":"اسحب للدوران",
+    "features.kicker":"لماذا ريد وان","features.title":"تجربة مصممة للاعبين","features.desc":"كل تفصيل هنا مدروس — من الأداء إلى المجتمع.",
+    "f1.t":"أداء فائق","f1.d":"سرعة استجابة عالية وتجربة سلسة على كل الأجهزة.",
+    "f2.t":"أمان وثقة","f2.d":"بيئة نظيفة، مجتمع محترم، وقواعد واضحة للجميع.",
+    "f3.t":"مجتمع حقيقي","f3.d":"لاعبون متحمسون وخبراء يشاركونك الشغف نفسه.",
+    "f4.t":"محتوى حصري","f4.d":"تحديثات وألعاب مختارة تُنشر أولاً على القناة.",
+    "f5.t":"دعم على مدار الساعة","f5.d":"فريق يرد عليك بسرعة، في أي وقت تحتاج المساعدة.",
+    "f6.t":"جودة احترافية","f6.d":"تصميم وتجربة بمستوى عالمي، بلا تنازلات.",
+    "games.kicker":"مكتبتنا","games.title":"ألعاب مختارة","games.desc":"عناوين نُلعبها ونحبها — كل واحدة منها تستحق وقتك.",
+    "g1.t":"معركة الظلال","g1.d":"أكشن سريع بإيقاع لا يهدأ.",
+    "g2.t":"أسطورة النيون","g2.d":"عالم مفتوح بعمق سردي نادر.",
+    "g3.t":"إمبراطورية خضراء","g3.d":"ابنِ، خطّط، وانتصر بذكاء.",
+    "g4.t":"سرعة الذهب","g4.d":"سباقات بأدرينالين عالٍ ومركبات أسطورية.",
+    "tg.title":"انضم إلى مجتمع ريد وان","tg.desc":"كل جديد، كل تحديث، وكل لعبة — تصل أولاً إلى قناتنا على تيليجرام.","tg.btn":"@tf22n",
+    "foot.rights":"جميع الحقوق محفوظة",
+    "theme.toLight":"فاتح","theme.toDark":"داكن","lang.label":"EN"
+  },
+  en: {
+    "nav.home":"Home","nav.features":"Features","nav.games":"Games","nav.community":"Community","nav.contact":"Contact",
+    "cta.telegram":"Telegram",
+    "hero.badge":"Pro Gaming Universe",
+    "hero.tag":"<b>Red1</b> — where the legend begins. Hand-picked games, a pro community, an unforgettable experience.",
+    "hero.cta1":"Join the channel","hero.cta2":"Explore games","hero.scroll":"Drag to rotate",
+    "features.kicker":"Why Red1","features.title":"Built for players","features.desc":"Every detail is intentional — from performance to community.",
+    "f1.t":"Blazing performance","f1.d":"High responsiveness and a smooth experience on every device.",
+    "f2.t":"Safe & trusted","f2.d":"A clean environment, a respectful community, clear rules for all.",
+    "f3.t":"A real community","f3.d":"Passionate players and experts who share your drive.",
+    "f4.t":"Exclusive content","f4.d":"Updates and curated games land on the channel first.",
+    "f5.t":"24/7 support","f5.d":"A team that answers fast, whenever you need help.",
+    "f6.t":"Pro-grade quality","f6.d":"World-class design and experience, no compromises.",
+    "games.kicker":"Our library","games.title":"Curated games","games.desc":"Titles we play and love — each one earns your time.",
+    "g1.t":"Shadow Clash","g1.d":"Fast action with a relentless pace.",
+    "g2.t":"Neon Legend","g2.d":"An open world with rare narrative depth.",
+    "g3.t":"Green Empire","g3.d":"Build, plan, and win with strategy.",
+    "g4.t":"Golden Speed","g4.d":"High-adrenaline racing with legendary machines.",
+    "tg.title":"Join the Red1 community","tg.desc":"Every update, every game — delivered first to our Telegram channel.","tg.btn":"@tf22n",
+    "foot.rights":"All rights reserved",
+    "theme.toLight":"Light","theme.toDark":"Dark","lang.label":"AR"
+  }
+};
 
-      document.querySelectorAll('.share-btn').forEach(button => button.addEventListener('click', async () => {
-        const title = button.dataset.title;
-        const url = new URL(button.dataset.url, window.location.href).href;
-        try {
-          if (navigator.share) {
-            await navigator.share({ title: title + ' | ريد وان RED1 GAMES', text: 'جرّب هذه اللعبة من ريد وان للألعاب', url });
-          } else if (navigator.clipboard && window.isSecureContext) {
-            await navigator.clipboard.writeText(url);
-            showToast('تم نسخ رابط اللعبة');
-          } else {
-            window.prompt('انسخ رابط اللعبة:', url);
-          }
-        } catch (error) {
-          if (error.name !== 'AbortError') showToast('تعذّرت مشاركة الرابط، جرّب نسخه يدويًا');
-        }
-      }));
+let lang = 'ar';
+let theme = 'dark';
 
-      renderGames();
-    })();
-  </script>
+const $ = (s,r=document)=>r.querySelector(s);
+const $$ = (s,r=document)=>[...r.querySelectorAll(s)];
+
+/* =========================================================
+   2) LANGUAGE
+   ========================================================= */
+function applyLang(next){
+  lang = next;
+  const html = document.documentElement;
+  html.lang = lang;
+  html.dir = lang === 'ar' ? 'rtl' : 'ltr';
+
+  $$('[data-i18n]').forEach(el=>{
+    const k = el.dataset.i18n;
+    if(I18N[lang][k] !== undefined) el.textContent = I18N[lang][k];
+  });
+  $$('[data-i18n-html]').forEach(el=>{
+    const k = el.dataset.i18nHtml;
+    if(I18N[lang][k] !== undefined) el.innerHTML = I18N[lang][k];
+  });
+
+  $('#langLabel').textContent = I18N[lang]['lang.label'];
+  $('#themeLabel').textContent = theme === 'dark' ? I18N[lang]['theme.toLight'] : I18N[lang]['theme.toDark'];
+
+  try{ localStorage.setItem('red1.lang', lang); }catch(e){}
+}
+
+$('#langBtn').addEventListener('click', ()=> applyLang(lang === 'ar' ? 'en' : 'ar'));
+
+/* =========================================================
+   3) THEME
+   ========================================================= */
+const sunIcon = '<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/>';
+const moonIcon = '<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>';
+
+function applyTheme(next){
+  theme = next;
+  document.documentElement.setAttribute('data-theme', theme);
+  $('#themeIcon').innerHTML = theme === 'dark' ? moonIcon : sunIcon;
+  $('#themeLabel').textContent = theme === 'dark' ? I18N[lang]['theme.toLight'] : I18N[lang]['theme.toDark'];
+  try{ localStorage.setItem('red1.theme', theme); }catch(e){}
+  if(window.__sceneColors) window.__sceneColors();
+}
+
+$('#themeBtn').addEventListener('click', ()=> applyTheme(theme === 'dark' ? 'light' : 'dark'));
+
+/* =========================================================
+   4) HEADER / BURGER / REVEAL / YEAR
+   ========================================================= */
+const header = $('#header');
+addEventListener('scroll', ()=>{
+  header.classList.toggle('scrolled', scrollY > 24);
+}, {passive:true});
+
+$('#burger').addEventListener('click', ()=> header.classList.toggle('open'));
+$$('#nav a').forEach(a=> a.addEventListener('click', ()=> header.classList.remove('open')));
+
+const io = new IntersectionObserver((entries)=>{
+  entries.forEach(e=>{
+    if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target); }
+  });
+}, {threshold:.14, rootMargin:'0px 0px -60px 0px'});
+$$('.reveal').forEach(el=> io.observe(el));
+
+$('#year').textContent = new Date().getFullYear();
+
+/* card pointer glow */
+$$('.card').forEach(card=>{
+  card.addEventListener('pointermove', e=>{
+    const r = card.getBoundingClientRect();
+    card.style.setProperty('--mx', (e.clientX - r.left) + 'px');
+    card.style.setProperty('--my', (e.clientY - r.top) + 'px');
+  });
+});
+
+/* =========================================================
+   5) 3D SCENE — pure WebGL, no libraries
+   Rotatable wireframe icosahedron + glowing orb + particles
+   ========================================================= */
+(function(){
+  const canvas = $('#scene');
+  const gl = canvas.getContext('webgl', {antialias:true, alpha:true, premultipliedAlpha:false})
+          || canvas.getContext('experimental-webgl', {antialias:true, alpha:true});
+  if(!gl){ canvas.style.display='none'; return; }
+
+  /* ---- shaders ---- */
+  const VS = `
+    attribute vec3 aPos;
+    attribute vec3 aNorm;
+    uniform mat4 uProj, uView, uModel;
+    uniform float uPointSize;
+    varying vec3 vNorm;
+    varying vec3 vWorld;
+    void main(){
+      vec4 world = uModel * vec4(aPos,1.0);
+      vWorld = world.xyz;
+      vNorm = mat3(uModel) * aNorm;
+      gl_Position = uProj * uView * world;
+      gl_PointSize = uPointSize;
+    }`;
+
+  const FS = `
+    precision mediump float;
+    uniform vec3 uColor, uEye;
+    uniform float uAlpha, uGlow;
+    varying vec3 vNorm;
+    varying vec3 vWorld;
+    void main(){
+      vec3 N = normalize(vNorm);
+      vec3 V = normalize(uEye - vWorld);
+      float fres = pow(1.0 - max(dot(N,V),0.0), 2.2);
+      float a = uAlpha + fres * uGlow;
+      gl_FragColor = vec4(uColor * (0.55 + fres*1.6), clamp(a,0.0,1.0));
+    }`;
+
+  const PFS = `
+    precision mediump float;
+    uniform vec3 uColor;
+    uniform float uAlpha;
+    void main(){
+      vec2 c = gl_PointCoord - 0.5;
+      float d = length(c);
+      if(d > 0.5) discard;
+      float a = smoothstep(0.5, 0.0, d) * uAlpha;
+      gl_FragColor = vec4(uColor, a);
+    }`;
+
+  function compile(type, src){
+    const s = gl.createShader(type);
+    gl.shaderSource(s, src); gl.compileShader(s);
+    if(!gl.getShaderParameter(s, gl.COMPILE_STATUS)) console.warn(gl.getShaderInfoLog(s));
+    return s;
+  }
+  function program(vs, fs){
+    const p = gl.createProgram();
+    gl.attachShader(p, compile(gl.VERTEX_SHADER, vs));
+    gl.attachShader(p, compile(gl.FRAGMENT_SHADER, fs));
+    gl.linkProgram(p);
+    if(!gl.getProgramParameter(p, gl.LINK_STATUS)) console.warn(gl.getProgramInfoLog(p));
+    return p;
+  }
+
+  const prog = program(VS, FS);
+  const LOC = {
+    aPos: gl.getAttribLocation(prog,'aPos'),
+    aNorm: gl.getAttribLocation(prog,'aNorm'),
+    uProj: gl.getUniformLocation(prog,'uProj'),
+    uView: gl.getUniformLocation(prog,'uView'),
+    uModel: gl.getUniformLocation(prog,'uModel'),
+    uColor: gl.getUniformLocation(prog,'uColor'),
+    uAlpha: gl.getUniformLocation(prog,'uAlpha'),
+    uGlow: gl.getUniformLocation(prog,'uGlow'),
+    uEye: gl.getUniformLocation(prog,'uEye'),
+    uPointSize: gl.getUniformLocation(prog,'uPointSize')
+  };
+
+  const pProg = program(VS, PFS);
+  const PLOC = {
+    aPos: gl.getAttribLocation(pProg,'aPos'),
+    aNorm: gl.getAttribLocation(pProg,'aNorm'),
+    uProj: gl.getUniformLocation(pProg,'uProj'),
+    uView: gl.getUniformLocation(pProg,'uView'),
+    uModel: gl.getUniformLocation(pProg,'uModel'),
+    uColor: gl.getUniformLocation(pProg,'uColor'),
+    uAlpha: gl.getUniformLocation(pProg,'uAlpha'),
+    uEye: gl.getUniformLocation(pProg,'uEye'),
+    uPointSize: gl.getUniformLocation(pProg,'uPointSize')
+  };
+
+  /* ---- geometry: icosahedron edges + solid ---- */
+  const t = (1 + Math.sqrt(5)) / 2;
+  const baseVerts = [
+    [-1,t,0],[1,t,0],[-1,-t,0],[1,-t,0],
+    [0,-1,t],[0,1,t],[0,-1,-t],[0,1,-t],
+    [t,0,-1],[t,0,1],[-t,0,-1],[-t,0,1]
+  ].map(v=>{
+    const l = Math.hypot(v[0],v[1],v[2]);
+    return [v[0]/l, v[1]/l, v[2]/l];
+  });
+
+  const faces = [
+    [0,11,5],[0,5,1],[0,1,7],[0,7,10],[0,10,11],
+    [1,5,9],[5,11,4],[11,10,2],[10,7,6],[7,1,8],
+    [3,9,4],[3,4,2],[3,2,6],[3,6,8],[3,8,9],
+    [4,9,5],[2,4,11],[6,2,10],[8,6,7],[9,8,1]
+  ];
+
+  // edges (unique)
+  const edgeSet = new Set(), edges = [];
+  faces.forEach(f=>{
+    for(let i=0;i<3;i++){
+      const a=f[i], b=f[(i+1)%3];
+      const key = a<b? a+'-'+b : b+'-'+a;
+      if(!edgeSet.has(key)){ edgeSet.add(key); edges.push([a,b]); }
+    }
+  });
+
+  const edgeData = [];
+  edges.forEach(([a,b])=>{
+    const A=baseVerts[a], B=baseVerts[b];
+    edgeData.push(...A,...B);
+  });
+
+  // triangles (for subtle solid pass)
+  const triData = [];
+  faces.forEach(f=>{
+    f.forEach(i=> triData.push(...baseVerts[i]));
+  });
+
+  function makeBuffer(arr){
+    const buf = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(arr), gl.STATIC_DRAW);
+    return buf;
+  }
+
+  const edgeBuf = makeBuffer(edgeData);
+  const triBuf  = makeBuffer(triData);
+  const triNorm = makeBuffer(triData); // normals ≈ positions on unit sphere
+
+  /* ---- particles ---- */
+  const N = 260, partData = [];
+  for(let i=0;i<N;i++){
+    const r = 1.9 + Math.random()*2.6;
+    const th = Math.random()*Math.PI*2;
+    const ph = Math.acos(2*Math.random()-1);
+    partData.push(
+      r*Math.sin(ph)*Math.cos(th),
+      r*Math.cos(ph),
+      r*Math.sin(ph)*Math.sin(th)
+    );
+  }
+  const partBuf = makeBuffer(partData);
+
+  /* ---- matrices (tiny helpers) ---- */
+  function perspective(fovy, aspect, near, far){
+    const f = 1/Math.tan(fovy/2), nf = 1/(near-far);
+    return new Float32Array([
+      f/aspect,0,0,0,
+      0,f,0,0,
+      0,0,(far+near)*nf,-1,
+      0,0,2*far*near*nf,0
+    ]);
+  }
+  function lookAt(eye, center, up){
+    let z = norm(sub(eye,center));
+    let x = norm(cross(up,z));
+    let y = cross(z,x);
+    return new Float32Array([
+      x[0],y[0],z[0],0,
+      x[1],y[1],z[1],0,
+      x[2],y[2],z[2],0,
+      -dot(x,eye),-dot(y,eye),-dot(z,eye),1
+    ]);
+  }
+  function sub(a,b){return [a[0]-b[0],a[1]-b[1],a[2]-b[2]];}
+  function cross(a,b){return [a[1]*b[2]-a[2]*b[1], a[2]*b[0]-a[0]*b[2], a[0]*b[1]-a[1]*b[0]];}
+  function dot(a,b){return a[0]*b[0]+a[1]*b[1]+a[2]*b[2];}
+  function norm(a){const l=Math.hypot(a[0],a[1],a[2])||1;return [a[0]/l,a[1]/l,a[2]/l];}
+
+  function multiply(a,b){
+    const o = new Float32Array(16);
+    for(let c=0;c<4;c++) for(let r=0;r<4;r++){
+      o[c*4+r] =
+        a[0*4+r]*b[c*4+0] +
+        a[1*4+r]*b[c*4+1] +
+        a[2*4+r]*b[c*4+2] +
+        a[3*4+r]*b[c*4+3];
+    }
+    return o;
+  }
+  function rotY(a){const c=Math.cos(a),s=Math.sin(a);return new Float32Array([c,0,-s,0, 0,1,0,0, s,0,c,0, 0,0,0,1]);}
+  function rotX(a){const c=Math.cos(a),s=Math.sin(a);return new Float32Array([1,0,0,0, 0,c,s,0, 0,-s,c,0, 0,0,0,1]);}
+  function scale(s){return new Float32Array([s,0,0,0, 0,s,0,0, 0,0,s,0, 0,0,0,1]);}
+
+  /* ---- interaction: drag to rotate (full 360°) ---- */
+  let rotX_ = -0.32, rotY_ = 0.6, velX = 0, velY = 0;
+  let dragging = false, lastX = 0, lastY = 0, spin = 0.0028;
+
+  function pointerDown(e){
+    dragging = true; lastX = e.clientX; lastY = e.clientY;
+    canvas.setPointerCapture && canvas.setPointerCapture(e.pointerId);
+  }
+  function pointerMove(e){
+    if(!dragging) return;
+    const dx = e.clientX - lastX, dy = e.clientY - lastY;
+    lastX = e.clientX; lastY = e.clientY;
+    velY = dx * 0.0065;
+    velX = dy * 0.0065;
+    rotY_ += velY;
+    rotX_ += velX;
+    rotX_ = Math.max(-1.35, Math.min(1.35, rotX_));
+  }
+  function pointerUp(){
+    dragging = false;
+  }
+  canvas.addEventListener('pointerdown', pointerDown);
+  canvas.addEventListener('pointermove', pointerMove);
+  canvas.addEventListener('pointerup', pointerUp);
+  canvas.addEventListener('pointercancel', pointerUp);
+  canvas.addEventListener('pointerleave', pointerUp);
+
+  /* ---- colors from CSS vars ---- */
+  let COL = {red:[1,0.12,0.24], red2:[0.55,0,0.09]};
+
+  function hexToRgb(h){
+    h = h.trim().replace('#','');
+    if(h.length===3) h = h.split('').map(c=>c+c).join('');
+    const n = parseInt(h,16);
+    return [((n>>16)&255)/255, ((n>>8)&255)/255, (n&255)/255];
+  }
+  function readColors(){
+    const cs = getComputedStyle(document.documentElement);
+    const a = cs.getPropertyValue('--red').trim();
+    const b = cs.getPropertyValue('--red-2').trim();
+    if(a) COL.red = hexToRgb(a);
+    if(b) COL.red2 = hexToRgb(b);
+  }
+  readColors();
+  window.__sceneColors = readColors;
+
+  /* ---- resize ---- */
+  function resize(){
+    const dpr = Math.min(devicePixelRatio || 1, 2);
+    const w = canvas.clientWidth, h = canvas.clientHeight;
+    canvas.width  = Math.max(1, Math.floor(w*dpr));
+    canvas.height = Math.max(1, Math.floor(h*dpr));
+    gl.viewport(0,0,canvas.width,canvas.height);
+  }
+  addEventListener('resize', resize);
+  resize();
+
+  /* ---- render ---- */
+  const light = norm([0.5,0.8,0.9]);
+  let time = 0;
+
+  function draw(){
+    time += 0.016;
+
+    if(!dragging){
+      velX *= 0.94;
+      velY *= 0.94;
+      rotY_ += velY + spin;
+      rotX_ += velX;
+      rotX_ = Math.max(-1.35, Math.min(1.35, rotX_));
+    }
+
+    const dpr = Math.min(devicePixelRatio || 1, 2);
+    const W = canvas.width, H = canvas.height;
+    gl.clearColor(0,0,0,0);
+    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+
+    gl.enable(gl.BLEND);
+    gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+    gl.enable(gl.DEPTH_TEST);
+
+    const aspect = W/H;
+    const proj = perspective(Math.PI/3.4, aspect, 0.1, 100);
+    const eye = [0, 0, 6.2];
+    const view = lookAt(eye, [0,0,0], [0,1,0]);
+
+    const breathe = 1 + Math.sin(time*1.1)*0.035;
+    const model = multiply(
+      multiply(rotY(rotY_), rotX(rotX_)),
+      scale(1.55 * breathe)
+    );
+
+    /* --- solid pass (subtle inner glow) --- */
+    gl.useProgram(prog);
+    gl.uniformMatrix4fv(LOC.uProj, false, proj);
+    gl.uniformMatrix4fv(LOC.uView, false, view);
+    gl.uniformMatrix4fv(LOC.uModel, false, model);
+    gl.uniform3fv(LOC.uEye, eye);
+    gl.uniform3fv(LOC.uColor, COL.red2);
+    gl.uniform1f(LOC.uAlpha, 0.10);
+    gl.uniform1f(LOC.uGlow, 0.55);
+    gl.uniform1f(LOC.uPointSize, 1);
+
+    gl.bindBuffer(gl.ARRAY_BUFFER, triBuf);
+    gl.enableVertexAttribArray(LOC.aPos);
+    gl.vertexAttribPointer(LOC.aPos, 3, gl.FLOAT, false, 0, 0);
+    gl.bindBuffer(gl.ARRAY_BUFFER, triNorm);
+    gl.enableVertexAttribArray(LOC.aNorm);
+    gl.vertexAttribPointer(LOC.aNorm, 3, gl.FLOAT, false, 0, 0);
+    gl.enable(gl.CULL_FACE);
+    gl.cullFace(gl.BACK);
+    gl.drawArrays(gl.TRIANGLES, 0, triData.length/3);
+    gl.disable(gl.CULL_FACE);
+
+    /* --- wireframe edges --- */
+    gl.uniform3fv(LOC.uColor, COL.red);
+    gl.uniform1f(LOC.uAlpha, 0.62);
+    gl.uniform1f(LOC.uGlow, 0.85);
+    gl.lineWidth(1);
+    gl.bindBuffer(gl.ARRAY_BUFFER, edgeBuf);
+    gl.enableVertexAttribArray(LOC.aPos);
+    gl.vertexAttribPointer(LOC.aPos, 3, gl.FLOAT, false, 0, 0);
+    gl.disableVertexAttribArray(LOC.aNorm);
+    gl.vertexAttrib3f(LOC.aNorm, 0,1,0);
+    gl.drawArrays(gl.LINES, 0, edgeData.length/3);
+
+    /* --- particles --- */
+    gl.useProgram(pProg);
+    gl.uniformMatrix4fv(PLOC.uProj, false, proj);
+    gl.uniformMatrix4fv(PLOC.uView, false, view);
+    const pModel = multiply(rotY(time*0.08), rotX(0.25));
+    gl.uniformMatrix4fv(PLOC.uModel, false, pModel);
+    gl.uniform3fv(PLOC.uEye, eye);
+    gl.uniform3fv(PLOC.uColor, [1,0.55,0.62]);
+    gl.uniform1f(PLOC.uAlpha, 0.55);
+    gl.uniform1f(PLOC.uPointSize, 2.2 * dpr);
+
+    gl.bindBuffer(gl.ARRAY_BUFFER, partBuf);
+    gl.enableVertexAttribArray(PLOC.aPos);
+    gl.vertexAttribPointer(PLOC.aPos, 3, gl.FLOAT, false, 0, 0);
+    gl.disableVertexAttribArray(PLOC.aNorm);
+    gl.vertexAttrib3f(PLOC.aNorm, 0,1,0);
+    gl.drawArrays(gl.POINTS, 0, N);
+
+    requestAnimationFrame(draw);
+  }
+  requestAnimationFrame(draw);
+})();
+
+/* =========================================================
+   6) BOOT
+   ========================================================= */
+(function boot(){
+  let savedLang = 'ar', savedTheme = 'dark';
+  try{
+    savedLang = localStorage.getItem('red1.lang') || 'ar';
+    savedTheme = localStorage.getItem('red1.theme') || 'dark';
+  }catch(e){}
+
+  applyTheme(savedTheme);
+  applyLang(savedLang);
+  $('#themeLabel').textContent = savedTheme === 'dark'
+    ? I18N[savedLang]['theme.toLight']
+    : I18N[savedLang]['theme.toDark'];
+})();
+</script>
 </body>
 </html>
