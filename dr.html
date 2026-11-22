@@ -1,0 +1,680 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>عيادات جميلة | Jameela Dental Clinic</title>
+<meta name="description" content="عيادات جميلة لطب وتجميل الأسنان - د. محمد حسن آل بكر. ابتسامتك هدفنا.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&family=Poppins:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --brand:#1279b0;--brand-deep:#0a4f74;--brand-soft:#35a7e0;
+  --teal:#0fb8a9;--radius:18px;
+  --shadow:0 18px 45px rgba(10,79,116,.14);
+  --shadow-lg:0 30px 70px rgba(10,79,116,.22);
+}
+[data-theme="light"]{
+  --bg:#f2f8fc;--bg-2:#e6f1f8;--surface:#ffffff;--surface-2:#f4f9fd;
+  --text:#0e2a3d;--muted:#5b7488;--border:#d5e7f2;--soft:#e3f1fa;
+  --hero-grad:linear-gradient(135deg,#eaf6fd 0%,#dcedf8 55%,#d3ecf4 100%);
+  --nav-bg:rgba(255,255,255,.82);
+}
+[data-theme="dark"]{
+  --bg:#06131d;--bg-2:#0a1c29;--surface:#0e2433;--surface-2:#122c3d;
+  --text:#e9f4fb;--muted:#93aec1;--border:#1d3d54;--soft:#123046;
+  --hero-grad:linear-gradient(135deg,#071722 0%,#0a2233 55%,#0c2b3f 100%);
+  --nav-bg:rgba(6,19,29,.8);
+  --shadow:0 18px 45px rgba(0,0,0,.45);
+  --shadow-lg:0 30px 70px rgba(0,0,0,.6);
+}
+html{scroll-behavior:smooth}
+body{
+  font-family:'Cairo','Poppins',sans-serif;
+  background:var(--bg);color:var(--text);
+  transition:background .4s,color .4s;
+  overflow-x:hidden;line-height:1.65;
+}
+[dir="ltr"] body{font-family:'Poppins','Cairo',sans-serif}
+.container{max-width:1200px;margin:0 auto;padding:0 22px}
+.red{color:var(--brand)}
+
+/* ===== NAV ===== */
+nav{
+  position:fixed;top:0;inset-inline:0;z-index:100;
+  background:var(--nav-bg);backdrop-filter:blur(16px);
+  border-bottom:1px solid var(--border);
+  transition:.3s;
+}
+.nav-inner{max-width:1200px;margin:0 auto;padding:12px 22px;display:flex;align-items:center;justify-content:space-between;gap:14px}
+.logo{display:flex;align-items:center;gap:10px;text-decoration:none;color:var(--text)}
+.logo-ico{
+  width:44px;height:44px;border-radius:13px;display:flex;align-items:center;justify-content:center;
+  background:linear-gradient(135deg,var(--brand),var(--teal));color:#fff;font-size:20px;
+  box-shadow:0 6px 18px rgba(18,121,176,.4);
+}
+.logo b{font-size:19px;font-weight:900}
+.logo small{display:block;font-size:11px;color:var(--muted);font-weight:600}
+.nav-links{display:flex;gap:4px;list-style:none}
+.nav-links a{
+  color:var(--muted);text-decoration:none;font-weight:700;font-size:14.5px;
+  padding:9px 14px;border-radius:10px;transition:.25s;
+}
+.nav-links a:hover{color:var(--brand);background:var(--soft)}
+.nav-tools{display:flex;align-items:center;gap:9px}
+.icon-btn{
+  width:42px;height:42px;border-radius:12px;border:1px solid var(--border);
+  background:var(--surface);color:var(--text);cursor:pointer;font-size:16px;
+  display:flex;align-items:center;justify-content:center;transition:.25s;
+}
+.icon-btn:hover{border-color:var(--brand);color:var(--brand);transform:translateY(-2px)}
+.lang-btn{width:auto;padding:0 14px;font-weight:800;font-size:13.5px}
+.wa-nav{
+  background:linear-gradient(135deg,#25d366,#128c7e);color:#fff;border:none;
+  padding:11px 18px;border-radius:12px;font-weight:800;font-size:14px;cursor:pointer;
+  text-decoration:none;display:flex;align-items:center;gap:8px;transition:.25s;
+  box-shadow:0 6px 18px rgba(37,211,102,.35);font-family:inherit;
+}
+.wa-nav:hover{transform:translateY(-2px)}
+.burger{display:none}
+
+/* ===== HERO ===== */
+.hero{
+  min-height:100vh;padding:130px 0 70px;
+  background:var(--hero-grad);position:relative;overflow:hidden;
+}
+.hero::before{
+  content:'';position:absolute;width:520px;height:520px;border-radius:50%;
+  background:radial-gradient(circle,rgba(18,121,176,.18),transparent 65%);
+  top:-120px;inset-inline-end:-120px;
+}
+.hero-grid{display:grid;grid-template-columns:1.05fr .95fr;gap:44px;align-items:center;position:relative}
+.badge{
+  display:inline-flex;align-items:center;gap:9px;background:var(--surface);
+  border:1px solid var(--border);border-radius:50px;padding:8px 18px;
+  font-size:13.5px;font-weight:800;color:var(--brand);box-shadow:var(--shadow);
+  margin-bottom:22px;animation:fadeUp .7s both;
+}
+.badge i{animation:pulse 1.8s infinite}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.25)}}
+.hero h1{font-size:clamp(34px,4.6vw,58px);font-weight:900;line-height:1.15;animation:fadeUp .7s .08s both}
+.hero h1 .grad{
+  background:linear-gradient(120deg,var(--brand),var(--teal));
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+}
+.hero p{font-size:17px;color:var(--muted);max-width:520px;margin:18px 0 30px;animation:fadeUp .7s .16s both}
+.hero-cta{display:flex;gap:14px;flex-wrap:wrap;animation:fadeUp .7s .24s both}
+.btn{
+  padding:15px 28px;border-radius:14px;font-weight:800;font-size:15px;
+  text-decoration:none;display:inline-flex;align-items:center;gap:10px;
+  border:none;cursor:pointer;transition:.3s;font-family:inherit;
+}
+.btn-primary{
+  background:linear-gradient(135deg,var(--brand),var(--brand-deep));color:#fff;
+  box-shadow:0 10px 28px rgba(18,121,176,.4);
+}
+.btn-primary:hover{transform:translateY(-3px);box-shadow:0 16px 36px rgba(18,121,176,.5)}
+.btn-ghost{background:var(--surface);color:var(--text);border:1px solid var(--border)}
+.btn-ghost:hover{border-color:var(--brand);color:var(--brand);transform:translateY(-3px)}
+.hero-mini{display:flex;gap:26px;margin-top:34px;animation:fadeUp .7s .32s both;flex-wrap:wrap}
+.mini b{font-size:24px;font-weight:900;color:var(--brand);display:block}
+.mini span{font-size:13px;color:var(--muted);font-weight:700}
+@keyframes fadeUp{from{opacity:0;transform:translateY(26px)}to{opacity:1;transform:none}}
+
+/* 3D TOOTH STAGE */
+.tooth-stage{
+  position:relative;background:var(--surface);border:1px solid var(--border);
+  border-radius:28px;box-shadow:var(--shadow-lg);overflow:hidden;
+  height:480px;animation:fadeUp .8s .2s both;
+}
+.tooth-stage::after{
+  content:'';position:absolute;inset:0;pointer-events:none;
+  background:radial-gradient(circle at 50% 115%,rgba(18,121,176,.14),transparent 60%);
+}
+#toothCanvas{width:100%;height:100%;display:block;cursor:grab;touch-action:none}
+#toothCanvas:active{cursor:grabbing}
+.tooth-hint{
+  position:absolute;bottom:16px;inset-inline:0;text-align:center;
+  font-size:13px;font-weight:800;color:var(--muted);pointer-events:none;
+}
+.tooth-hint i{color:var(--brand)}
+.tooth-fallback{display:none;position:absolute;inset:0;align-items:center;justify-content:center;font-size:120px;color:var(--brand)}
+
+/* ===== SECTION ===== */
+.section{padding:90px 0}
+.sec-head{text-align:center;max-width:640px;margin:0 auto 54px}
+.sec-tag{
+  display:inline-block;color:var(--brand);font-weight:900;font-size:13px;
+  letter-spacing:2px;background:var(--soft);padding:7px 18px;border-radius:50px;
+  border:1px solid var(--border);margin-bottom:14px;
+}
+.sec-head h2{font-size:clamp(26px,3.4vw,40px);font-weight:900}
+.sec-head p{color:var(--muted);margin-top:10px;font-size:15.5px}
+
+/* ===== DOCTOR ===== */
+.doctor-grid{display:grid;grid-template-columns:.9fr 1.1fr;gap:50px;align-items:center}
+.doc-stage{perspective:1300px;display:flex;flex-direction:column;align-items:center;gap:16px}
+.doc-card{
+  width:300px;height:400px;position:relative;transform-style:preserve-3d;
+  cursor:grab;touch-action:none;transition:box-shadow .3s;
+}
+.doc-card:active{cursor:grabbing}
+.doc-face{
+  position:absolute;inset:0;border-radius:24px;overflow:hidden;
+  backface-visibility:hidden;-webkit-backface-visibility:hidden;
+  box-shadow:var(--shadow-lg);border:1px solid var(--border);
+}
+.doc-front{background:linear-gradient(160deg,var(--surface),var(--surface-2))}
+.doc-front .avatar-wrap{position:absolute;inset:0}
+.doc-front svg,.doc-front img{width:100%;height:100%;object-fit:cover;display:block}
+.doc-front .name-strip{
+  position:absolute;inset-inline:0;bottom:0;padding:16px 14px;text-align:center;
+  background:linear-gradient(0deg,rgba(10,79,116,.92),transparent);color:#fff;
+}
+.doc-front .name-strip b{font-size:17px;font-weight:900;display:block}
+.doc-front .name-strip span{font-size:12px;opacity:.85;font-weight:600}
+.doc-back{
+  transform:rotateY(180deg);
+  background:linear-gradient(160deg,var(--brand-deep),var(--brand));
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;color:#fff;
+}
+.doc-back .back-ico{font-size:56px;opacity:.9}
+.doc-back b{font-size:22px;font-weight:900}
+.doc-back span{font-size:13px;opacity:.85}
+.doc-back .back-phone{background:rgba(255,255,255,.16);padding:8px 18px;border-radius:50px;font-weight:800;font-size:14px;letter-spacing:1px}
+.doc-tools{display:flex;gap:10px;align-items:center}
+.doc-tools .hint{font-size:12.5px;color:var(--muted);font-weight:700}
+.doc-info h3{font-size:clamp(24px,3vw,34px);font-weight:900;margin-bottom:8px}
+.doc-info .degree{
+  display:inline-flex;align-items:center;gap:8px;color:var(--brand);
+  background:var(--soft);border:1px solid var(--border);
+  padding:9px 18px;border-radius:50px;font-weight:800;font-size:14px;margin-bottom:20px;
+}
+.doc-info p{color:var(--muted);font-size:16px;margin-bottom:26px}
+.doc-points{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:30px}
+.doc-points div{display:flex;gap:11px;align-items:center;font-weight:700;font-size:14.5px}
+.doc-points i{
+  width:38px;height:38px;border-radius:11px;flex:none;
+  background:linear-gradient(135deg,var(--brand),var(--teal));color:#fff;
+  display:flex;align-items:center;justify-content:center;font-size:15px;
+  box-shadow:0 6px 16px rgba(18,121,176,.35);
+}
+
+/* ===== SERVICES ===== */
+.services{background:var(--bg-2)}
+.svc-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:22px}
+.svc{
+  background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);
+  padding:30px 26px;transition:.35s;position:relative;overflow:hidden;
+}
+.svc::before{
+  content:'';position:absolute;top:0;inset-inline-start:0;width:100%;height:4px;
+  background:linear-gradient(90deg,var(--brand),var(--teal));
+  transform:scaleX(0);transform-origin:start;transition:.4s;
+}
+.svc:hover{transform:translateY(-8px);box-shadow:var(--shadow-lg);border-color:var(--brand)}
+.svc:hover::before{transform:scaleX(1)}
+.svc-ico{
+  width:62px;height:62px;border-radius:17px;font-size:25px;color:#fff;
+  background:linear-gradient(135deg,var(--brand),var(--brand-deep));
+  display:flex;align-items:center;justify-content:center;margin-bottom:18px;
+  box-shadow:0 10px 24px rgba(18,121,176,.35);transition:.35s;
+}
+.svc:hover .svc-ico{transform:rotate(-8deg) scale(1.08)}
+.svc h4{font-size:18px;font-weight:900;margin-bottom:8px}
+.svc p{font-size:14px;color:var(--muted)}
+
+/* ===== CONTACT ===== */
+.contact-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:22px}
+.c-card{
+  background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);
+  padding:34px 26px;text-align:center;transition:.3s;text-decoration:none;color:var(--text);
+  display:block;
+}
+.c-card:hover{transform:translateY(-6px);box-shadow:var(--shadow-lg);border-color:var(--brand)}
+.c-ico{
+  width:66px;height:66px;border-radius:50%;margin:0 auto 16px;font-size:26px;color:#fff;
+  display:flex;align-items:center;justify-content:center;
+}
+.c-wa .c-ico{background:linear-gradient(135deg,#25d366,#128c7e);box-shadow:0 10px 26px rgba(37,211,102,.4)}
+.c-ph .c-ico{background:linear-gradient(135deg,var(--brand),var(--brand-deep));box-shadow:0 10px 26px rgba(18,121,176,.4)}
+.c-loc .c-ico{background:linear-gradient(135deg,#ff6b6b,#c92a2a);box-shadow:0 10px 26px rgba(255,107,107,.4)}
+.c-card h5{font-size:16px;font-weight:900;margin-bottom:6px}
+.c-card p{font-size:14.5px;color:var(--muted);font-weight:600}
+.c-card .big{font-size:21px;font-weight:900;color:var(--text);letter-spacing:.5px;direction:ltr}
+.banner{
+  margin-top:34px;border-radius:22px;padding:40px;text-align:center;color:#fff;
+  background:linear-gradient(120deg,var(--brand-deep),var(--brand) 55%,var(--teal));
+  box-shadow:var(--shadow-lg);position:relative;overflow:hidden;
+}
+.banner::after{
+  content:'\f5c1';font-family:'Font Awesome 6 Free';font-weight:900;
+  position:absolute;font-size:150px;opacity:.12;inset-inline-end:30px;top:-25px;
+}
+.banner h3{font-size:clamp(20px,2.6vw,30px);font-weight:900;margin-bottom:8px}
+.banner p{opacity:.9;font-weight:600}
+
+/* ===== FOOTER ===== */
+footer{background:var(--bg-2);border-top:1px solid var(--border);padding:44px 0 26px}
+.foot-grid{display:flex;justify-content:space-between;align-items:center;gap:20px;flex-wrap:wrap}
+.foot-links{display:flex;gap:10px}
+.foot-links a{
+  width:42px;height:42px;border-radius:12px;background:var(--surface);border:1px solid var(--border);
+  color:var(--muted);display:flex;align-items:center;justify-content:center;font-size:17px;transition:.25s;text-decoration:none;
+}
+.foot-links a:hover{color:#fff;background:linear-gradient(135deg,var(--brand),var(--teal));transform:translateY(-3px)}
+.foot-copy{text-align:center;color:var(--muted);font-size:13.5px;margin-top:26px;font-weight:600}
+.foot-copy i{color:#ff5b7a}
+
+/* Floating WA */
+.wa-float{
+  position:fixed;bottom:26px;inset-inline-start:26px;z-index:90;
+  width:58px;height:58px;border-radius:50%;background:linear-gradient(135deg,#25d366,#128c7e);
+  color:#fff;font-size:26px;display:flex;align-items:center;justify-content:center;
+  text-decoration:none;box-shadow:0 12px 30px rgba(37,211,102,.5);transition:.3s;
+}
+.wa-float:hover{transform:scale(1.12) rotate(8deg)}
+
+/* Responsive */
+@media(max-width:1024px){
+  .hero-grid,.doctor-grid{grid-template-columns:1fr;gap:36px}
+  .tooth-stage{height:400px}
+  .svc-grid,.contact-grid{grid-template-columns:1fr 1fr}
+}
+@media(max-width:720px){
+  .nav-links{
+    position:fixed;top:68px;inset-inline:0;background:var(--surface);
+    flex-direction:column;padding:16px;border-bottom:1px solid var(--border);
+    transform:translateY(-130%);transition:.3s;gap:2px;
+  }
+  .nav-links.open{transform:none}
+  .burger{display:flex}
+  .wa-nav span{display:none}
+  .svc-grid,.contact-grid,.doc-points{grid-template-columns:1fr}
+  .section{padding:64px 0}
+  .hero{padding:120px 0 56px}
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav id="nav">
+  <div class="nav-inner">
+    <a href="#home" class="logo">
+      <span class="logo-ico"><i class="fas fa-tooth"></i></span>
+      <span><b data-i18n="clinic">عيادات جميلة</b><small data-i18n="clinicSub">طب وتجميل الأسنان</small></span>
+    </a>
+    <ul class="nav-links" id="navLinks">
+      <li><a href="#home" data-i18n="navHome">الرئيسية</a></li>
+      <li><a href="#doctor" data-i18n="navDoctor">الدكتور</a></li>
+      <li><a href="#services" data-i18n="navServices">خدماتنا</a></li>
+      <li><a href="#contact" data-i18n="navContact">تواصل معنا</a></li>
+    </ul>
+    <div class="nav-tools">
+      <button class="icon-btn lang-btn" id="langBtn">English</button>
+      <button class="icon-btn" id="themeBtn" aria-label="theme"><i class="fas fa-moon"></i></button>
+      <a class="wa-nav" href="https://wa.me/9647851661616" target="_blank"><i class="fab fa-whatsapp"></i><span data-i18n="book">احجز الآن</span></a>
+      <button class="icon-btn burger" id="burger"><i class="fas fa-bars"></i></button>
+    </div>
+  </div>
+</nav>
+
+<!-- HERO -->
+<header class="hero" id="home">
+  <div class="container hero-grid">
+    <div>
+      <div class="badge"><i class="fas fa-circle-check"></i><span data-i18n="heroBadge">ابتسامتك هدفنا</span></div>
+      <h1>
+        <span data-i18n="heroT1">عيادات جميلة</span><br>
+        <span class="grad" data-i18n="heroT2">لطب وتجميل الأسنان</span>
+      </h1>
+      <p data-i18n="heroDesc">أسنان صحية.. ابتسامة أجمل. رعاية متكاملة بأحدث التقنيات والليزر على يد الدكتور محمد حسن آل بكر.</p>
+      <div class="hero-cta">
+        <a class="btn btn-primary" href="https://wa.me/9647851661616" target="_blank"><i class="fab fa-whatsapp"></i><span data-i18n="ctaWa">حجز عبر واتساب</span></a>
+        <a class="btn btn-ghost" href="#services"><i class="fas fa-stethoscope"></i><span data-i18n="ctaSvc">خدماتنا</span></a>
+      </div>
+      <div class="hero-mini">
+        <div class="mini"><b>07851661616</b><span data-i18n="miniPhone">للاستفسار والحجز</span></div>
+        <div class="mini"><b>24/7</b><span data-i18n="miniWelcome">نرحب بكم دائماً</span></div>
+      </div>
+    </div>
+    <div class="tooth-stage">
+      <canvas id="toothCanvas"></canvas>
+      <div class="tooth-fallback" id="toothFallback"><i class="fas fa-tooth"></i></div>
+      <div class="tooth-hint"><i class="fas fa-hand-pointer"></i> <span data-i18n="dragTooth">اسحب السن لتدويره 360°</span></div>
+    </div>
+  </div>
+</header>
+
+<!-- DOCTOR -->
+<section class="section" id="doctor">
+  <div class="container">
+    <div class="sec-head">
+      <span class="sec-tag" data-i18n="tagDoctor">استشاري العيادة</span>
+      <h2 data-i18n="docHeadT">طبيبك <span class="red">بكل ثقة</span></h2>
+    </div>
+    <div class="doctor-grid">
+      <div class="doc-stage">
+        <div class="doc-card" id="docCard">
+          <div class="doc-face doc-front">
+            <div class="avatar-wrap">
+              <img src="doctor.jpg" alt="Dr. Mohammed Hassan Al-Bakr" onerror="this.remove()">
+              <svg viewBox="0 0 300 400" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                  <linearGradient id="bgG" x1="0" y1="0" x2="1" y2="1">
+                    <stop offset="0" stop-color="#dcedf8"/><stop offset="1" stop-color="#bfe0ef"/>
+                  </linearGradient>
+                  <linearGradient id="scrub" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0" stop-color="#1565a0"/><stop offset="1" stop-color="#0a4f74"/>
+                  </linearGradient>
+                </defs>
+                <rect width="300" height="400" fill="url(#bgG)"/>
+                <circle cx="150" cy="150" r="58" fill="#e8b98f"/>
+                <path d="M92 138 Q92 92 150 90 Q208 92 208 138 Q208 112 188 104 Q170 118 150 116 Q130 118 112 104 Q92 112 92 138Z" fill="#1c1c24"/>
+                <path d="M96 150 Q96 100 150 98 Q204 100 204 150 L204 128 Q190 108 150 108 Q110 108 96 128Z" fill="#23232e"/>
+                <ellipse cx="128" cy="146" rx="6" ry="4" fill="#2b2b35"/>
+                <ellipse cx="172" cy="146" rx="6" ry="4" fill="#2b2b35"/>
+                <path d="M138 168 Q150 176 162 168" stroke="#b5764a" stroke-width="3" fill="none" stroke-linecap="round"/>
+                <path d="M132 186 Q150 198 168 186" stroke="#c98a5e" stroke-width="3" fill="none" stroke-linecap="round"/>
+                <path d="M60 400 Q60 290 150 282 Q240 290 240 400Z" fill="url(#scrub)"/>
+                <path d="M150 282 L132 320 L150 340 L168 320Z" fill="#0d3d5c"/>
+                <rect x="176" y="330" width="40" height="34" rx="6" fill="#0d3d5c"/>
+                <circle cx="150" cy="252" r="14" fill="none" stroke="#cfd8dc" stroke-width="5"/>
+                <path d="M150 266 L150 300" stroke="#cfd8dc" stroke-width="5" fill="none"/>
+              </svg>
+            </div>
+            <div class="name-strip">
+              <b data-i18n="docName">د. محمد حسن آل بكر</b>
+              <span data-i18n="docDegree">بكالوريوس طب وجراحة الفم والأسنان</span>
+            </div>
+          </div>
+          <div class="doc-face doc-back">
+            <div class="back-ico"><i class="fas fa-tooth"></i></div>
+            <b data-i18n="clinic">عيادات جميلة</b>
+            <span data-i18n="clinicSub">طب وتجميل الأسنان</span>
+            <div class="back-phone" dir="ltr">0785 166 1616</div>
+          </div>
+        </div>
+        <div class="doc-tools">
+          <button class="icon-btn" id="docSpin" aria-label="spin"><i class="fas fa-sync-alt"></i></button>
+          <span class="hint" data-i18n="dragDoc">اسحب البطاقة لتدويرها 360°</span>
+        </div>
+      </div>
+      <div class="doc-info">
+        <span class="degree"><i class="fas fa-graduation-cap"></i><span data-i18n="docDegree">بكالوريوس طب وجراحة الفم والأسنان</span></span>
+        <h3 data-i18n="docName2">الدكتور محمد حسن آل بكر</h3>
+        <p data-i18n="docAbout">خبرة في علاج وتجميل الأسنان باستخدام أحدث التقنيات، مع اهتمام خاص براحة المريض وابتسامته. نرحب بكم دائماً في عيادات جميلة.</p>
+        <div class="doc-points">
+          <div><i class="fas fa-user-doctor"></i><span data-i18n="p1">تشخيص دقيق</span></div>
+          <div><i class="fas fa-laser-pointer"></i><span data-i18n="p2">تقنيات الليزر</span></div>
+          <div><i class="fas fa-hand-holding-heart"></i><span data-i18n="p3">تعامل لطيف وآمن</span></div>
+          <div><i class="fas fa-smile"></i><span data-i18n="p4">نتائج تجميلية مبهرة</span></div>
+        </div>
+        <a class="btn btn-primary" href="tel:+9647851661616"><i class="fas fa-phone-volume"></i><span data-i18n="ctaCall">اتصل للحجز</span></a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SERVICES -->
+<section class="section services" id="services">
+  <div class="container">
+    <div class="sec-head">
+      <span class="sec-tag" data-i18n="tagSvc">خدماتنا</span>
+      <h2 data-i18n="svcHeadT">كل ما يحتاجه <span class="red">فمك</span></h2>
+      <p data-i18n="svcHeadP">حلول متكاملة لطب وتجميل الأسنان تحت سقف واحد.</p>
+    </div>
+    <div class="svc-grid">
+      <div class="svc"><div class="svc-ico"><i class="fas fa-tooth"></i></div><h4 data-i18n="s1t">حشوات ضوئية</h4><p data-i18n="s1p">حشو تجميلي بالمواد الضوئية الحديثة بلون السن الطبيعي.</p></div>
+      <div class="svc"><div class="svc-ico"><i class="fas fa-sparkles"></i></div><h4 data-i18n="s2t">حشوات تجميلية</h4><p data-i18n="s2p">إعادة تشكيل الأسنان واستعادة جمالها بدقة عالية.</p></div>
+      <div class="svc"><div class="svc-ico"><i class="fas fa-pump-medical"></i></div><h4 data-i18n="s3t">حشوات الجذور</h4><p data-i18n="s3p">علاج العصب وحشو الجذور لإنقاذ الأسنان المتضررة.</p></div>
+      <div class="svc"><div class="svc-ico"><i class="fas fa-teeth"></i></div><h4 data-i18n="s4t">قلع الأسنان والجذور التالفة</h4><p data-i18n="s4p">قلع آمن وبأقل ألم possible مع عناية ما بعد العملية.</p></div>
+      <div class="svc"><div class="svc-ico"><i class="fas fa-wand-magic-sparkles"></i></div><h4 data-i18n="s5t">تنظيف وتبييض بالليزر</h4><p data-i18n="s5p">إزالة الجير والتصبغات وتبييض احترافي لابتسامة أكثر إشراقاً.</p></div>
+      <div class="svc"><div class="svc-ico"><i class="fas fa-gear"></i></div><h4 data-i18n="s6t">تركيب الأسنان</h4><p data-i18n="s6p">تيجان وجسور وتراكيب ثابتة ومتحركة بمواد عالية الجودة.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- CONTACT -->
+<section class="section" id="contact">
+  <div class="container">
+    <div class="sec-head">
+      <span class="sec-tag" data-i18n="tagContact">تواصل معنا</span>
+      <h2 data-i18n="ctHeadT">لحجز <span class="red">الموعد</span></h2>
+    </div>
+    <div class="contact-grid">
+      <a class="c-card c-wa" href="https://wa.me/9647851661616" target="_blank">
+        <div class="c-ico"><i class="fab fa-whatsapp"></i></div>
+        <h5 data-i18n="ctWa">واتساب للحجز والاستفسار</h5>
+        <div class="big">07851661616</div>
+        <p data-i18n="ctWaName">د. محمد</p>
+      </a>
+      <a class="c-card c-ph" href="tel:+9647851661616">
+        <div class="c-ico"><i class="fas fa-phone"></i></div>
+        <h5 data-i18n="ctPhone">اتصال مباشر</h5>
+        <div class="big">07851661616</div>
+        <p data-i18n="ctPhoneSub">متاحون للرد على استفساراتكم</p>
+      </a>
+      <div class="c-card c-loc">
+        <div class="c-ico"><i class="fas fa-location-dot"></i></div>
+        <h5 data-i18n="ctLoc">الموقع</h5>
+        <p data-i18n="ctLoc1">الخصرانية — الشارع العام</p>
+        <p data-i18n="ctLoc2">قرب جامع حجي رشيد</p>
+      </div>
+    </div>
+    <div class="banner">
+      <h3 data-i18n="banT">أسنان صحية.. ابتسامة أجمل</h3>
+      <p data-i18n="banP">تابعنا على تيك توك @dr_moh27 لنصائح يومية عن صحة أسنانك — نرحب بكم دائماً <i class="fas fa-heart"></i></p>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="container">
+    <div class="foot-grid">
+      <a href="#home" class="logo">
+        <span class="logo-ico"><i class="fas fa-tooth"></i></span>
+        <span><b data-i18n="clinic">عيادات جميلة</b><small data-i18n="clinicSub">طب وتجميل الأسنان</small></span>
+      </a>
+      <div class="foot-links">
+        <a href="https://www.tiktok.com/@dr_moh27" target="_blank" aria-label="TikTok"><i class="fab fa-tiktok"></i></a>
+        <a href="https://wa.me/9647851661616" target="_blank" aria-label="WhatsApp"><i class="fab fa-whatsapp"></i></a>
+        <a href="tel:+9647851661616" aria-label="Phone"><i class="fas fa-phone"></i></a>
+        <a href="#contact" aria-label="Location"><i class="fas fa-location-dot"></i></a>
+      </div>
+    </div>
+    <p class="foot-copy">© 2026 <span class="red" data-i18n="clinic">عيادات جميلة</span> — <span data-i18n="rights">جميع الحقوق محفوظة</span> · <span data-i18n="madeWith">صنع بعناية</span> <i class="fas fa-heart"></i></p>
+  </div>
+</footer>
+
+<a class="wa-float" href="https://wa.me/9647851661616" target="_blank" aria-label="WhatsApp"><i class="fab fa-whatsapp"></i></a>
+
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+<script>
+/* ============ I18N ============ */
+const I18N = {
+ ar:{
+  clinic:'عيادات جميلة',clinicSub:'طب وتجميل الأسنان',book:'احجز الآن',
+  navHome:'الرئيسية',navDoctor:'الدكتور',navServices:'خدماتنا',navContact:'تواصل معنا',
+  heroBadge:'ابتسامتك هدفنا',heroT1:'عيادات جميلة',heroT2:'لطب وتجميل الأسنان',
+  heroDesc:'أسنان صحية.. ابتسامة أجمل. رعاية متكاملة بأحدث التقنيات والليزر على يد الدكتور محمد حسن آل بكر.',
+  ctaWa:'حجز عبر واتساب',ctaSvc:'خدماتنا',miniPhone:'للاستفسار والحجز',miniWelcome:'نرحب بكم دائماً',
+  dragTooth:'اسحب السن لتدويره 360°',
+  tagDoctor:'استشاري العيادة',docHeadT:'طبيبك بكل ثقة',
+  docName:'د. محمد حسن آل بكر',docName2:'الدكتور محمد حسن آل بكر',
+  docDegree:'بكالوريوس طب وجراحة الفم والأسنان',
+  dragDoc:'اسحب البطاقة لتدويرها 360°',
+  docAbout:'خبرة في علاج وتجميل الأسنان باستخدام أحدث التقنيات، مع اهتمام خاص براحة المريض وابتسامته. نرحب بكم دائماً في عيادات جميلة.',
+  p1:'تشخيص دقيق',p2:'تقنيات الليزر',p3:'تعامل لطيف وآمن',p4:'نتائج تجميلية مبهرة',ctaCall:'اتصل للحجز',
+  tagSvc:'خدماتنا',svcHeadT:'كل ما يحتاجه فمك',svcHeadP:'حلول متكاملة لطب وتجميل الأسنان تحت سقف واحد.',
+  s1t:'حشوات ضوئية',s1p:'حشو تجميلي بالمواد الضوئية الحديثة بلون السن الطبيعي.',
+  s2t:'حشوات تجميلية',s2p:'إعادة تشكيل الأسنان واستعادة جمالها بدقة عالية.',
+  s3t:'حشوات الجذور',s3p:'علاج العصب وحشو الجذور لإنقاذ الأسنان المتضررة.',
+  s4t:'قلع الأسنان والجذور التالفة',s4p:'قلع آمن وبأقل ألم مع عناية ما بعد العملية.',
+  s5t:'تنظيف وتبييض بالليزر',s5p:'إزالة الجير والتصبغات وتبييض احترافي لابتسامة أكثر إشراقاً.',
+  s6t:'تركيب الأسنان',s6p:'تيجان وجسور وتراكيب ثابتة ومتحركة بمواد عالية الجودة.',
+  tagContact:'تواصل معنا',ctHeadT:'لحجز الموعد',
+  ctWa:'واتساب للحجز والاستفسار',ctWaName:'د. محمد',ctPhone:'اتصال مباشر',ctPhoneSub:'متاحون للرد على استفساراتكم',
+  ctLoc:'الموقع',ctLoc1:'الخصرانية — الشارع العام',ctLoc2:'قرب جامع حجي رشيد',
+  banT:'أسنان صحية.. ابتسامة أجمل',banP:'تابعنا على تيك توك @dr_moh27 لنصائح يومية عن صحة أسنانك — نرحب بكم دائماً',
+  rights:'جميع الحقوق محفوظة',madeWith:'صنع بعناية'
+ },
+ en:{
+  clinic:'Jameela Clinic',clinicSub:'Dental & Cosmetic Care',book:'Book Now',
+  navHome:'Home',navDoctor:'Doctor',navServices:'Services',navContact:'Contact',
+  heroBadge:'Your Smile Is Our Goal',heroT1:'Jameela Dental',heroT2:'Clinic',
+  heroDesc:'Healthy teeth.. a more beautiful smile. Complete care with the latest laser technology by Dr. Mohammed Hassan Al-Bakr.',
+  ctaWa:'Book on WhatsApp',ctaSvc:'Our Services',miniPhone:'For appointments',miniWelcome:'Always welcoming you',
+  dragTooth:'Drag the tooth to rotate 360°',
+  tagDoctor:'Lead Dentist',docHeadT:'Your Doctor, With Trust',
+  docName:'Dr. Mohammed Hassan Al-Bakr',docName2:'Dr. Mohammed Hassan Al-Bakr',
+  docDegree:'BSc in Oral Medicine & Dental Surgery',
+  dragDoc:'Drag the card to rotate 360°',
+  docAbout:'Experienced in dental treatment and cosmetics using the latest technology, with special care for patient comfort. Welcome always at Jameela Clinic.',
+  p1:'Accurate diagnosis',p2:'Laser technology',p3:'Gentle & safe care',p4:'Stunning cosmetic results',ctaCall:'Call to Book',
+  tagSvc:'Our Services',svcHeadT:'Everything Your Smile Needs',svcHeadP:'Complete dental solutions under one roof.',
+  s1t:'Light-Cured Fillings',s1p:'Modern composite fillings matched to your natural tooth color.',
+  s2t:'Cosmetic Fillings',s2p:'Precise reshaping to restore the beauty of your teeth.',
+  s3t:'Root Canal Fillings',s3p:'Endodontic treatment to save damaged teeth.',
+  s4t:'Extraction',s4p:'Safe, low-pain extraction of damaged teeth and roots.',
+  s5t:'Laser Cleaning & Whitening',s5p:'Professional tartar removal and laser whitening for a brighter smile.',
+  s6t:'Crowns & Implants',s6p:'High-quality crowns, bridges, and dentures.',
+  tagContact:'Contact Us',ctHeadT:'Book Your Appointment',
+  ctWa:'WhatsApp Booking',ctWaName:'Dr. Mohammed',ctPhone:'Direct Call',ctPhoneSub:'Available for all inquiries',
+  ctLoc:'Location',ctLoc1:'Al-Khasraniya — Main Street',ctLoc2:'Near Haji Rasheed Mosque',
+  banT:'Healthy teeth.. a more beautiful smile',banP:'Follow us on TikTok @dr_moh27 for daily dental tips — always welcome',
+  rights:'All Rights Reserved',madeWith:'Crafted with'
+ }
+};
+let lang = localStorage.getItem('jc_lang') || 'ar';
+function applyLang(l){
+  lang = l; localStorage.setItem('jc_lang', l);
+  const root = document.documentElement;
+  root.lang = l; root.dir = (l === 'ar') ? 'rtl' : 'ltr';
+  document.querySelectorAll('[data-i18n]').forEach(el=>{
+    const v = I18N[l][el.dataset.i18n];
+    if(v != null) el.textContent = v;
+  });
+  document.getElementById('langBtn').textContent = (l === 'ar') ? 'English' : 'عربي';
+}
+document.getElementById('langBtn').addEventListener('click', ()=> applyLang(lang === 'ar' ? 'en' : 'ar'));
+
+/* ============ THEME ============ */
+const themeBtn = document.getElementById('themeBtn');
+function applyTheme(t){
+  document.documentElement.dataset.theme = t;
+  localStorage.setItem('jc_theme', t);
+  themeBtn.innerHTML = (t === 'dark') ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>';
+}
+themeBtn.addEventListener('click', ()=>{
+  applyTheme(document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark');
+});
+
+/* ============ NAV ============ */
+document.getElementById('burger').addEventListener('click', ()=>{
+  document.getElementById('navLinks').classList.toggle('open');
+});
+document.querySelectorAll('.nav-links a').forEach(a=>{
+  a.addEventListener('click', ()=> document.getElementById('navLinks').classList.remove('open'));
+});
+
+/* ============ 3D TOOTH (Three.js) ============ */
+(function(){
+  if(!window.THREE){ document.getElementById('toothFallback').style.display='flex'; return; }
+  const canvas = document.getElementById('toothCanvas');
+  const stage = canvas.parentElement;
+  const renderer = new THREE.WebGLRenderer({canvas, antialias:true, alpha:true});
+  renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+  const scene = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(40, 1, 0.1, 100);
+  camera.position.set(0, 0.4, 5.2);
+
+  scene.add(new THREE.AmbientLight(0xffffff, 0.65));
+  const key = new THREE.DirectionalLight(0xffffff, 0.95); key.position.set(3,5,4); scene.add(key);
+  const rim = new THREE.PointLight(0x35a7e0, 0.6); rim.position.set(-4,-2,3); scene.add(rim);
+  const fill = new THREE.PointLight(0x0fb8a9, 0.35); fill.position.set(2,-4,-3); scene.add(fill);
+
+  const toothMat = new THREE.MeshPhysicalMaterial({
+    color:0xffffff, roughness:0.22, metalness:0.02,
+    clearcoat:1, clearcoatRoughness:0.18,
+    emissive:0x0a1a24, emissiveIntensity:0.05
+  });
+
+  // Crown via lathe
+  const profile = [
+    new THREE.Vector2(0.001, 1.30),
+    new THREE.Vector2(0.20, 1.27),
+    new THREE.Vector2(0.40, 1.14),
+    new THREE.Vector2(0.58, 0.90),
+    new THREE.Vector2(0.68, 0.58),
+    new THREE.Vector2(0.70, 0.28),
+    new THREE.Vector2(0.60, 0.02),
+    new THREE.Vector2(0.46,-0.10)
+  ];
+  const crown = new THREE.Mesh(new THREE.LatheGeometry(profile, 64), toothMat);
+
+  // Two roots
+  const rootGeo = new THREE.CylinderGeometry(0.17, 0.05, 1.25, 32);
+  const rootL = new THREE.Mesh(rootGeo, toothMat);
+  rootL.position.set(-0.27, -0.72, 0); rootL.rotation.z = 0.16;
+  const rootR = new THREE.Mesh(rootGeo, toothMat);
+  rootR.position.set(0.27, -0.72, 0); rootR.rotation.z = -0.16;
+
+  const tooth = new THREE.Group();
+  tooth.add(crown, rootL, rootR);
+  tooth.scale.setScalar(1.25);
+  scene.add(tooth);
+
+  const controls = new THREE.OrbitControls(camera, canvas);
+  controls.enableDamping = true; controls.dampingFactor = 0.06;
+  controls.enableZoom = false; controls.enablePan = false;
+  controls.autoRotate = true; controls.autoRotateSpeed = 2.2;
+
+  function resize(){
+    const w = stage.clientWidth, h = stage.clientHeight;
+    renderer.setSize(w, h, false);
+    camera.aspect = w/h; camera.updateProjectionMatrix();
+  }
+  window.addEventListener('resize', resize); resize();
+
+  (function loop(){ controls.update(); renderer.render(scene, camera); requestAnimationFrame(loop); })();
+})();
+
+/* ============ DOCTOR CARD 360 ROTATION ============ */
+(function(){
+  const card = document.getElementById('docCard');
+  let rot = 0, dragging = false, lastX = 0, auto = true, vel = 0;
+  function render(){ card.style.transform = 'rotateY(' + rot + 'deg)'; }
+  card.addEventListener('pointerdown', e=>{
+    dragging = true; lastX = e.clientX; vel = 0; card.setPointerCapture(e.pointerId);
+  });
+  card.addEventListener('pointermove', e=>{
+    if(!dragging) return;
+    const dx = e.clientX - lastX; lastX = e.clientX;
+    rot += dx * 0.6; vel = dx * 0.6; render();
+  });
+  card.addEventListener('pointerup', ()=>{ dragging = false; });
+  card.addEventListener('pointercancel', ()=>{ dragging = false; });
+  (function tick(){
+    if(!dragging){
+      if(Math.abs(vel) > 0.05){ rot += vel; vel *= 0.95; render(); }
+      else if(auto){ rot += 0.35; render(); }
+    }
+    requestAnimationFrame(tick);
+  })();
+  document.getElementById('docSpin').addEventListener('click', ()=>{ auto = !auto; });
+  render();
+})();
+
+/* ============ INIT ============ */
+applyTheme(localStorage.getItem('jc_theme') || 'light');
+applyLang(lang);
+</script>
+</body>
+</html>
