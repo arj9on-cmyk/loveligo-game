@@ -1,0 +1,737 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🍉 محلل حفلة الفاكهة — Fruit Party Analyzer</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{
+  font-family:'Segoe UI','Cairo',sans-serif;
+  background:linear-gradient(135deg,#1a0b2e 0%,#2d1b4e 50%,#1a0b2e 100%);
+  color:#fff;min-height:100vh;padding:16px;
+  background-attachment:fixed;
+}
+body::before{
+  content:'';position:fixed;inset:0;pointer-events:none;
+  background:radial-gradient(circle at 20% 30%,rgba(138,43,226,.25),transparent 50%),
+             radial-gradient(circle at 80% 70%,rgba(255,215,0,.12),transparent 50%);
+  z-index:0;
+}
+.wrap{max-width:1100px;margin:0 auto;position:relative;z-index:1}
+
+/* Header */
+.header{
+  text-align:center;padding:20px 16px;margin-bottom:20px;
+  background:linear-gradient(135deg,rgba(138,43,226,.3),rgba(75,0,130,.4));
+  border:1px solid rgba(255,215,0,.3);border-radius:20px;
+  box-shadow:0 10px 40px rgba(138,43,226,.4);
+}
+.header h1{
+  font-size:clamp(22px,4vw,32px);font-weight:900;
+  background:linear-gradient(90deg,#ffd700,#ff6b9d,#ffd700);
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+  margin-bottom:6px;
+}
+.header p{color:#c9b8e8;font-size:14px}
+.stats-row{
+  display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:16px;
+}
+.stat{
+  background:rgba(0,0,0,.35);border:1px solid rgba(255,215,0,.2);
+  border-radius:12px;padding:12px 8px;text-align:center;
+}
+.stat b{display:block;font-size:20px;font-weight:900;color:#ffd700}
+.stat small{font-size:11px;color:#c9b8e8}
+
+/* Tabs */
+.tabs{
+  display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;
+}
+.tab{
+  flex:1;min-width:120px;padding:12px 16px;
+  background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);
+  border-radius:12px;color:#c9b8e8;font-weight:700;font-size:14px;
+  cursor:pointer;transition:.25s;text-align:center;
+}
+.tab:hover{background:rgba(255,215,0,.1);color:#fff}
+.tab.active{
+  background:linear-gradient(135deg,#ffd700,#ff8c00);
+  color:#1a0b2e;border-color:#ffd700;
+  box-shadow:0 6px 20px rgba(255,215,0,.4);
+}
+
+/* Panels */
+.panel{display:none}
+.panel.active{display:block;animation:fadeUp .3s}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+
+.card{
+  background:rgba(20,10,40,.7);border:1px solid rgba(255,255,255,.08);
+  border-radius:16px;padding:18px;margin-bottom:16px;
+  backdrop-filter:blur(10px);
+}
+.card h3{
+  font-size:16px;font-weight:900;margin-bottom:14px;
+  color:#ffd700;display:flex;align-items:center;gap:8px;
+}
+
+/* Fruit Grid Input */
+.fruit-grid{
+  display:grid;grid-template-columns:repeat(3,1fr);gap:10px;
+}
+.fruit-card{
+  background:linear-gradient(135deg,#6a1b9a,#8e24aa);
+  border:2px solid rgba(255,215,0,.2);border-radius:14px;
+  padding:14px 10px;text-align:center;cursor:pointer;transition:.25s;
+  position:relative;
+}
+.fruit-card:hover{transform:translateY(-3px);border-color:#ffd700}
+.fruit-card.selected{
+  border-color:#ffd700;
+  box-shadow:0 0 25px rgba(255,215,0,.6);
+  background:linear-gradient(135deg,#8e24aa,#ab47bc);
+}
+.fruit-card .emoji{font-size:42px;display:block;margin-bottom:6px}
+.fruit-card .name{font-size:13px;font-weight:700;color:#fff}
+.fruit-card .multi{font-size:11px;color:#ffd700;margin-top:3px}
+.fruit-card .bet-input{
+  margin-top:8px;width:100%;padding:6px;border-radius:8px;
+  border:1px solid rgba(255,255,255,.2);background:rgba(0,0,0,.4);
+  color:#fff;text-align:center;font-weight:700;font-size:13px;
+}
+.fruit-card .bet-input:focus{outline:none;border-color:#ffd700}
+.fruit-card .crowd-label{font-size:10px;color:#ff8c00;margin-top:4px;font-weight:700}
+
+/* Winner selector */
+.winner-section{margin-bottom:16px}
+.winner-section label{display:block;font-size:14px;font-weight:700;color:#ffd700;margin-bottom:8px}
+
+/* Buttons */
+.btn{
+  padding:12px 22px;border-radius:12px;border:none;cursor:pointer;
+  font-weight:800;font-size:14px;font-family:inherit;transition:.25s;
+  display:inline-flex;align-items:center;gap:8px;
+}
+.btn-primary{
+  background:linear-gradient(135deg,#ffd700,#ff8c00);color:#1a0b2e;
+  box-shadow:0 6px 20px rgba(255,215,0,.4);
+}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 10px 28px rgba(255,215,0,.6)}
+.btn-danger{background:linear-gradient(135deg,#e53935,#b71c1c);color:#fff}
+.btn-ghost{background:rgba(255,255,255,.08);color:#fff;border:1px solid rgba(255,255,255,.15)}
+.btn-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+
+/* Analysis */
+.analysis-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media(max-width:700px){.analysis-grid{grid-template-columns:1fr}}
+
+.bar-row{
+  display:flex;align-items:center;gap:10px;margin:8px 0;
+  font-size:13px;
+}
+.bar-row .emoji{font-size:22px;width:32px;text-align:center}
+.bar-row .label{width:70px;font-weight:700}
+.bar-row .bar{flex:1;height:10px;background:rgba(255,255,255,.08);border-radius:5px;overflow:hidden}
+.bar-row .fill{height:100%;border-radius:5px;transition:width .5s}
+.bar-row .val{width:50px;text-align:left;font-weight:800;color:#ffd700;font-size:12px}
+
+/* Recommendation */
+.recommendation{
+  background:linear-gradient(135deg,rgba(255,215,0,.15),rgba(255,140,0,.1));
+  border:2px solid #ffd700;border-radius:16px;padding:20px;
+  text-align:center;margin-top:14px;
+}
+.recommendation .big-emoji{font-size:64px;display:block;margin-bottom:10px;animation:bounce 1.5s infinite}
+@keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+.recommendation h2{font-size:22px;font-weight:900;color:#ffd700;margin-bottom:6px}
+.recommendation p{color:#e0d0f0;font-size:14px}
+.recommendation .reason{
+  margin-top:12px;padding:10px;background:rgba(0,0,0,.3);
+  border-radius:10px;font-size:13px;color:#fff;
+}
+
+/* History */
+.history-item{
+  background:rgba(0,0,0,.3);border:1px solid rgba(255,255,255,.08);
+  border-radius:12px;padding:12px;margin-bottom:8px;
+  display:flex;align-items:center;gap:12px;flex-wrap:wrap;
+}
+.history-item .round-num{
+  background:#ffd700;color:#1a0b2e;width:36px;height:36px;
+  border-radius:10px;display:flex;align-items:center;justify-content:center;
+  font-weight:900;font-size:14px;flex:none;
+}
+.history-item .winner{font-size:28px}
+.history-item .details{flex:1;font-size:12px;color:#c9b8e8}
+.history-item .details b{color:#ffd700}
+
+/* Chart */
+canvas{width:100%;height:220px;display:block}
+
+/* Warning */
+.warning{
+  background:rgba(255,87,34,.12);border:1px solid rgba(255,87,34,.4);
+  border-radius:12px;padding:12px;font-size:12.5px;color:#ffab91;
+  margin-bottom:14px;line-height:1.7;
+}
+.warning b{color:#ff8a65}
+
+/* Empty */
+.empty{text-align:center;padding:40px 20px;color:#8a7aa8;font-size:14px}
+.empty i{font-size:48px;display:block;margin-bottom:10px;opacity:.4}
+
+@media(max-width:600px){
+  .fruit-grid{grid-template-columns:repeat(2,1fr)}
+  .stats-row{grid-template-columns:repeat(2,1fr)}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="header">
+    <h1>🍉 محلل حفلة الفاكهة 🍒</h1>
+    <p>سجّل ما تراه في كل جولة — وسأخبرك أين تضع جواهرك</p>
+    <div class="stats-row">
+      <div class="stat"><b id="statRounds">0</b><small>جولة مسجلة</small></div>
+      <div class="stat"><b id="statWins">0</b><small>فوز متوقع</small></div>
+      <div class="stat"><b id="statHitRate">0%</b><small>دقة التحليل</small></div>
+      <div class="stat"><b id="statHot">—</b><small>الفاكهة الساخنة</small></div>
+    </div>
+  </div>
+
+  <div class="tabs">
+    <div class="tab active" data-tab="input">🎯 تسجيل جولة</div>
+    <div class="tab" data-tab="analysis">📊 التحليل</div>
+    <div class="tab" data-tab="history">📜 السجل</div>
+    <div class="tab" data-tab="settings">⚙️ الإعدادات</div>
+  </div>
+
+  <!-- INPUT PANEL -->
+  <div class="panel active" id="panel-input">
+    <div class="warning">
+      <b>💡 كيف تستخدم الأداة:</b> قبل كل دوران، انظر إلى الشاشة وسجّل كم جوهرة وضع <b>اللاعبون الآخرون</b> على كل فاكهة (تقريبياً). ثم بعد ظهور النتيجة، اختر الفاكهة الفائزة. الأداة ستتعلم النمط وتخبرك下次 أين تضع.
+    </div>
+
+    <div class="card">
+      <h3>👥 جواهر اللاعبين على كل فاكهة (قبل الدوران)</h3>
+      <p style="font-size:12px;color:#c9b8e8;margin-bottom:12px">أدخل إجمالي الجواهر التي تراها على كل فاكهة من جميع اللاعبين</p>
+      <div class="fruit-grid" id="betGrid"></div>
+    </div>
+
+    <div class="card">
+      <h3>🏆 الفاكهة الفائزة في هذه الجولة</h3>
+      <div class="fruit-grid" id="winnerGrid" style="grid-template-columns:repeat(3,1fr)"></div>
+      <div class="btn-row">
+        <button class="btn btn-primary" id="saveRound">💾 حفظ الجولة وتحليلها</button>
+        <button class="btn btn-ghost" id="skipRound">⏭️ تخطي (لا نتيجة)</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ANALYSIS PANEL -->
+  <div class="panel" id="panel-analysis">
+    <div class="card">
+      <h3>🎯 توصية الجولة القادمة</h3>
+      <div id="recommendationBox">
+        <div class="empty"><i>📊</i>سجّل 3 جولات على الأقل للحصول على توصية</div>
+      </div>
+    </div>
+
+    <div class="analysis-grid">
+      <div class="card">
+        <h3>🔥 تكرار الظهور</h3>
+        <div id="freqChart"></div>
+      </div>
+      <div class="card">
+        <h3>💎 الجواهر vs الظهور</h3>
+        <p style="font-size:12px;color:#c9b8e8;margin-bottom:10px">كلما ارتفع العمود = الفاكهة تستقبل جواهر كثيرة لكنها <b style="color:#ff5252">لا تظهر</b></p>
+        <div id="trapChart"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>📈 مخطط الظهور عبر الجولات</h3>
+      <canvas id="historyChart"></canvas>
+    </div>
+
+    <div class="card">
+      <h3>🧠 الأنماط المكتشفة</h3>
+      <div id="patternsList"></div>
+    </div>
+  </div>
+
+  <!-- HISTORY PANEL -->
+  <div class="panel" id="panel-history">
+    <div class="card">
+      <h3>📜 سجل الجولات</h3>
+      <div id="historyList"></div>
+    </div>
+  </div>
+
+  <!-- SETTINGS PANEL -->
+  <div class="panel" id="panel-settings">
+    <div class="card">
+      <h3>⚙️ إدارة البيانات</h3>
+      <p style="font-size:13px;color:#c9b8e8;margin-bottom:14px">بياناتك تُحفظ محلياً في متصفحك فقط — لا تُرسل لأي خادم.</p>
+      <div class="btn-row">
+        <button class="btn btn-ghost" id="exportData">📤 تصدير البيانات</button>
+        <button class="btn btn-ghost" id="importData">📥 استيراد</button>
+        <button class="btn btn-danger" id="clearData">🗑️ مسح كل البيانات</button>
+      </div>
+      <input type="file" id="importFile" accept=".json" style="display:none">
+    </div>
+
+    <div class="card">
+      <h3>ℹ️ عن الأداة</h3>
+      <p style="font-size:13px;color:#c9b8e8;line-height:1.8">
+        هذه الأداة تعتمد على <b style="color:#ffd700">ملاحظاتك اليدوية</b> لما تراه في اللعبة. 
+        لا يمكن تقنياً مراقبة سيرفرات التطبيق من الخارج، لكن بتسجيلك المستمر، 
+        الأداة تتعرف على نمط اللعبة وتنبهك للفخاخ (الفواكه التي يستهدفها اللاعبون ولا تظهر).
+      </p>
+    </div>
+  </div>
+
+</div>
+
+<script>
+/* ============ DATA ============ */
+const FRUITS = [
+  {id:'orange', emoji:'🍊', name:'برتقال', multi:5, color:'#ff9800'},
+  {id:'lemon',  emoji:'🍋', name:'ليمون',  multi:5, color:'#ffeb3b'},
+  {id:'apple',  emoji:'🍎', name:'تفاح',   multi:5, color:'#f44336'},
+  {id:'cherry', emoji:'🍒', name:'كرز',    multi:45, color:'#e91e63'},
+  {id:'banana', emoji:'🍌', name:'موز',    multi:5, color:'#ffeb3b'},
+  {id:'avocado',emoji:'🥑', name:'أفوكادو',multi:25, color:'#4caf50'},
+  {id:'watermelon',emoji:'🍉',name:'بطيخ', multi:15, color:'#f44336'},
+  {id:'grape',  emoji:'🍇', name:'عنب',    multi:10, color:'#9c27b0'},
+  {id:'center', emoji:'🎰', name:'المركز', multi:0, color:'#ffd700'} // center slot (not bettable usually)
+];
+// Exclude center from betting
+const BETTABLE = FRUITS.filter(f=>f.id!=='center');
+
+let state = loadState();
+let selectedWinner = null;
+let bets = {}; // fruitId -> crowd gems
+
+function loadState(){
+  try{
+    const s = localStorage.getItem('fruitAnalyzer');
+    if(s) return JSON.parse(s);
+  }catch(e){}
+  return {rounds:[], currentBets:{}};
+}
+function saveState(){
+  localStorage.setItem('fruitAnalyzer', JSON.stringify(state));
+}
+
+/* ============ RENDER INPUT ============ */
+function renderBetGrid(){
+  const grid = document.getElementById('betGrid');
+  grid.innerHTML = '';
+  BETTABLE.forEach(f=>{
+    const val = state.currentBets[f.id] || 0;
+    const div = document.createElement('div');
+    div.className = 'fruit-card';
+    div.innerHTML = `
+      <span class="emoji">${f.emoji}</span>
+      <div class="name">${f.name}</div>
+      <div class="multi">×${f.multi}</div>
+      <div class="crowd-label">جواهر اللاعبين:</div>
+      <input type="number" class="bet-input" data-id="${f.id}" value="${val}" min="0" placeholder="0">
+    `;
+    grid.appendChild(div);
+  });
+  grid.querySelectorAll('.bet-input').forEach(inp=>{
+    inp.addEventListener('input', e=>{
+      state.currentBets[e.target.dataset.id] = parseInt(e.target.value)||0;
+      saveState();
+    });
+  });
+}
+
+function renderWinnerGrid(){
+  const grid = document.getElementById('winnerGrid');
+  grid.innerHTML = '';
+  // Include all fruits except center for winner
+  const winners = BETTABLE;
+  winners.forEach(f=>{
+    const div = document.createElement('div');
+    div.className = 'fruit-card' + (selectedWinner===f.id?' selected':'');
+    div.innerHTML = `
+      <span class="emoji">${f.emoji}</span>
+      <div class="name">${f.name}</div>
+    `;
+    div.addEventListener('click', ()=>{
+      selectedWinner = f.id;
+      renderWinnerGrid();
+    });
+    grid.appendChild(div);
+  });
+}
+
+/* ============ SAVE ROUND ============ */
+document.getElementById('saveRound').addEventListener('click', ()=>{
+  if(!selectedWinner){
+    alert('⚠️ اختر الفاكهة الفائزة أولاً');
+    return;
+  }
+  const round = {
+    n: state.rounds.length + 1,
+    winner: selectedWinner,
+    bets: {...state.currentBets},
+    time: Date.now()
+  };
+  state.rounds.push(round);
+  saveState();
+  // Reset
+  selectedWinner = null;
+  state.currentBets = {};
+  BETTABLE.forEach(f=> state.currentBets[f.id]=0);
+  renderBetGrid();
+  renderWinnerGrid();
+  updateStats();
+  alert('✅ تم حفظ الجولة #' + round.n);
+});
+
+document.getElementById('skipRound').addEventListener('click', ()=>{
+  selectedWinner = null;
+  state.currentBets = {};
+  BETTABLE.forEach(f=> state.currentBets[f.id]=0);
+  renderBetGrid();
+  renderWinnerGrid();
+});
+
+/* ============ TABS ============ */
+document.querySelectorAll('.tab').forEach(t=>{
+  t.addEventListener('click', ()=>{
+    document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
+    document.querySelectorAll('.panel').forEach(x=>x.classList.remove('active'));
+    t.classList.add('active');
+    document.getElementById('panel-'+t.dataset.tab).classList.add('active');
+    if(t.dataset.tab==='analysis') renderAnalysis();
+    if(t.dataset.tab==='history') renderHistory();
+  });
+});
+
+/* ============ STATS ============ */
+function updateStats(){
+  document.getElementById('statRounds').textContent = state.rounds.length;
+  if(state.rounds.length === 0){
+    document.getElementById('statHot').textContent = '—';
+    document.getElementById('statHitRate').textContent = '0%';
+    document.getElementById('statWins').textContent = '0';
+    return;
+  }
+  // Hot fruit
+  const freq = {};
+  state.rounds.forEach(r=> freq[r.winner] = (freq[r.winner]||0)+1);
+  const hot = Object.entries(freq).sort((a,b)=>b[1]-a[1])[0];
+  const hotFruit = FRUITS.find(f=>f.id===hot[0]);
+  document.getElementById('statHot').textContent = hotFruit ? hotFruit.emoji : '—';
+  
+  // Hit rate (how often our recommendation would have won)
+  let hits = 0;
+  state.rounds.forEach((r,i)=>{
+    if(i===0) return;
+    const prev = state.rounds.slice(0,i);
+    const rec = computeRecommendation(prev);
+    if(rec && rec.fruitId === r.winner) hits++;
+  });
+  const rate = state.rounds.length > 1 ? Math.round(hits/(state.rounds.length-1)*100) : 0;
+  document.getElementById('statHitRate').textContent = rate + '%';
+  document.getElementById('statWins').textContent = hits;
+}
+
+/* ============ ANALYSIS ============ */
+function computeRecommendation(rounds){
+  if(rounds.length < 3) return null;
+  const recent = rounds.slice(-10);
+  const freq = {};
+  const totalGems = {};
+  const totalAppear = {};
+  BETTABLE.forEach(f=>{freq[f.id]=0; totalGems[f.id]=0; totalAppear[f.id]=0;});
+  
+  rounds.forEach(r=>{
+    freq[r.winner] = (freq[r.winner]||0)+1;
+    BETTABLE.forEach(f=>{
+      totalGems[f.id] += (r.bets[f.id]||0);
+      if(r.winner===f.id) totalAppear[f.id]++;
+    });
+  });
+  
+  // For each fruit: "trap score" = gems received but didn't appear
+  // Lower trap score + higher recent frequency = good bet
+  const scores = {};
+  BETTABLE.forEach(f=>{
+    const appearRate = totalAppear[f.id] / rounds.length;
+    const avgGems = totalGems[f.id] / rounds.length;
+    const recentFreq = recent.filter(r=>r.winner===f.id).length / recent.length;
+    // Trap: high gems, low appearance
+    const trapScore = avgGems * (1 - appearRate);
+    // Good fruit: appears often, low crowd gems (underbet)
+    scores[f.id] = {
+      fruit: f,
+      appearRate,
+      avgGems,
+      recentFreq,
+      trapScore,
+      // Recommendation score: high appearance, low crowd, high recent
+      score: (recentFreq * 2) + (appearRate * 1.5) - (avgGems / 500)
+    };
+  });
+  
+  const sorted = Object.values(scores).sort((a,b)=>b.score - a.score);
+  return sorted[0];
+}
+
+function renderAnalysis(){
+  const rec = computeRecommendation(state.rounds);
+  const recBox = document.getElementById('recommendationBox');
+  if(!rec){
+    recBox.innerHTML = '<div class="empty"><i>📊</i>سجّل 3 جولات على الأقل للحصول على توصية</div>';
+  } else {
+    recBox.innerHTML = `
+      <div class="recommendation">
+        <span class="big-emoji">${rec.fruit.emoji}</span>
+        <h2>ضع جواهرك على: ${rec.fruit.name}</h2>
+        <p>مضاعف الربح: ×${rec.fruit.multi}</p>
+        <div class="reason">
+          <b>📊 السبب:</b><br>
+          • نسبة الظهور: ${(rec.appearRate*100).toFixed(1)}%<br>
+          • الظهور مؤخراً (آخر 10): ${(rec.recentFreq*100).toFixed(0)}%<br>
+          • متوسط جواهر اللاعبين عليها: ${Math.round(rec.avgGems)}<br>
+          • <b style="color:#ffd700">مؤشر الفخ: ${rec.trapScore<200?'منخفض ✅':'مرتفع ⚠️'}</b>
+        </div>
+      </div>
+    `;
+  }
+  
+  // Frequency chart
+  const freq = {};
+  BETTABLE.forEach(f=> freq[f.id]=0);
+  state.rounds.forEach(r=> freq[r.winner]++);
+  const maxFreq = Math.max(...Object.values(freq), 1);
+  const freqDiv = document.getElementById('freqChart');
+  freqDiv.innerHTML = '';
+  BETTABLE.forEach(f=>{
+    const pct = (freq[f.id]/maxFreq*100);
+    freqDiv.innerHTML += `
+      <div class="bar-row">
+        <span class="emoji">${f.emoji}</span>
+        <span class="label">${f.name}</span>
+        <div class="bar"><div class="fill" style="width:${pct}%;background:${f.color}"></div></div>
+        <span class="val">${freq[f.id]}× (${state.rounds.length?(freq[f.id]/state.rounds.length*100).toFixed(0):0}%)</span>
+      </div>`;
+  });
+  
+  // Trap chart
+  const totalGems = {};
+  const totalAppear = {};
+  BETTABLE.forEach(f=>{totalGems[f.id]=0; totalAppear[f.id]=0;});
+  state.rounds.forEach(r=>{
+    BETTABLE.forEach(f=>{
+      totalGems[f.id] += (r.bets[f.id]||0);
+      if(r.winner===f.id) totalAppear[f.id]++;
+    });
+  });
+  const maxGems = Math.max(...Object.values(totalGems), 1);
+  const trapDiv = document.getElementById('trapChart');
+  trapDiv.innerHTML = '';
+  BETTABLE.forEach(f=>{
+    const appearRate = state.rounds.length ? totalAppear[f.id]/state.rounds.length : 0;
+    const gemsPct = totalGems[f.id]/maxGems*100;
+    const isTrap = appearRate < 0.1 && totalGems[f.id] > 100;
+    trapDiv.innerHTML += `
+      <div class="bar-row">
+        <span class="emoji">${f.emoji}</span>
+        <span class="label">${f.name}</span>
+        <div class="bar"><div class="fill" style="width:${gemsPct}%;background:${isTrap?'#ff5252':f.color}"></div></div>
+        <span class="val" style="color:${isTrap?'#ff5252':'#ffd700'}">${isTrap?'⚠️ فخ':'✓'}</span>
+      </div>`;
+  });
+  
+  // Patterns
+  const patternsDiv = document.getElementById('patternsList');
+  patternsDiv.innerHTML = '';
+  const patterns = [];
+  
+  // Pattern 1: fruits that never appeared despite high bets
+  BETTABLE.forEach(f=>{
+    const appearRate = state.rounds.length ? totalAppear[f.id]/state.rounds.length : 0;
+    const avgGems = state.rounds.length ? totalGems[f.id]/state.rounds.length : 0;
+    if(avgGems > 200 && appearRate < 0.08 && state.rounds.length >= 5){
+      patterns.push({type:'trap', text:`⚠️ <b>${f.emoji} ${f.name}</b> يستقبل جواهر كثيرة (متوسط ${Math.round(avgGems)}) لكنه نادر الظهور (${(appearRate*100).toFixed(0)}%) — <b style="color:#ff5252">تجنّبه</b>`});
+    }
+    if(appearRate > 0.2 && avgGems < 100 && state.rounds.length >= 5){
+      patterns.push({type:'gold', text:`💎 <b>${f.emoji} ${f.name}</b> يظهر كثيراً (${(appearRate*100).toFixed(0)}%) واللاعبون يتجاهلونه — <b style="color:#4caf50">فرصة جيدة</b>`});
+    }
+  });
+  
+  // Pattern 2: streak detection
+  const last5 = state.rounds.slice(-5).map(r=>r.winner);
+  const streaks = {};
+  last5.forEach(id=> streaks[id]=(streaks[id]||0)+1);
+  Object.entries(streaks).forEach(([id,count])=>{
+    if(count >= 3){
+      const f = FRUITS.find(x=>x.id===id);
+      patterns.push({type:'streak', text:`🔥 <b>${f.emoji} ${f.name}</b> ظهر ${count} مرات في آخر 5 جولات — قد يكون في سلسلة ساخنة`});
+    }
+  });
+  
+  // Pattern 3: cold fruit
+  const last10 = state.rounds.slice(-10).map(r=>r.winner);
+  BETTABLE.forEach(f=>{
+    if(!last10.includes(f.id) && state.rounds.length >= 10){
+      patterns.push({type:'cold', text:`❄️ <b>${f.emoji} ${f.name}</b> لم يظهر في آخر 10 جولات — قد يكونDue للظهور أو متجنب عمداً`});
+    }
+  });
+  
+  if(patterns.length === 0){
+    patternsDiv.innerHTML = '<div class="empty">لا توجد أنماط واضحة بعد — سجّل المزيد من الجولات</div>';
+  } else {
+    patternsDiv.innerHTML = patterns.map(p=>`<div style="padding:10px;margin:6px 0;background:rgba(0,0,0,.3);border-radius:10px;border-right:3px solid ${p.type==='trap'?'#ff5252':p.type==='gold'?'#4caf50':p.type==='streak'?'#ff9800':'#2196f3'};font-size:13px">${p.text}</div>`).join('');
+  }
+  
+  // Canvas chart
+  drawHistoryChart();
+}
+
+function drawHistoryChart(){
+  const canvas = document.getElementById('historyChart');
+  if(!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const W = canvas.width = canvas.offsetWidth * 2;
+  const H = canvas.height = canvas.offsetHeight * 2;
+  ctx.scale(2,2);
+  const w = canvas.offsetWidth, h = canvas.offsetHeight;
+  ctx.clearRect(0,0,w,h);
+  
+  if(state.rounds.length < 2){
+    ctx.fillStyle = '#8a7aa8';
+    ctx.font = '14px Cairo';
+    ctx.textAlign = 'center';
+    ctx.fillText('بيانات غير كافية', w/2, h/2);
+    return;
+  }
+  
+  // Count cumulative appearances
+  const counts = {};
+  BETTABLE.forEach(f=> counts[f.id]=0);
+  const data = state.rounds.map((r,i)=>{
+    counts[r.winner]++;
+    return {i, winner:r.winner, counts:{...counts}};
+  });
+  
+  const maxCount = Math.max(...BETTABLE.map(f=>counts[f.id]), 1);
+  const colors = {};
+  BETTABLE.forEach(f=> colors[f.id]=f.color);
+  
+  // Draw lines
+  BETTABLE.forEach(f=>{
+    ctx.strokeStyle = f.color;
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    data.forEach((d,i)=>{
+      const x = 30 + (i/(data.length-1)) * (w-60);
+      const y = h - 20 - (d.counts[f.id]/maxCount) * (h-40);
+      if(i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+    });
+    ctx.stroke();
+  });
+  
+  // Legend
+  let lx = 10, ly = 10;
+  BETTABLE.forEach(f=>{
+    ctx.fillStyle = f.color;
+    ctx.fillRect(lx, ly, 10, 10);
+    ctx.fillStyle = '#fff';
+    ctx.font = '10px Cairo';
+    ctx.textAlign = 'right';
+    ctx.fillText(f.emoji, lx+22, ly+9);
+    lx += 28;
+    if(lx > w-30){lx=10; ly+=14;}
+  });
+}
+
+/* ============ HISTORY ============ */
+function renderHistory(){
+  const list = document.getElementById('historyList');
+  if(state.rounds.length === 0){
+    list.innerHTML = '<div class="empty"><i>📜</i>لا توجد جولات مسجلة بعد</div>';
+    return;
+  }
+  list.innerHTML = '';
+  [...state.rounds].reverse().forEach(r=>{
+    const f = FRUITS.find(x=>x.id===r.winner);
+    const betSummary = BETTABLE.map(b=>`${b.emoji}${r.bets[b.id]||0}`).join(' · ');
+    list.innerHTML += `
+      <div class="history-item">
+        <div class="round-num">#${r.n}</div>
+        <div class="winner">${f?f.emoji:'?'}</div>
+        <div class="details">
+          <b>${f?f.name:'?'}</b> (×${f?f.multi:0})<br>
+          <span style="font-size:11px">الجواهر: ${betSummary}</span>
+        </div>
+        <button class="btn btn-danger" style="padding:6px 12px;font-size:11px" onclick="deleteRound(${r.n})">🗑️</button>
+      </div>`;
+  });
+}
+
+window.deleteRound = function(n){
+  if(confirm('حذف الجولة #' + n + '؟')){
+    state.rounds = state.rounds.filter(r=>r.n!==n);
+    // Renumber
+    state.rounds.forEach((r,i)=> r.n = i+1);
+    saveState();
+    renderHistory();
+    updateStats();
+  }
+};
+
+/* ============ SETTINGS ============ */
+document.getElementById('exportData').addEventListener('click', ()=>{
+  const blob = new Blob([JSON.stringify(state,null,2)], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = 'fruit-analyzer-'+Date.now()+'.json';
+  a.click();
+});
+document.getElementById('importData').addEventListener('click', ()=>{
+  document.getElementById('importFile').click();
+});
+document.getElementById('importFile').addEventListener('change', e=>{
+  const file = e.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = ev=>{
+    try{
+      state = JSON.parse(ev.target.result);
+      saveState();
+      renderBetGrid();
+      renderWinnerGrid();
+      updateStats();
+      alert('✅ تم استيراد البيانات');
+    }catch(err){alert('❌ ملف غير صالح');}
+  };
+  reader.readAsText(file);
+});
+document.getElementById('clearData').addEventListener('click', ()=>{
+  if(confirm('⚠️ هل أنت متأكد من مسح كل البيانات؟ لا يمكن التراجع.')){
+    state = {rounds:[], currentBets:{}};
+    saveState();
+    renderBetGrid();
+    renderWinnerGrid();
+    updateStats();
+    alert('🗑️ تم المسح');
+  }
+});
+
+/* ============ INIT ============ */
+renderBetGrid();
+renderWinnerGrid();
+updateStats();
+</script>
+</body>
+</html>
