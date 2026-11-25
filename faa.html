@@ -1,0 +1,945 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🎯 محلل حفلة الفاكهة — النسخة الذكية</title>
+<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{
+  font-family:'Segoe UI','Cairo',Tahoma,sans-serif;
+  background:linear-gradient(135deg,#0f0c29 0%,#302b63 50%,#24243e 100%);
+  color:#fff;min-height:100vh;padding:12px;background-attachment:fixed;
+}
+body::before{
+  content:'';position:fixed;inset:0;pointer-events:none;
+  background:radial-gradient(circle at 20% 30%,rgba(138,43,226,.3),transparent 50%),
+             radial-gradient(circle at 80% 70%,rgba(255,215,0,.15),transparent 50%);
+  z-index:0;
+}
+.wrap{max-width:1200px;margin:0 auto;position:relative;z-index:1}
+
+.header{
+  text-align:center;padding:24px 20px;margin-bottom:20px;
+  background:linear-gradient(135deg,rgba(138,43,226,.4),rgba(75,0,130,.5));
+  border:2px solid rgba(255,215,0,.4);border-radius:24px;
+  box-shadow:0 15px 50px rgba(138,43,226,.5);
+}
+.header h1{
+  font-size:clamp(22px,4.5vw,34px);font-weight:900;
+  background:linear-gradient(90deg,#ffd700,#ff6b9d,#ffd700);
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+  margin-bottom:8px;
+}
+.header p{color:#d4c5f0;font-size:14px}
+.stats-row{
+  display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:18px;
+}
+.stat{
+  background:rgba(0,0,0,.4);border:1px solid rgba(255,215,0,.3);
+  border-radius:14px;padding:12px 8px;text-align:center;
+  backdrop-filter:blur(10px);
+}
+.stat b{display:block;font-size:20px;font-weight:900;color:#ffd700}
+.stat small{font-size:11px;color:#d4c5f0}
+
+.tabs{
+  display:flex;gap:8px;margin-bottom:18px;flex-wrap:wrap;
+}
+.tab{
+  flex:1;min-width:110px;padding:12px 14px;
+  background:rgba(255,255,255,.08);border:2px solid rgba(255,255,255,.1);
+  border-radius:12px;color:#d4c5f0;font-weight:700;font-size:13.5px;
+  cursor:pointer;transition:.3s;text-align:center;
+}
+.tab:hover{background:rgba(255,215,0,.15);color:#fff;transform:translateY(-2px)}
+.tab.active{
+  background:linear-gradient(135deg,#ffd700,#ff8c00);
+  color:#1a0b2e;border-color:#ffd700;
+  box-shadow:0 8px 25px rgba(255,215,0,.5);
+}
+
+.panel{display:none}
+.panel.active{display:block;animation:fadeUp .4s}
+@keyframes fadeUp{from{opacity:0;transform:translateY(15px)}to{opacity:1;transform:none}}
+
+.card{
+  background:rgba(20,10,40,.75);border:2px solid rgba(255,255,255,.1);
+  border-radius:18px;padding:20px;margin-bottom:18px;
+  backdrop-filter:blur(15px);box-shadow:0 10px 30px rgba(0,0,0,.3);
+}
+.card h3{
+  font-size:17px;font-weight:900;margin-bottom:14px;
+  color:#ffd700;display:flex;align-items:center;gap:8px;
+}
+
+/* Fruit selector */
+.fruit-grid{
+  display:grid;grid-template-columns:repeat(4,1fr);gap:10px;
+}
+.fruit-card{
+  background:linear-gradient(135deg,#6a1b9a,#8e24aa);
+  border:2px solid rgba(255,215,0,.25);border-radius:14px;
+  padding:14px 10px;text-align:center;cursor:pointer;transition:.3s;
+}
+.fruit-card:hover{transform:translateY(-4px);border-color:#ffd700;box-shadow:0 8px 25px rgba(255,215,0,.4)}
+.fruit-card.selected{
+  border-color:#ffd700;
+  box-shadow:0 0 25px rgba(255,215,0,.7);
+  background:linear-gradient(135deg,#8e24aa,#ab47bc);
+  transform:scale(1.03);
+}
+.fruit-card .emoji{font-size:42px;display:block;margin-bottom:6px}
+.fruit-card .name{font-size:13px;font-weight:700;color:#fff}
+.fruit-card .multi{font-size:11px;color:#ffd700;margin-top:3px}
+
+/* Inputs */
+.input-row{
+  display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px;
+}
+.input-group{display:flex;flex-direction:column;gap:6px}
+.input-group label{font-size:13px;font-weight:700;color:#ffd700}
+.input-group input,.input-group select{
+  padding:12px;border-radius:10px;border:2px solid rgba(255,255,255,.15);
+  background:rgba(0,0,0,.5);color:#fff;font-size:15px;font-weight:700;
+  font-family:inherit;
+}
+.input-group input:focus,.input-group select:focus{outline:none;border-color:#ffd700}
+
+.btn{
+  padding:13px 24px;border-radius:12px;border:none;cursor:pointer;
+  font-weight:800;font-size:14px;font-family:inherit;transition:.3s;
+  display:inline-flex;align-items:center;gap:8px;
+}
+.btn-primary{
+  background:linear-gradient(135deg,#ffd700,#ff8c00);color:#1a0b2e;
+  box-shadow:0 8px 25px rgba(255,215,0,.5);
+}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 12px 35px rgba(255,215,0,.7)}
+.btn-primary:disabled{opacity:.5;cursor:not-allowed}
+.btn-danger{background:linear-gradient(135deg,#e53935,#b71c1c);color:#fff}
+.btn-ghost{background:rgba(255,255,255,.1);color:#fff;border:2px solid rgba(255,255,255,.2)}
+.btn-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+
+/* Recommendation */
+.recommendation{
+  background:linear-gradient(135deg,rgba(255,215,0,.2),rgba(255,140,0,.15));
+  border:3px solid #ffd700;border-radius:18px;padding:22px;
+  text-align:center;margin-top:14px;
+  animation:glow 2s ease-in-out infinite;
+}
+@keyframes glow{0%,100%{box-shadow:0 0 30px rgba(255,215,0,.5)}50%{box-shadow:0 0 50px rgba(255,215,0,.8)}}
+.recommendation .big-emoji{font-size:68px;display:block;margin-bottom:10px;animation:bounce 1.5s infinite}
+@keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+.recommendation h2{font-size:24px;font-weight:900;color:#ffd700;margin-bottom:6px}
+.recommendation p{color:#e0d0f0;font-size:14px}
+
+/* Weekly analysis */
+.weekly-item{
+  background:rgba(0,0,0,.4);border:2px solid rgba(255,215,0,.2);
+  border-radius:12px;padding:14px;margin-bottom:10px;
+  display:flex;align-items:center;gap:12px;flex-wrap:wrap;
+}
+.weekly-item.repeated{
+  border-color:#4caf50;
+  background:linear-gradient(135deg,rgba(76,175,80,.15),rgba(0,0,0,.4));
+  box-shadow:0 0 20px rgba(76,175,80,.3);
+}
+.weekly-item .round-badge{
+  background:linear-gradient(135deg,#ffd700,#ff8c00);color:#1a0b2e;
+  padding:8px 14px;border-radius:10px;font-weight:900;font-size:14px;
+  min-width:70px;text-align:center;
+}
+.weekly-item .fruits{flex:1;display:flex;gap:6px;flex-wrap:wrap}
+.weekly-item .fruit-chip{
+  background:rgba(255,255,255,.1);padding:6px 10px;border-radius:8px;
+  font-size:12px;font-weight:700;display:flex;align-items:center;gap:5px;
+}
+.weekly-item .repeat-badge{
+  background:#4caf50;color:#fff;padding:6px 12px;border-radius:8px;
+  font-weight:900;font-size:12px;
+}
+
+/* History */
+.history-item{
+  background:rgba(0,0,0,.4);border:2px solid rgba(255,255,255,.1);
+  border-radius:12px;padding:12px;margin-bottom:8px;
+  display:flex;align-items:center;gap:12px;flex-wrap:wrap;
+  transition:.3s;
+}
+.history-item:hover{border-color:rgba(255,215,0,.3)}
+.history-item .round-num{
+  background:linear-gradient(135deg,#ffd700,#ff8c00);color:#1a0b2e;
+  width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;
+  font-weight:900;font-size:14px;flex:none;
+}
+.history-item .winner{font-size:30px}
+.history-item .details{flex:1;font-size:12.5px;color:#d4c5f0}
+.history-item .details b{color:#ffd700}
+
+/* Image analysis */
+.image-drop{
+  border:3px dashed rgba(255,215,0,.4);border-radius:16px;
+  padding:40px 20px;text-align:center;cursor:pointer;transition:.3s;
+  background:rgba(0,0,0,.3);
+}
+.image-drop:hover{border-color:#ffd700;background:rgba(255,215,0,.05)}
+.image-drop img{max-width:100%;max-height:300px;border-radius:12px;margin-top:14px}
+.image-drop .upload-icon{font-size:50px;margin-bottom:10px}
+
+/* Progress */
+.progress-bar{
+  width:100%;height:10px;background:rgba(255,255,255,.1);
+  border-radius:5px;overflow:hidden;margin-top:10px;
+}
+.progress-fill{
+  height:100%;background:linear-gradient(90deg,#ffd700,#ff8c00);
+  border-radius:5px;transition:width .3s;
+}
+
+/* Bar chart */
+.bar-row{display:flex;align-items:center;gap:10px;margin:8px 0;font-size:13px}
+.bar-row .emoji{font-size:22px;width:30px;text-align:center}
+.bar-row .label{width:70px;font-weight:700}
+.bar-row .bar{flex:1;height:10px;background:rgba(255,255,255,.1);border-radius:5px;overflow:hidden}
+.bar-row .fill{height:100%;border-radius:5px;transition:width .6s}
+.bar-row .val{width:50px;text-align:left;font-weight:800;color:#ffd700;font-size:12px}
+
+.empty{text-align:center;padding:40px 20px;color:#8a7aa8;font-size:14px}
+.empty i{font-size:50px;display:block;margin-bottom:10px;opacity:.4}
+
+.warning{
+  background:rgba(33,150,243,.12);border:2px solid rgba(33,150,243,.4);
+  border-radius:12px;padding:12px;font-size:13px;color:#90caf9;
+  margin-bottom:14px;line-height:1.7;
+}
+.warning b{color:#64b5f6}
+
+@media(max-width:768px){
+  .fruit-grid{grid-template-columns:repeat(2,1fr)}
+  .stats-row{grid-template-columns:repeat(2,1fr)}
+  .input-row{grid-template-columns:1fr}
+  .tabs{flex-direction:column}
+  .tab{min-width:100%}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="header">
+    <h1>🎯 محلل حفلة الفاكهة — النسخة الذكية</h1>
+    <p>تتبع 1740 جولة يومياً + تحليل أسبوعي للتكرار + تحليل الصور</p>
+    <div class="stats-row">
+      <div class="stat"><b id="statToday">0</b><small>جولات اليوم</small></div>
+      <div class="stat"><b id="statWeek">0</b><small>جولات الأسبوع</small></div>
+      <div class="stat"><b id="statRepeat">0</b><small>تكرار الأسبوع</small></div>
+      <div class="stat"><b id="statHot">—</b><small>الأكثر تكراراً</small></div>
+    </div>
+  </div>
+
+  <div class="tabs">
+    <div class="tab active" data-tab="record">📝 تسجيل جولة</div>
+    <div class="tab" data-tab="today">📊 تحليل اليوم</div>
+    <div class="tab" data-tab="weekly">📅 تحليل الأسبوع</div>
+    <div class="tab" data-tab="image">🖼️ تحليل صورة</div>
+    <div class="tab" data-tab="history">📜 السجل</div>
+    <div class="tab" data-tab="settings">⚙️</div>
+  </div>
+
+  <!-- RECORD PANEL -->
+  <div class="panel active" id="panel-record">
+    <div class="warning">
+      <b>💡 طريقة التسجيل:</b><br>
+      1️⃣ أدخل رقم الجولة (1-1740) — يبدأ من جديد كل يوم<br>
+      2️⃣ اختر الفاكهة الفائزة<br>
+      3️⃣ التاريخ يُسجَّل تلقائياً<br>
+      4️⃣ اضغط "حفظ" وانتقل للجولة التالية
+    </div>
+
+    <div class="card">
+      <h3>🎯 تسجيل نتيجة جولة</h3>
+      <div class="input-row">
+        <div class="input-group">
+          <label>🔢 رقم الجولة (1-1740)</label>
+          <input type="number" id="roundNum" min="1" max="1740" placeholder="مثال: 386">
+        </div>
+        <div class="input-group">
+          <label>📅 التاريخ</label>
+          <input type="date" id="roundDate">
+        </div>
+      </div>
+
+      <label style="font-size:14px;font-weight:700;color:#ffd700;display:block;margin-bottom:10px">🏆 الفاكهة الفائزة:</label>
+      <div class="fruit-grid" id="winnerGrid"></div>
+
+      <div class="btn-row">
+        <button class="btn btn-primary" id="saveRound">💾 حفظ الجولة</button>
+        <button class="btn btn-ghost" id="autoNext">⚡ الجولة التالية تلقائياً</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- TODAY PANEL -->
+  <div class="panel" id="panel-today">
+    <div class="card">
+      <h3>📊 تحليل يوم <span id="todayDate"></span></h3>
+      <div id="todayAnalysis"></div>
+    </div>
+
+    <div class="card">
+      <h3>🔥 أكثر الفواكه ظهوراً اليوم</h3>
+      <div id="todayFreq"></div>
+    </div>
+
+    <div class="card">
+      <h3>🎯 توصية للجولة القادمة اليوم</h3>
+      <div id="todayRecommendation"></div>
+    </div>
+  </div>
+
+  <!-- WEEKLY PANEL -->
+  <div class="panel" id="panel-weekly">
+    <div class="card">
+      <h3>📅 تحليل الأسبوع — تكرار نفس الجولة</h3>
+      <p style="font-size:13px;color:#d4c5f0;margin-bottom:12px">
+        يقارن <b style="color:#ffd700">نفس رقم الجولة</b> عبر أيام الأسبوع ويكشف إذا تكررت نفس الفاكهة
+      </p>
+      <div class="input-row">
+        <div class="input-group">
+          <label>من تاريخ</label>
+          <input type="date" id="weekFrom">
+        </div>
+        <div class="input-group">
+          <label>إلى تاريخ</label>
+          <input type="date" id="weekTo">
+        </div>
+      </div>
+      <button class="btn btn-primary" id="analyzeWeek">🔍 تحليل الأسبوع</button>
+      <div id="weeklyResults" style="margin-top:16px"></div>
+    </div>
+
+    <div class="card">
+      <h3>🎯 الجولات ذات التكرار العالي (فرص ربح)</h3>
+      <p style="font-size:13px;color:#d4c5f0;margin-bottom:12px">
+        الجولات التي ظهرت فيها نفس الفاكهة في <b style="color:#4caf50">3 أيام أو أكثر</b> من الأسبوع — هذه أنماط قوية
+      </p>
+      <div id="highRepeat"></div>
+    </div>
+  </div>
+
+  <!-- IMAGE PANEL -->
+  <div class="panel" id="panel-image">
+    <div class="card">
+      <h3>🖼️ تحليل صورة من اللعبة</h3>
+      <p style="font-size:13px;color:#d4c5f0;margin-bottom:14px">
+        ارفع لقطة شاشة من اللعبة — الأداة ستحاول استخراج رقم الجولة والفاكهة الفائزة تلقائياً
+      </p>
+      <div class="image-drop" id="imageDrop">
+        <div class="upload-icon">📤</div>
+        <div style="font-size:15px;font-weight:700">اضغط هنا أو اسحب صورة</div>
+        <div style="font-size:12px;color:#d4c5f0;margin-top:6px">JPG, PNG, WebP</div>
+        <input type="file" id="imageInput" accept="image/*" style="display:none">
+        <img id="imagePreview" style="display:none">
+      </div>
+      <div id="ocrProgress" style="display:none;margin-top:14px">
+        <div style="font-size:13px;color:#ffd700;margin-bottom:6px">⏳ جاري تحليل الصورة...</div>
+        <div class="progress-bar"><div class="progress-fill" id="ocrFill" style="width:0%"></div></div>
+        <div id="ocrStatus" style="font-size:12px;color:#d4c5f0;margin-top:6px"></div>
+      </div>
+      <div id="ocrResult" style="margin-top:14px"></div>
+    </div>
+  </div>
+
+  <!-- HISTORY PANEL -->
+  <div class="panel" id="panel-history">
+    <div class="card">
+      <h3>📜 سجل الجولات</h3>
+      <div class="input-row">
+        <div class="input-group">
+          <label>🔍 تصفية بالتاريخ</label>
+          <input type="date" id="filterDate">
+        </div>
+        <div class="input-group">
+          <label>🔢 تصفية برقم الجولة</label>
+          <input type="number" id="filterRound" min="1" max="1740" placeholder="رقم الجولة">
+        </div>
+      </div>
+      <button class="btn btn-ghost" id="applyFilter">🔍 تطبيق الفلتر</button>
+      <button class="btn btn-ghost" id="clearFilter">✖️ إلغاء الفلتر</button>
+      <div id="historyList" style="margin-top:14px"></div>
+    </div>
+  </div>
+
+  <!-- SETTINGS PANEL -->
+  <div class="panel" id="panel-settings">
+    <div class="card">
+      <h3>⚙️ إدارة البيانات</h3>
+      <p style="font-size:13px;color:#d4c5f0;margin-bottom:14px">بياناتك تُحفظ محلياً في متصفحك فقط.</p>
+      <div class="btn-row">
+        <button class="btn btn-ghost" id="exportData">📤 تصدير JSON</button>
+        <button class="btn btn-ghost" id="importData">📥 استيراد</button>
+        <button class="btn btn-danger" id="clearData">🗑️ مسح الكل</button>
+      </div>
+      <input type="file" id="importFile" accept=".json" style="display:none">
+    </div>
+
+    <div class="card">
+      <h3>ℹ️ عن الأداة</h3>
+      <p style="font-size:13px;color:#d4c5f0;line-height:1.9">
+        • تسجل حتى 1740 جولة يومياً<br>
+        • تحليل أسبوعي يكشف التكرار في نفس رقم الجولة<br>
+        • تحليل الصور بـ OCR (تesseract.js)<br>
+        • البيانات محلية 100% — لا تُرسل لأي خادم
+      </p>
+    </div>
+  </div>
+
+</div>
+
+<script>
+const FRUITS = [
+  {id:'orange', emoji:'🍊', name:'برتقال', multi:5, color:'#ff9800'},
+  {id:'lemon',  emoji:'🍋', name:'ليمون',  multi:5, color:'#ffeb3b'},
+  {id:'apple',  emoji:'🍎', name:'تفاح',   multi:5, color:'#f44336'},
+  {id:'cherry', emoji:'🍒', name:'كرز',    multi:45, color:'#e91e63'},
+  {id:'banana', emoji:'🍌', name:'موز',    multi:5, color:'#ffeb3b'},
+  {id:'avocado',emoji:'🥑', name:'أفوكادو',multi:25, color:'#4caf50'},
+  {id:'watermelon',emoji:'🍉',name:'بطيخ', multi:15, color:'#f44336'},
+  {id:'grape',  emoji:'🍇', name:'عنب',    multi:10, color:'#9c27b0'}
+];
+
+let state = loadState();
+let selectedWinner = null;
+let autoNextEnabled = false;
+
+function loadState(){
+  try{
+    const s = localStorage.getItem('fruitAnalyzerV2');
+    if(s) return JSON.parse(s);
+  }catch(e){}
+  return {rounds:[]};
+}
+function saveState(){
+  localStorage.setItem('fruitAnalyzerV2', JSON.stringify(state));
+}
+
+function todayStr(){
+  return new Date().toISOString().split('T')[0];
+}
+
+function renderWinnerGrid(){
+  const grid = document.getElementById('winnerGrid');
+  grid.innerHTML = '';
+  FRUITS.forEach(f=>{
+    const div = document.createElement('div');
+    div.className = 'fruit-card' + (selectedWinner===f.id?' selected':'');
+    div.innerHTML = `
+      <span class="emoji">${f.emoji}</span>
+      <div class="name">${f.name}</div>
+      <div class="multi">×${f.multi}</div>
+    `;
+    div.addEventListener('click', ()=>{
+      selectedWinner = f.id;
+      renderWinnerGrid();
+    });
+    grid.appendChild(div);
+  });
+}
+
+// Set default date
+document.getElementById('roundDate').value = todayStr();
+
+document.getElementById('saveRound').addEventListener('click', ()=>{
+  const num = parseInt(document.getElementById('roundNum').value);
+  const date = document.getElementById('roundDate').value;
+  if(!num || num<1 || num>1740){
+    alert('⚠️ أدخل رقم جولة صحيح (1-1740)');
+    return;
+  }
+  if(!date){
+    alert('⚠️ اختر التاريخ');
+    return;
+  }
+  if(!selectedWinner){
+    alert('⚠️ اختر الفاكهة الفائزة');
+    return;
+  }
+  // Check duplicate
+  const exists = state.rounds.find(r=>r.roundNum===num && r.date===date);
+  if(exists){
+    if(!confirm(`⚠️ الجولة ${num} في ${date} مسجلة مسبقاً (${FRUITS.find(f=>f.id===exists.winner).emoji}). هل تريد الاستبدال؟`)){
+      return;
+    }
+    state.rounds = state.rounds.filter(r=>!(r.roundNum===num && r.date===date));
+  }
+  
+  const round = {
+    id: Date.now(),
+    roundNum: num,
+    winner: selectedWinner,
+    date: date,
+    time: new Date().toISOString()
+  };
+  state.rounds.push(round);
+  saveState();
+  
+  const fruit = FRUITS.find(f=>f.id===selectedWinner);
+  alert(`✅ تم حفظ: جولة ${num} — ${fruit.emoji} ${fruit.name} — ${date}`);
+  
+  if(autoNextEnabled && num < 1740){
+    document.getElementById('roundNum').value = num + 1;
+  } else {
+    document.getElementById('roundNum').value = '';
+  }
+  selectedWinner = null;
+  renderWinnerGrid();
+  updateStats();
+});
+
+document.getElementById('autoNext').addEventListener('click', ()=>{
+  autoNextEnabled = !autoNextEnabled;
+  document.getElementById('autoNext').textContent = autoNextEnabled ? '⚡ تلقائي: مفعّل' : '⚡ الجولة التالية تلقائياً';
+  document.getElementById('autoNext').classList.toggle('active', autoNextEnabled);
+});
+
+// Tabs
+document.querySelectorAll('.tab').forEach(t=>{
+  t.addEventListener('click', ()=>{
+    document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
+    document.querySelectorAll('.panel').forEach(x=>x.classList.remove('active'));
+    t.classList.add('active');
+    document.getElementById('panel-'+t.dataset.tab).classList.add('active');
+    if(t.dataset.tab==='today') renderToday();
+    if(t.dataset.tab==='weekly') initWeekly();
+    if(t.dataset.tab==='history') renderHistory();
+  });
+});
+
+function updateStats(){
+  const today = todayStr();
+  const todayRounds = state.rounds.filter(r=>r.date===today);
+  document.getElementById('statToday').textContent = todayRounds.length;
+  document.getElementById('statWeek').textContent = state.rounds.length;
+  
+  // Hot fruit
+  if(state.rounds.length > 0){
+    const freq = {};
+    state.rounds.forEach(r=> freq[r.winner] = (freq[r.winner]||0)+1);
+    const hot = Object.entries(freq).sort((a,b)=>b[1]-a[1])[0];
+    const hotFruit = FRUITS.find(f=>f.id===hot[0]);
+    document.getElementById('statHot').textContent = hotFruit ? hotFruit.emoji : '—';
+  }
+  
+  // Repeat count (weekly)
+  const weekAgo = new Date();
+  weekAgo.setDate(weekAgo.getDate() - 7);
+  const weekStr = weekAgo.toISOString().split('T')[0];
+  const weekRounds = state.rounds.filter(r=>r.date >= weekStr);
+  const roundFreq = {};
+  weekRounds.forEach(r=>{
+    const key = `${r.roundNum}-${r.winner}`;
+    roundFreq[key] = (roundFreq[key]||0)+1;
+  });
+  const repeats = Object.values(roundFreq).filter(v=>v>=2).length;
+  document.getElementById('statRepeat').textContent = repeats;
+}
+
+// TODAY ANALYSIS
+function renderToday(){
+  const today = todayStr();
+  document.getElementById('todayDate').textContent = today;
+  const todayRounds = state.rounds.filter(r=>r.date===today).sort((a,b)=>a.roundNum-b.roundNum);
+  const div = document.getElementById('todayAnalysis');
+  
+  if(todayRounds.length === 0){
+    div.innerHTML = '<div class="empty"><i>📊</i>لا توجد جولات مسجلة اليوم</div>';
+    document.getElementById('todayFreq').innerHTML = '';
+    document.getElementById('todayRecommendation').innerHTML = '<div class="empty">سجّل بعض الجولات أولاً</div>';
+    return;
+  }
+  
+  div.innerHTML = `
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px">
+      <div class="stat"><b>${todayRounds.length}</b><small>جولة اليوم</small></div>
+      <div class="stat"><b>${todayRounds[todayRounds.length-1].roundNum}</b><small>آخر جولة</small></div>
+      <div class="stat"><b>${1740 - todayRounds[todayRounds.length-1].roundNum}</b><small>متبقي اليوم</small></div>
+    </div>
+  `;
+  
+  // Frequency
+  const freq = {};
+  FRUITS.forEach(f=> freq[f.id]=0);
+  todayRounds.forEach(r=> freq[r.winner]++);
+  const maxFreq = Math.max(...Object.values(freq), 1);
+  const freqDiv = document.getElementById('todayFreq');
+  freqDiv.innerHTML = '';
+  FRUITS.forEach(f=>{
+    const pct = (freq[f.id]/maxFreq*100);
+    freqDiv.innerHTML += `
+      <div class="bar-row">
+        <span class="emoji">${f.emoji}</span>
+        <span class="label">${f.name}</span>
+        <div class="bar"><div class="fill" style="width:${pct}%;background:${f.color}"></div></div>
+        <span class="val">${freq[f.id]}× (${(freq[f.id]/todayRounds.length*100).toFixed(0)}%)</span>
+      </div>`;
+  });
+  
+  // Recommendation: least frequent fruit (due to appear)
+  const sorted = FRUITS.slice().sort((a,b)=>freq[a.id]-freq[b.id]);
+  const rec = sorted[0];
+  document.getElementById('todayRecommendation').innerHTML = `
+    <div class="recommendation">
+      <span class="big-emoji">${rec.emoji}</span>
+      <h2>الفاكهة المرشحة: ${rec.name}</h2>
+      <p>ظهرت ${freq[rec.id]} مرات فقط من ${todayRounds.length} جولة — الأرجح ظهورها قريباً</p>
+      <p style="margin-top:8px;font-size:12px;color:#ffd700">مضاعف الربح: ×${rec.multi}</p>
+    </div>
+  `;
+}
+
+// WEEKLY ANALYSIS
+function initWeekly(){
+  const today = new Date();
+  const weekAgo = new Date();
+  weekAgo.setDate(weekAgo.getDate() - 7);
+  document.getElementById('weekTo').value = today.toISOString().split('T')[0];
+  document.getElementById('weekFrom').value = weekAgo.toISOString().split('T')[0];
+}
+
+document.getElementById('analyzeWeek').addEventListener('click', ()=>{
+  const from = document.getElementById('weekFrom').value;
+  const to = document.getElementById('weekTo').value;
+  if(!from || !to){
+    alert('⚠️ اختر نطاق التاريخ');
+    return;
+  }
+  analyzeWeekly(from, to);
+});
+
+function analyzeWeekly(from, to){
+  const weekRounds = state.rounds.filter(r=>r.date >= from && r.date <= to);
+  const resultsDiv = document.getElementById('weeklyResults');
+  const highRepeatDiv = document.getElementById('highRepeat');
+  
+  if(weekRounds.length === 0){
+    resultsDiv.innerHTML = '<div class="empty"><i>📅</i>لا توجد بيانات في هذا النطاق</div>';
+    highRepeatDiv.innerHTML = '';
+    return;
+  }
+  
+  // Group by round number
+  const byRound = {};
+  weekRounds.forEach(r=>{
+    if(!byRound[r.roundNum]) byRound[r.roundNum] = [];
+    byRound[r.roundNum].push(r);
+  });
+  
+  // Find rounds with same fruit repeated
+  const repeated = [];
+  const highRepeat = [];
+  
+  Object.entries(byRound).forEach(([num, rounds])=>{
+    if(rounds.length < 2) return;
+    const fruitCount = {};
+    rounds.forEach(r=> fruitCount[r.winner] = (fruitCount[r.winner]||0)+1);
+    const sorted = Object.entries(fruitCount).sort((a,b)=>b[1]-a[1]);
+    const topFruit = sorted[0][0];
+    const topCount = sorted[0][1];
+    
+    if(topCount >= 2){
+      repeated.push({
+        roundNum: parseInt(num),
+        fruit: topFruit,
+        count: topCount,
+        total: rounds.length,
+        dates: rounds.map(r=>r.date)
+      });
+    }
+    if(topCount >= 3){
+      highRepeat.push({
+        roundNum: parseInt(num),
+        fruit: topFruit,
+        count: topCount,
+        total: rounds.length,
+        dates: rounds.map(r=>r.date)
+      });
+    }
+  });
+  
+  repeated.sort((a,b)=>b.count-a.count);
+  highRepeat.sort((a,b)=>b.count-a.count);
+  
+  // Render repeated rounds
+  if(repeated.length === 0){
+    resultsDiv.innerHTML = '<div class="empty">لا يوجد تكرار في هذا النطاق — جرّب نطاقاً أوسع</div>';
+  } else {
+    resultsDiv.innerHTML = `
+      <div style="font-size:14px;color:#ffd700;font-weight:700;margin-bottom:10px">
+        🔍 تم العثور على ${repeated.length} جولة بها تكرار
+      </div>
+      ${repeated.slice(0, 30).map(r=>{
+        const fruit = FRUITS.find(f=>f.id===r.fruit);
+        return `
+          <div class="weekly-item ${r.count>=3?'repeated':''}">
+            <div class="round-badge">جولة ${r.roundNum}</div>
+            <div class="fruits">
+              ${r.dates.map((d,i)=>{
+                const round = weekRounds.find(x=>x.roundNum===r.roundNum && x.date===d);
+                const f = FRUITS.find(f=>f.id===round.winner);
+                return `<span class="fruit-chip">${f?f.emoji:'?'} ${d}</span>`;
+              }).join('')}
+            </div>
+            <div class="repeat-badge">${fruit.emoji} تكرر ${r.count}× من ${r.total}</div>
+          </div>
+        `;
+      }).join('')}
+    `;
+  }
+  
+  // High repeat
+  if(highRepeat.length === 0){
+    highRepeatDiv.innerHTML = '<div class="empty">لا توجد جولات بتكرار 3+ — هذه أنماط قوية جداً عندما تظهر</div>';
+  } else {
+    highRepeatDiv.innerHTML = highRepeat.map(r=>{
+      const fruit = FRUITS.find(f=>f.id===r.fruit);
+      return `
+        <div class="weekly-item repeated">
+          <div class="round-badge">جولة ${r.roundNum}</div>
+          <div style="flex:1">
+            <div style="font-size:16px;font-weight:900;color:#4caf50">${fruit.emoji} ${fruit.name} — تكرر ${r.count} مرات!</div>
+            <div style="font-size:12px;color:#d4c5f0;margin-top:4px">${r.dates.join(' · ')}</div>
+          </div>
+          <div class="repeat-badge" style="background:#ffd700;color:#1a0b2e">💎 فرصة قوية</div>
+        </div>
+      `;
+    }).join('');
+  }
+}
+
+// IMAGE ANALYSIS
+const imageDrop = document.getElementById('imageDrop');
+const imageInput = document.getElementById('imageInput');
+const imagePreview = document.getElementById('imagePreview');
+
+imageDrop.addEventListener('click', ()=> imageInput.click());
+imageDrop.addEventListener('dragover', e=>{e.preventDefault();imageDrop.style.borderColor='#ffd700'});
+imageDrop.addEventListener('dragleave', ()=>{imageDrop.style.borderColor='rgba(255,215,0,.4)'});
+imageDrop.addEventListener('drop', e=>{
+  e.preventDefault();
+  imageDrop.style.borderColor='rgba(255,215,0,.4)';
+  if(e.dataTransfer.files[0]) handleImage(e.dataTransfer.files[0]);
+});
+imageInput.addEventListener('change', e=>{
+  if(e.target.files[0]) handleImage(e.target.files[0]);
+});
+
+function handleImage(file){
+  const reader = new FileReader();
+  reader.onload = e=>{
+    imagePreview.src = e.target.result;
+    imagePreview.style.display = 'block';
+    runOCR(e.target.result);
+  };
+  reader.readAsDataURL(file);
+}
+
+async function runOCR(imageData){
+  const progress = document.getElementById('ocrProgress');
+  const fill = document.getElementById('ocrFill');
+  const status = document.getElementById('ocrStatus');
+  const result = document.getElementById('ocrResult');
+  
+  progress.style.display = 'block';
+  result.innerHTML = '';
+  
+  try{
+    const {data} = await Tesseract.recognize(imageData, 'ara+eng', {
+      logger: m=>{
+        if(m.status === 'recognizing text'){
+          fill.style.width = (m.progress*100)+'%';
+          status.textContent = `جاري التعرف... ${Math.round(m.progress*100)}%`;
+        } else {
+          status.textContent = m.status;
+        }
+      }
+    });
+    
+    const text = data.text;
+    status.textContent = '✅ اكتمل التحليل';
+    
+    // Try to extract round number
+    const roundMatch = text.match(/(\d{1,4})\s*(جولة|round|Round)/i) || 
+                       text.match(/(جولة|round|Round)\s*(\d{1,4})/i) ||
+                       text.match(/(\d{3,4})/);
+    const roundNum = roundMatch ? parseInt(roundMatch[1] || roundMatch[2] || roundMatch[0]) : null;
+    
+    // Try to detect fruit
+    let detectedFruit = null;
+    const fruitKeywords = {
+      'orange':'برتقال|orange|🍊',
+      'lemon':'ليمون|lemon|🍋',
+      'apple':'تفاح|apple|🍎',
+      'cherry':'كرز|cherry|🍒',
+      'banana':'موز|banana|🍌',
+      'avocado':'أفوكادو|avocado|🥑',
+      'watermelon':'بطيخ|watermelon|🍉',
+      'grape':'عنب|grape|🍇'
+    };
+    for(const [id, patterns] of Object.entries(fruitKeywords)){
+      const regex = new RegExp(patterns, 'i');
+      if(regex.test(text)){
+        detectedFruit = id;
+        break;
+      }
+    }
+    
+    result.innerHTML = `
+      <div class="card" style="margin-top:14px">
+        <h3>📝 النص المستخرج</h3>
+        <div style="background:rgba(0,0,0,.4);padding:12px;border-radius:10px;font-size:13px;max-height:150px;overflow-y:auto;direction:ltr;text-align:left">${text.substring(0, 500) || 'لم يتم استخراج نص'}</div>
+        
+        <div style="margin-top:14px">
+          <h3>🎯 النتائج المستخرجة</h3>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px">
+            <div class="stat"><b>${roundNum || '—'}</b><small>رقم الجولة</small></div>
+            <div class="stat"><b>${detectedFruit ? FRUITS.find(f=>f.id===detectedFruit).emoji : '—'}</b><small>الفاكهة</small></div>
+          </div>
+          
+          ${roundNum && detectedFruit ? `
+            <div class="btn-row">
+              <button class="btn btn-primary" onclick="quickSave(${roundNum}, '${detectedFruit}')">💾 حفظ النتيجة مباشرة</button>
+            </div>
+          ` : '<div style="margin-top:10px;font-size:13px;color:#ffab91">⚠️ لم يتم التعرف بشكل كامل — يمكنك التسجيل يدوياً</div>'}
+        </div>
+      </div>
+    `;
+  }catch(err){
+    status.textContent = '❌ خطأ: ' + err.message;
+  }
+}
+
+window.quickSave = function(roundNum, fruitId){
+  const date = todayStr();
+  const exists = state.rounds.find(r=>r.roundNum===roundNum && r.date===date);
+  if(exists){
+    if(!confirm('مسجلة مسبقاً. استبدال؟')) return;
+    state.rounds = state.rounds.filter(r=>!(r.roundNum===roundNum && r.date===date));
+  }
+  state.rounds.push({
+    id: Date.now(),
+    roundNum,
+    winner: fruitId,
+    date,
+    time: new Date().toISOString(),
+    fromImage: true
+  });
+  saveState();
+  updateStats();
+  alert(`✅ تم حفظ: جولة ${roundNum} — ${FRUITS.find(f=>f.id===fruitId).emoji}`);
+};
+
+// HISTORY
+function renderHistory(filter){
+  const list = document.getElementById('historyList');
+  let rounds = [...state.rounds].sort((a,b)=> new Date(b.time)-new Date(a.time));
+  
+  if(filter){
+    if(filter.date) rounds = rounds.filter(r=>r.date===filter.date);
+    if(filter.roundNum) rounds = rounds.filter(r=>r.roundNum===filter.roundNum);
+  }
+  
+  if(rounds.length === 0){
+    list.innerHTML = '<div class="empty"><i>📜</i>لا توجد جولات</div>';
+    return;
+  }
+  
+  list.innerHTML = rounds.slice(0, 100).map(r=>{
+    const f = FRUITS.find(x=>x.id===r.winner);
+    return `
+      <div class="history-item">
+        <div class="round-num">#${r.roundNum}</div>
+        <div class="winner">${f?f.emoji:'?'}</div>
+        <div class="details">
+          <b>${f?f.name:'?'}</b> (×${f?f.multi:0})<br>
+          <span style="font-size:11px">📅 ${r.date} ${r.fromImage?'🖼️':''}</span>
+        </div>
+        <button class="btn btn-danger" style="padding:6px 12px;font-size:11px" onclick="deleteRound(${r.id})">🗑️</button>
+      </div>
+    `;
+  }).join('');
+}
+
+document.getElementById('applyFilter').addEventListener('click', ()=>{
+  const filter = {};
+  const d = document.getElementById('filterDate').value;
+  const r = parseInt(document.getElementById('filterRound').value);
+  if(d) filter.date = d;
+  if(r) filter.roundNum = r;
+  renderHistory(filter);
+});
+document.getElementById('clearFilter').addEventListener('click', ()=>{
+  document.getElementById('filterDate').value = '';
+  document.getElementById('filterRound').value = '';
+  renderHistory();
+});
+
+window.deleteRound = function(id){
+  if(confirm('حذف هذه الجولة؟')){
+    state.rounds = state.rounds.filter(r=>r.id!==id);
+    saveState();
+    renderHistory();
+    updateStats();
+  }
+};
+
+// Settings
+document.getElementById('exportData').addEventListener('click', ()=>{
+  const blob = new Blob([JSON.stringify(state,null,2)], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = 'fruit-analyzer-'+todayStr()+'.json';
+  a.click();
+});
+document.getElementById('importData').addEventListener('click', ()=> document.getElementById('importFile').click());
+document.getElementById('importFile').addEventListener('change', e=>{
+  const file = e.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = ev=>{
+    try{
+      const imported = JSON.parse(ev.target.result);
+      if(imported.rounds){
+        state.rounds = [...state.rounds, ...imported.rounds];
+        // Remove duplicates
+        const seen = new Set();
+        state.rounds = state.rounds.filter(r=>{
+          const key = r.roundNum+'-'+r.date;
+          if(seen.has(key)) return false;
+          seen.add(key);
+          return true;
+        });
+        saveState();
+        updateStats();
+        alert('✅ تم الاستيراد');
+      }
+    }catch(err){alert('❌ ملف غير صالح');}
+  };
+  reader.readAsText(file);
+});
+document.getElementById('clearData').addEventListener('click', ()=>{
+  if(confirm('⚠️ مسح كل البيانات؟')){
+    state = {rounds:[]};
+    saveState();
+    updateStats();
+    alert('🗑️ تم المسح');
+  }
+});
+
+// Init
+renderWinnerGrid();
+updateStats();
+</script>
+</body>
+</html>
