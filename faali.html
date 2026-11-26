@@ -1,0 +1,909 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>🎰 حفلة الفاكهة</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{overflow-x:hidden}
+body{
+  font-family:'Segoe UI','Cairo',Tahoma,sans-serif;
+  background:linear-gradient(180deg,#1a0b3d 0%,#2d1b69 50%,#1a0b3d 100%);
+  color:#fff;min-height:100vh;padding:10px;
+  background-attachment:fixed;
+}
+body::before{
+  content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
+  background:
+    radial-gradient(circle at 10% 20%,rgba(255,215,0,.08),transparent 40%),
+    radial-gradient(circle at 90% 80%,rgba(138,43,226,.15),transparent 40%);
+}
+.wrap{max-width:480px;margin:0 auto;position:relative;z-index:1}
+
+.top-bar{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:8px 4px;margin-bottom:8px;
+}
+.close-btn{
+  width:36px;height:36px;border-radius:50%;
+  background:rgba(255,255,255,.1);border:none;color:#fff;
+  font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center;
+}
+.game-title{
+  font-size:26px;font-weight:900;
+  background:linear-gradient(90deg,#ffd700,#ff6b9d,#ffd700);
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+}
+.crown{font-size:28px}
+
+.timer-bar{
+  background:rgba(0,0,0,.3);border-radius:30px;padding:8px 16px;
+  text-align:center;margin-bottom:10px;font-size:13px;color:#d4c5f0;
+  display:flex;justify-content:space-between;align-items:center;
+}
+.timer-bar b{color:#ffd700}
+
+.round-display{
+  text-align:center;font-size:16px;font-weight:900;margin-bottom:10px;
+  color:#fff;
+}
+.round-display b{color:#ffd700}
+
+.board{
+  background:linear-gradient(180deg,#3d1a6e,#2a0f4f);
+  border:3px solid #5a2d8f;border-radius:20px;
+  padding:12px;margin-bottom:12px;
+  box-shadow:0 10px 40px rgba(0,0,0,.5),inset 0 0 30px rgba(138,43,226,.3);
+}
+.fruit-grid{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  grid-template-rows:repeat(3,1fr);
+  gap:8px;
+  aspect-ratio:1/1;
+}
+.fruit-cell{
+  aspect-ratio:1/1;
+  background:linear-gradient(135deg,#7b2cbf,#5a189a);
+  border:2px solid #9d4edd;border-radius:14px;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  cursor:pointer;position:relative;transition:all .2s;
+  overflow:hidden;
+}
+.fruit-cell::before{
+  content:'';position:absolute;inset:0;
+  background:radial-gradient(circle at center,rgba(255,255,255,.1),transparent 70%);
+  opacity:0;transition:opacity .3s;
+}
+.fruit-cell:hover::before{opacity:1}
+.fruit-cell.lit{
+  background:linear-gradient(135deg,#c77dff,#9d4edd);
+  border-color:#ffd700;
+  box-shadow:0 0 25px rgba(255,215,0,.7),inset 0 0 20px rgba(255,215,0,.3);
+  transform:scale(1.05);
+  z-index:2;
+}
+.fruit-cell.winner-cell{
+  background:linear-gradient(135deg,#ffd700,#ff8c00);
+  border-color:#fff;
+  box-shadow:0 0 40px rgba(255,215,0,.9);
+  animation:winnerPulse 1s infinite;
+  z-index:3;
+}
+@keyframes winnerPulse{
+  0%,100%{transform:scale(1);box-shadow:0 0 40px rgba(255,215,0,.9)}
+  50%{transform:scale(1.08);box-shadow:0 0 60px rgba(255,215,0,1)}
+}
+.fruit-cell .emoji{font-size:clamp(32px,10vw,48px);filter:drop-shadow(0 2px 4px rgba(0,0,0,.3))}
+.fruit-cell .multi{
+  font-size:clamp(12px,3.5vw,15px);font-weight:900;color:#ffd700;
+  margin-top:2px;text-shadow:0 1px 2px rgba(0,0,0,.5);
+}
+.fruit-cell .bet-tag{
+  position:absolute;top:4px;left:4px;
+  background:#ffd700;color:#1a0b2e;
+  padding:2px 6px;border-radius:6px;
+  font-size:10px;font-weight:900;
+  box-shadow:0 2px 6px rgba(0,0,0,.4);
+}
+.fruit-cell.center-timer{
+  background:linear-gradient(135deg,#8b0000,#dc143c);
+  border:3px solid #ffd700;
+  box-shadow:0 0 20px rgba(255,215,0,.5),inset 0 0 15px rgba(0,0,0,.5);
+}
+.fruit-cell.center-timer .timer-num{
+  font-size:clamp(36px,12vw,56px);
+  font-weight:900;color:#ffd700;
+  font-family:'Courier New',monospace;
+  text-shadow:0 0 15px rgba(255,215,0,.8);
+  letter-spacing:2px;
+}
+.fruit-cell.center-timer.spinning{
+  background:linear-gradient(135deg,#ff6b00,#ff0000);
+  animation:spinPulse 0.5s infinite;
+}
+@keyframes spinPulse{
+  0%,100%{box-shadow:0 0 20px rgba(255,215,0,.5)}
+  50%{box-shadow:0 0 40px rgba(255,107,0,.9)}
+}
+
+.bet-row{
+  display:flex;gap:8px;margin-bottom:10px;
+  justify-content:center;flex-wrap:wrap;
+}
+.bet-chip{
+  background:rgba(0,0,0,.4);border:2px solid rgba(255,255,255,.2);
+  border-radius:20px;padding:8px 14px;color:#fff;
+  font-weight:900;font-size:14px;cursor:pointer;
+  display:flex;align-items:center;gap:6px;transition:.2s;
+}
+.bet-chip.active{
+  background:linear-gradient(135deg,#ffd700,#ff8c00);
+  color:#1a0b2e;border-color:#ffd700;
+  box-shadow:0 4px 15px rgba(255,215,0,.5);
+}
+.bet-chip .gem{font-size:16px}
+
+.bet-info{
+  text-align:center;font-size:13px;color:#d4c5f0;margin-bottom:10px;
+}
+.bet-info b{color:#ffd700}
+
+.buttons-row{
+  display:flex;gap:10px;margin-bottom:10px;
+}
+.action-btn{
+  flex:1;padding:14px;border-radius:50%;border:none;
+  font-size:22px;cursor:pointer;transition:.2s;
+  box-shadow:0 6px 15px rgba(0,0,0,.4);
+  display:flex;align-items:center;justify-content:center;
+}
+.action-btn.blue{
+  background:linear-gradient(180deg,#4a90e2,#2c5aa0);
+  border:3px solid #6bb3ff;
+}
+.action-btn.gold{
+  background:linear-gradient(180deg,#ffd700,#ff8c00);
+  border:3px solid #fff;
+  box-shadow:0 6px 20px rgba(255,215,0,.6);
+}
+.action-btn:active{transform:scale(.95)}
+.action-btn:disabled{opacity:.5;cursor:not-allowed}
+
+.stats-row{
+  display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;
+}
+.stat-box{
+  background:rgba(0,0,0,.4);border:1px solid rgba(255,215,0,.2);
+  border-radius:12px;padding:10px;text-align:center;
+}
+.stat-box .label{font-size:12px;color:#d4c5f0;margin-bottom:4px}
+.stat-box .value{
+  font-size:20px;font-weight:900;color:#fff;
+  display:flex;align-items:center;justify-content:center;gap:6px;
+}
+.stat-box .value .gem{font-size:18px}
+
+.results-strip{
+  background:rgba(0,0,0,.4);border:1px solid rgba(255,215,0,.2);
+  border-radius:12px;padding:10px;margin-bottom:10px;
+  display:flex;align-items:center;gap:8px;flex-wrap:wrap;
+}
+.results-strip .label{
+  font-size:14px;font-weight:900;color:#ffd700;
+}
+.results-strip .items{
+  display:flex;gap:4px;flex-wrap:wrap;flex:1;
+}
+.results-strip .item{
+  font-size:22px;
+  animation:slideIn .3s;
+}
+@keyframes slideIn{from{opacity:0;transform:translateX(20px)}to{opacity:1;transform:none}}
+.results-strip .new-tag{
+  background:#ffd700;color:#1a0b2e;
+  padding:2px 8px;border-radius:6px;
+  font-size:10px;font-weight:900;
+}
+
+.controls{
+  display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap;
+}
+.ctrl-btn{
+  flex:1;min-width:100px;padding:10px;border-radius:10px;
+  background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);
+  color:#fff;font-weight:700;font-size:12px;cursor:pointer;
+  font-family:inherit;transition:.2s;
+}
+.ctrl-btn:hover{background:rgba(255,215,0,.15)}
+.ctrl-btn.primary{
+  background:linear-gradient(135deg,#ffd700,#ff8c00);
+  color:#1a0b2e;border-color:#ffd700;
+}
+
+.modal-overlay{
+  position:fixed;inset:0;background:rgba(0,0,0,.85);
+  display:none;align-items:center;justify-content:center;
+  z-index:100;padding:20px;
+  backdrop-filter:blur(10px);
+}
+.modal-overlay.show{display:flex;animation:fadeIn .3s}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+.modal{
+  background:linear-gradient(135deg,#3d1a6e,#2a0f4f);
+  border:3px solid #ffd700;border-radius:24px;
+  padding:30px;text-align:center;max-width:360px;width:100%;
+  box-shadow:0 20px 60px rgba(0,0,0,.7);
+  animation:modalPop .4s;
+}
+@keyframes modalPop{from{transform:scale(.7);opacity:0}to{transform:scale(1);opacity:1}}
+.modal .big-emoji{font-size:90px;margin-bottom:10px;animation:bounce 1s infinite}
+@keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-15px)}}
+.modal h2{font-size:24px;color:#ffd700;margin-bottom:10px}
+.modal .amount{
+  font-size:28px;font-weight:900;margin:10px 0;
+  display:flex;align-items:center;justify-content:center;gap:8px;
+}
+.modal .amount.win{color:#4caf50}
+.modal .amount.lose{color:#ff5252}
+.modal .timer-sec{font-size:14px;color:#d4c5f0;margin-top:10px}
+
+.settings-modal input{
+  width:100%;padding:12px;border-radius:10px;
+  border:2px solid rgba(255,215,0,.3);
+  background:rgba(0,0,0,.5);color:#fff;
+  font-size:16px;font-weight:700;text-align:center;
+  margin:10px 0;font-family:inherit;
+}
+.settings-modal input:focus{outline:none;border-color:#ffd700}
+.settings-modal .btn-row{display:flex;gap:10px;margin-top:10px}
+.settings-modal .btn{
+  flex:1;padding:12px;border-radius:10px;border:none;
+  font-weight:800;font-size:14px;cursor:pointer;font-family:inherit;
+}
+.settings-modal .btn.save{background:linear-gradient(135deg,#ffd700,#ff8c00);color:#1a0b2e}
+.settings-modal .btn.cancel{background:rgba(255,255,255,.1);color:#fff}
+
+.warning{
+  background:rgba(33,150,243,.12);border:1px solid rgba(33,150,243,.4);
+  border-radius:10px;padding:8px;font-size:11px;color:#90caf9;
+  margin-bottom:10px;text-align:center;
+}
+
+.speed-control{
+  display:flex;align-items:center;justify-content:center;gap:10px;
+  margin-bottom:10px;font-size:13px;color:#d4c5f0;
+}
+.speed-control input{
+  width:80px;padding:6px;border-radius:8px;
+  border:1px solid rgba(255,215,0,.3);
+  background:rgba(0,0,0,.5);color:#fff;
+  text-align:center;font-family:inherit;
+}
+
+/* حالة الانتظار - الفواكه مفعلة */
+.waiting-phase .fruit-cell:not(.center-timer){
+  opacity:1;
+  pointer-events:auto;
+}
+
+/* حالة الدوران - الفواكه معطلة */
+.spinning-phase .fruit-cell:not(.center-timer){
+  opacity:.5;
+  pointer-events:none;
+}
+
+@media(max-width:360px){
+  .fruit-cell .emoji{font-size:30px}
+  .fruit-cell .multi{font-size:11px}
+}
+</style>
+</head>
+<body>
+<div class="wrap waiting-phase">
+
+  <div class="top-bar">
+    <button class="close-btn">✕</button>
+    <div class="game-title">حفلة الفاكهة</div>
+    <div class="crown">👑</div>
+  </div>
+
+  <div class="timer-bar">
+    <span>⏱️ <b id="eventTimer">35 يوم 19 ساعة 9 دقيقة</b></span>
+    <span>👥 <b id="playersCount">7</b></span>
+  </div>
+
+  <div class="round-display">الجولة <b id="roundNum">1</b> اليوم</div>
+
+  <div class="board">
+    <div class="fruit-grid" id="fruitGrid"></div>
+  </div>
+
+  <div class="bet-info">
+    حدد عدد الجواهر &gt; حدد الفاكهة
+  </div>
+
+  <div class="bet-row" id="betRow">
+    <div class="bet-chip" data-amount="100000"><span class="gem">💎</span>100000</div>
+    <div class="bet-chip" data-amount="50000"><span class="gem">💎</span>50000</div>
+    <div class="bet-chip" data-amount="10000"><span class="gem">💎</span>10000</div>
+    <div class="bet-chip" data-amount="5000"><span class="gem">💎</span>5000</div>
+    <div class="bet-chip" data-amount="1000"><span class="gem">💎</span>1000</div>
+    <div class="bet-chip active" data-amount="100"><span class="gem">💎</span>100</div>
+  </div>
+
+  <div class="buttons-row">
+    <button class="action-btn blue" id="btnAuto" title="تلقائي">🤖</button>
+    <button class="action-btn blue" id="btnManual" title="جولة يدوية">🎲</button>
+    <button class="action-btn blue" id="btnSettings" title="إعدادات">⚙️</button>
+    <button class="action-btn gold" id="btnSpin" title="ابدأ الدوران">▶️</button>
+  </div>
+
+  <div class="stats-row">
+    <div class="stat-box">
+      <div class="label">أرباح اليوم</div>
+      <div class="value"><span id="todayProfit">0</span><span class="gem">💎</span></div>
+    </div>
+    <div class="stat-box">
+      <div class="label">رصيدي</div>
+      <div class="value"><span id="balance">100000</span><span class="gem">💎</span></div>
+    </div>
+  </div>
+
+  <div class="controls">
+    <button class="ctrl-btn primary" id="btnStartAuto">▶️ تشغيل تلقائي</button>
+    <button class="ctrl-btn" id="btnClearBets">🗑️ مسح الرهانات</button>
+    <button class="ctrl-btn" id="btnReset">🔄 إعادة</button>
+  </div>
+
+  <div class="speed-control">
+    <span>⚡ سرعة الدوران:</span>
+    <input type="number" id="spinSpeed" value="100" min="50" max="300" step="50">
+    <span>ms</span>
+  </div>
+
+  <div class="warning" id="phaseWarning">
+    💡 <b>مرحلة الانتظار:</b> لديك <b id="countdownDisplay" style="color:#ffd700">40</b> ثانية لوضع الجواهر
+  </div>
+
+  <div class="results-strip">
+    <span class="label">النتائج:</span>
+    <div class="items" id="resultsStrip"></div>
+  </div>
+
+</div>
+
+<!-- Result Modal -->
+<div class="modal-overlay" id="resultModal">
+  <div class="modal">
+    <div class="big-emoji" id="modalEmoji">🍎</div>
+    <h2 id="modalTitle">الفاكهة الفائزة</h2>
+    <div class="amount" id="modalAmount"></div>
+    <div class="timer-sec">يُغلق خلال <b id="modalTimer">10</b> ثوانٍ</div>
+  </div>
+</div>
+
+<!-- Settings Modal -->
+<div class="modal-overlay" id="settingsModal">
+  <div class="modal settings-modal">
+    <h2>⚙️ الإعدادات</h2>
+    <div style="text-align:right;margin-top:15px">
+      <label style="font-size:13px;color:#ffd700">💰 الرصيد</label>
+      <input type="number" id="inputBalance" value="100000" min="0">
+      
+      <label style="font-size:13px;color:#ffd700">🔢 رقم الجولة</label>
+      <input type="number" id="inputRound" value="1" min="1" max="1740">
+      
+      <label style="font-size:13px;color:#ffd700">⏱️ مدة عرض النتيجة (ثوانٍ)</label>
+      <input type="number" id="inputShowTime" value="10" min="3" max="30">
+      
+      <label style="font-size:13px;color:#ffd700">⏳ وقت الانتظار (ثوانٍ)</label>
+      <input type="number" id="inputWaitTime" value="40" min="5" max="120">
+      
+      <label style="font-size:13px;color:#ffd700">🎰 مدة الدوران (ثوانٍ)</label>
+      <input type="number" id="inputSpinTime" value="10" min="3" max="20">
+    </div>
+    <div class="btn-row">
+      <button class="btn save" id="btnSaveSettings">💾 حفظ</button>
+      <button class="btn cancel" id="btnCancelSettings">✖️ إلغاء</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const FRUITS = [
+  {id:'orange',  emoji:'🍊', name:'برتقال',  multi:5,  pos:0},
+  {id:'lemon',   emoji:'🍋', name:'ليمون',   multi:5,  pos:1},
+  {id:'apple',   emoji:'🍎', name:'تفاح',    multi:5,  pos:2},
+  {id:'cherry',  emoji:'🍒', name:'كرز',     multi:45, pos:3},
+  {id:'banana',  emoji:'🍌', name:'موز',     multi:5,  pos:5},
+  {id:'avocado', emoji:'🥑', name:'أفوكادو', multi:25, pos:6},
+  {id:'watermelon',emoji:'🍉',name:'بطيخ',  multi:15, pos:7},
+  {id:'grape',   emoji:'🍇', name:'عنب',     multi:10, pos:8}
+];
+
+const FRUIT_MAP = {};
+FRUITS.forEach(f=> FRUIT_MAP[f.id] = f);
+
+let state = {
+  balance: 100000,
+  selectedBet: 100,
+  bets: {},
+  round: 1,
+  results: [],
+  todayProfit: 0,
+  autoPlay: false,
+  autoInterval: null,
+  spinning: false,
+  showTime: 10,
+  waitTime: 40,
+  spinTime: 10
+};
+
+try{
+  const s = localStorage.getItem('fruitPartyV5');
+  if(s) state = {...state, ...JSON.parse(s)};
+}catch(e){}
+
+function save(){
+  localStorage.setItem('fruitPartyV5', JSON.stringify(state));
+}
+
+// ===== Phase Management =====
+let currentPhase = 'waiting'; // 'waiting' or 'spinning'
+let countdownValue = state.waitTime;
+let countdownInterval = null;
+let spinInterval = null;
+let autoPausedForModal = false;
+
+function setPhase(phase){
+  currentPhase = phase;
+  const wrap = document.querySelector('.wrap');
+  const warning = document.getElementById('phaseWarning');
+  
+  if(phase === 'waiting'){
+    wrap.classList.remove('spinning-phase');
+    wrap.classList.add('waiting-phase');
+    warning.innerHTML = `💡 <b>مرحلة الانتظار:</b> لديك <b id="countdownDisplay" style="color:#ffd700">${countdownValue}</b> ثانية لوضع الجواهر`;
+  } else if(phase === 'spinning'){
+    wrap.classList.remove('waiting-phase');
+    wrap.classList.add('spinning-phase');
+    warning.innerHTML = `🎰 <b>مرحلة الدوران:</b> العجلة تدور... <b id="countdownDisplay" style="color:#ff6b00">${countdownValue}</b> ثانية`;
+  }
+}
+
+function startCountdown(){
+  if(countdownInterval) clearInterval(countdownInterval);
+  
+  countdownValue = state.waitTime;
+  setPhase('waiting');
+  updateCountdownDisplay();
+  renderGrid();
+  
+  countdownInterval = setInterval(()=>{
+    countdownValue--;
+    updateCountdownDisplay();
+    
+    if(countdownValue <= 0){
+      clearInterval(countdownInterval);
+      countdownInterval = null;
+      // بدء مرحلة الدوران
+      startSpinningPhase();
+    }
+  }, 1000);
+}
+
+function startSpinningPhase(){
+  setPhase('spinning');
+  countdownValue = state.spinTime;
+  updateCountdownDisplay();
+  
+  // إضافة تأثير الدوران للعدّاد المركزي
+  const timerCell = document.querySelector('.fruit-cell.center-timer');
+  if(timerCell) timerCell.classList.add('spinning');
+  
+  spinInterval = setInterval(()=>{
+    countdownValue--;
+    updateCountdownDisplay();
+    
+    // إضاءة فاكهة عشوائية أثناء الدوران
+    const randomFruit = FRUITS[Math.floor(Math.random() * FRUITS.length)];
+    const cells = document.querySelectorAll('.fruit-cell:not(.center-timer)');
+    cells.forEach(c=> c.classList.remove('lit'));
+    const cell = document.querySelector(`.fruit-cell[data-id="${randomFruit.id}"]`);
+    if(cell) cell.classList.add('lit');
+    
+    if(countdownValue <= 0){
+      clearInterval(spinInterval);
+      spinInterval = null;
+      if(timerCell) timerCell.classList.remove('spinning');
+      cells.forEach(c=> c.classList.remove('lit'));
+      // انتهاء الدوران - عرض النتيجة
+      finishSpin();
+    }
+  }, 1000);
+}
+
+function updateCountdownDisplay(){
+  const el = document.getElementById('countdownDisplay');
+  if(el) el.textContent = countdownValue;
+  
+  const timerEl = document.getElementById('timerNum');
+  if(timerEl){
+    timerEl.textContent = countdownValue.toString().padStart(2,'0');
+  }
+}
+
+function stopAllTimers(){
+  if(countdownInterval){
+    clearInterval(countdownInterval);
+    countdownInterval = null;
+  }
+  if(spinInterval){
+    clearInterval(spinInterval);
+    spinInterval = null;
+  }
+}
+
+// ===== Render Grid =====
+function renderGrid(){
+  const grid = document.getElementById('fruitGrid');
+  grid.innerHTML = '';
+  
+  for(let i=0; i<9; i++){
+    if(i === 4){
+      const cell = document.createElement('div');
+      cell.className = 'fruit-cell center-timer';
+      cell.innerHTML = `<div class="timer-num" id="timerNum">${countdownValue.toString().padStart(2,'0')}</div>`;
+      grid.appendChild(cell);
+      continue;
+    }
+    const fruit = FRUITS.find(f=>f.pos===i);
+    const cell = document.createElement('div');
+    cell.className = 'fruit-cell';
+    cell.dataset.id = fruit.id;
+    
+    const betAmount = state.bets[fruit.id] || 0;
+    cell.innerHTML = `
+      ${betAmount > 0 ? `<div class="bet-tag">${betAmount}</div>` : ''}
+      <div class="emoji">${fruit.emoji}</div>
+      <div class="multi">×${fruit.multi}</div>
+    `;
+    cell.addEventListener('click', ()=> onFruitClick(fruit.id));
+    grid.appendChild(cell);
+  }
+}
+
+// ===== Bet Chips =====
+document.querySelectorAll('.bet-chip').forEach(chip=>{
+  chip.addEventListener('click', ()=>{
+    document.querySelectorAll('.bet-chip').forEach(c=>c.classList.remove('active'));
+    chip.classList.add('active');
+    state.selectedBet = parseInt(chip.dataset.amount);
+  });
+});
+
+// ===== Fruit Click =====
+function onFruitClick(id){
+  // السماح بالنقر فقط في مرحلة الانتظار
+  if(currentPhase !== 'waiting'){
+    return;
+  }
+  
+  const fruit = FRUIT_MAP[id];
+  const currentBet = state.bets[id] || 0;
+  const newBet = currentBet + state.selectedBet;
+  
+  const totalBets = Object.values(state.bets).reduce((a,b)=>a+b,0);
+  const diff = state.selectedBet;
+  if(state.balance < totalBets + diff){
+    alert('⚠️ رصيدك غير كافٍ!\nالرصيد المطلوب: ' + (totalBets + diff));
+    return;
+  }
+  
+  const uniqueFruits = Object.keys(state.bets).filter(k=> state.bets[k] > 0);
+  if(!state.bets[id] && uniqueFruits.length >= 6){
+    alert('⚠️ يمكنك وضع رهان على 6 فواكه فقط!\nامسح بعض الرهانات أولاً.');
+    return;
+  }
+  
+  state.bets[id] = newBet;
+  save();
+  renderGrid();
+  updateStats();
+}
+
+// ===== Clear Bets =====
+document.getElementById('btnClearBets').addEventListener('click', ()=>{
+  if(currentPhase !== 'waiting') return;
+  const total = Object.values(state.bets).reduce((a,b)=>a+b,0);
+  state.balance += total;
+  state.bets = {};
+  save();
+  renderGrid();
+  updateStats();
+});
+
+// ===== Spin Buttons =====
+document.getElementById('btnSpin').addEventListener('click', ()=>{
+  stopAllTimers();
+  startSpinningPhase();
+});
+document.getElementById('btnManual').addEventListener('click', ()=>{
+  stopAllTimers();
+  startSpinningPhase();
+});
+
+// ===== Finish Spin =====
+async function finishSpin(){
+  state.spinning = true;
+  
+  const totalBet = Object.values(state.bets).reduce((a,b)=>a+b,0);
+  const winner = FRUITS[Math.floor(Math.random() * FRUITS.length)];
+  
+  // إذا لم يضع المستخدم رهانات
+  if(totalBet === 0){
+    await showNotParticipatedModal(winner);
+    finalizeRound(winner, 0, 0, false);
+    return;
+  }
+  
+  // خصم الرهانات
+  state.balance -= totalBet;
+  save();
+  updateStats();
+  
+  const userBet = state.bets[winner.id] || 0;
+  const winAmount = userBet * winner.multi;
+  const isWin = userBet > 0;
+  
+  if(isWin){
+    state.balance += winAmount;
+    state.todayProfit += winAmount - totalBet;
+  } else {
+    state.todayProfit -= totalBet;
+  }
+  
+  state.results.unshift(winner);
+  if(state.results.length > 20) state.results.pop();
+  
+  state.round++;
+  if(state.round > 1740) state.round = 1;
+  
+  save();
+  
+  // إظهار الفائز
+  const winnerCell = document.querySelector(`.fruit-cell[data-id="${winner.id}"]`);
+  if(winnerCell) winnerCell.classList.add('winner-cell');
+  
+  setTimeout(()=>{
+    if(winnerCell) winnerCell.classList.remove('winner-cell');
+    showResultModal(winner, isWin, winAmount, totalBet);
+    renderResults();
+    updateStats();
+    state.spinning = false;
+  }, 1500);
+}
+
+// ===== Not Participated Modal =====
+function showNotParticipatedModal(winner){
+  return new Promise(resolve=>{
+    const modal = document.getElementById('resultModal');
+    const emoji = document.getElementById('modalEmoji');
+    const title = document.getElementById('modalTitle');
+    const amount = document.getElementById('modalAmount');
+    const timerEl = document.getElementById('modalTimer');
+    
+    emoji.textContent = '😔';
+    title.textContent = 'لم تشارك في هذه الجولة';
+    amount.className = 'amount lose';
+    amount.innerHTML = `<span style="font-size:16px;color:#d4c5f0">الفاكهة الفائزة كانت: ${winner.emoji} ${winner.name}</span>`;
+    
+    modal.classList.add('show');
+    
+    if(state.autoPlay){
+      autoPausedForModal = true;
+    }
+    
+    let sec = state.showTime;
+    timerEl.textContent = sec;
+    
+    const int = setInterval(()=>{
+      sec--;
+      timerEl.textContent = sec;
+      if(sec <= 0){
+        clearInterval(int);
+        modal.classList.remove('show');
+        resolve();
+      }
+    }, 1000);
+  });
+}
+
+// ===== Result Modal =====
+let modalTimerInt;
+function showResultModal(winner, isWin, winAmount, totalBet){
+  const modal = document.getElementById('resultModal');
+  const emoji = document.getElementById('modalEmoji');
+  const title = document.getElementById('modalTitle');
+  const amount = document.getElementById('modalAmount');
+  const timerEl = document.getElementById('modalTimer');
+  
+  emoji.textContent = winner.emoji;
+  
+  if(isWin){
+    title.textContent = `🎉 الفائز: ${winner.name}`;
+    amount.className = 'amount win';
+    amount.innerHTML = `+${winAmount} 💎 <span style="font-size:14px;color:#d4c5f0">(×${winner.multi})</span>`;
+  } else {
+    title.textContent = '😔 حظ أوفر';
+    amount.className = 'amount lose';
+    amount.innerHTML = `-${totalBet} 💎 <span style="font-size:14px;color:#d4c5f0">خسرت هذه الجولة</span>`;
+  }
+  
+  modal.classList.add('show');
+  
+  if(state.autoPlay){
+    autoPausedForModal = true;
+  }
+  
+  let sec = state.showTime;
+  timerEl.textContent = sec;
+  clearInterval(modalTimerInt);
+  modalTimerInt = setInterval(()=>{
+    sec--;
+    timerEl.textContent = sec;
+    if(sec <= 0){
+      clearInterval(modalTimerInt);
+      modal.classList.remove('show');
+      
+      if(autoPausedForModal){
+        autoPausedForModal = false;
+        // بدء جولة جديدة بعد ثانية
+        setTimeout(()=>{
+          if(state.autoPlay){
+            // مسح الرهانات للجولة الجديدة
+            state.bets = {};
+            save();
+            renderGrid();
+            startCountdown();
+          }
+        }, 1000);
+      }
+    }
+  }, 1000);
+}
+
+// ===== Finalize Round =====
+function finalizeRound(winner, winAmount, totalBet, isWin){
+  state.results.unshift(winner);
+  if(state.results.length > 20) state.results.pop();
+  
+  state.round++;
+  if(state.round > 1740) state.round = 1;
+  
+  save();
+  renderResults();
+  updateStats();
+  state.spinning = false;
+  
+  if(state.autoPlay && !autoPausedForModal){
+    setTimeout(()=>{
+      state.bets = {};
+      save();
+      renderGrid();
+      startCountdown();
+    }, 1500);
+  }
+}
+
+// ===== Render Results =====
+function renderResults(){
+  const strip = document.getElementById('resultsStrip');
+  strip.innerHTML = state.results.map((r,i)=>`
+    <span class="item">${r.emoji}</span>
+    ${i===0?'<span class="new-tag">جديد</span>':''}
+  `).join('');
+}
+
+// ===== Update Stats =====
+function updateStats(){
+  document.getElementById('balance').textContent = state.balance.toLocaleString();
+  document.getElementById('todayProfit').textContent = state.todayProfit.toLocaleString();
+  document.getElementById('roundNum').textContent = state.round;
+}
+
+// ===== Auto Play =====
+document.getElementById('btnStartAuto').addEventListener('click', ()=>{
+  state.autoPlay = !state.autoPlay;
+  const btn = document.getElementById('btnStartAuto');
+  const autoBtn = document.getElementById('btnAuto');
+  
+  if(state.autoPlay){
+    btn.textContent = '⏸️ إيقاف التلقائي';
+    btn.classList.add('primary');
+    autoBtn.style.background = 'linear-gradient(180deg,#4caf50,#2e7d32)';
+    if(!state.spinning && !countdownInterval && !spinInterval){
+      startCountdown();
+    }
+  } else {
+    btn.textContent = '▶️ تشغيل تلقائي';
+    btn.classList.remove('primary');
+    autoBtn.style.background = '';
+    stopAllTimers();
+  }
+});
+
+// ===== Settings =====
+document.getElementById('btnSettings').addEventListener('click', ()=>{
+  document.getElementById('inputBalance').value = state.balance;
+  document.getElementById('inputRound').value = state.round;
+  document.getElementById('inputShowTime').value = state.showTime;
+  document.getElementById('inputWaitTime').value = state.waitTime;
+  document.getElementById('inputSpinTime').value = state.spinTime;
+  document.getElementById('settingsModal').classList.add('show');
+});
+document.getElementById('btnCancelSettings').addEventListener('click', ()=>{
+  document.getElementById('settingsModal').classList.remove('show');
+});
+document.getElementById('btnSaveSettings').addEventListener('click', ()=>{
+  state.balance = parseInt(document.getElementById('inputBalance').value) || 0;
+  state.round = parseInt(document.getElementById('inputRound').value) || 1;
+  state.showTime = parseInt(document.getElementById('inputShowTime').value) || 10;
+  state.waitTime = parseInt(document.getElementById('inputWaitTime').value) || 40;
+  state.spinTime = parseInt(document.getElementById('inputSpinTime').value) || 10;
+  save();
+  updateStats();
+  document.getElementById('settingsModal').classList.remove('show');
+});
+
+// ===== Reset =====
+document.getElementById('btnReset').addEventListener('click', ()=>{
+  if(confirm('⚠️ إعادة تعيين كل البيانات؟')){
+    stopAllTimers();
+    state = {
+      balance: 100000,
+      selectedBet: 100,
+      bets: {},
+      round: 1,
+      results: [],
+      todayProfit: 0,
+      autoPlay: false,
+      spinning: false,
+      showTime: 10,
+      waitTime: 40,
+      spinTime: 10
+    };
+    save();
+    renderGrid();
+    renderResults();
+    updateStats();
+    updateCountdownDisplay();
+    setPhase('waiting');
+  }
+});
+
+// ===== Init =====
+renderGrid();
+renderResults();
+updateStats();
+updateCountdownDisplay();
+setPhase('waiting');
+
+// بدء العد التنازلي تلقائياً عند فتح الصفحة
+setTimeout(()=> startCountdown(), 1000);
+
+// ===== Event Timer (fake) =====
+setInterval(()=>{
+  const now = new Date();
+  const end = new Date(now.getTime() + 35*24*3600000 + 19*3600000 + 9*60000);
+  const diff = end - now;
+  const d = Math.floor(diff/86400000);
+  const h = Math.floor((diff%86400000)/3600000);
+  const m = Math.floor((diff%3600000)/60000);
+  document.getElementById('eventTimer').textContent = `${d} يوم ${h} ساعة ${m} دقيقة`;
+}, 60000);
+</script>
+</body>
+</html>
